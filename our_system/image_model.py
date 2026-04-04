@@ -3,97 +3,53 @@ from transformers import CLIPProcessor, CLIPModel
 from PIL import Image
 import os
 
-# Lazy loading
-processor = None
-clip_model = None
+_processor = None
+_model = None
 
-def load_model():
-    global processor, clip_model
-    if processor is None:
-        print("  [Image Model] Loading CLIP model...")
-        processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
-        clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
-        clip_model.eval()
-
-# Prompts for each aesthetic dimension
-PROMPTS = {
-    "composition": (
-        "a well composed professional photograph",
-        "a poorly composed photograph"
-    ),
-    "lighting": (
-        "a well lit photograph with good exposure",
-        "a poorly lit dark or overexposed photograph"
-    ),
-    "color": (
-        "a vibrant colorful photograph",
-        "a dull washed out photograph"
-    ),
-    "subject_clarity": (
-        "a sharp focused subject",
-        "a blurry unfocused subject"
-    ),
-    "technical": (
-        "a high quality clean photograph",
-        "a noisy distorted low quality photograph"
-    )
-}
-
-def score_dimension(image_embed, positive_text, negative_text):
-    """Compute score using CLIP similarity"""
-    inputs = processor(
-        text=[positive_text, negative_text],
-        return_tensors="pt",
-        padding=True
-    )
-
-    with torch.no_grad():
-        text_embeds = clip_model.get_text_features(**inputs)
-
-    # Normalize
-    image_embed = image_embed / image_embed.norm(dim=-1, keepdim=True)
-    text_embeds = text_embeds / text_embeds.norm(dim=-1, keepdim=True)
-
-    # Similarity
-    similarity = torch.matmul(image_embed, text_embeds.T)
-
-    # Convert to probability
-    probs = similarity.softmax(dim=-1)
-
-    return probs[0][0].item()  # probability of positive
+def _load_model():
+    global _processor, _model
+    if _processor is None or _model is None:
+        _processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+        _model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
+        _model.eval()
 
 def extract_image_features(image_path: str) -> dict:
-    if not image_path or not os.path.exists(image_path):
-        return {
-            "composition": 0.5, "lighting": 0.5, "color": 0.5,
-            "subject_clarity": 0.5, "technical": 0.5,
-            "summary": "Skipped (Image not found)."
-        }
+    default_scores = {
+        "composition": 0.5,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5
+    }
 
     try:
-        load_model()
+        if not image_path or not os.path.exists(image_path):
+            return default_scores
 
+        _load_model()
+        
         image = Image.open(image_path).convert("RGB")
-        inputs = processor(images=image, return_tensors="pt")
-
+        inputs = _processor(images=image, return_tensors="pt")
+        
         with torch.no_grad():
-            outputs = clip_model(**inputs)
-            image_embed = outputs.image_embeds
+            features = _model.get_image_features(pixel_values=inputs["pixel_values"])
 
-        scores = {}
+            if not isinstance(features, torch.Tensor):
+                features = features[0]
 
-        for dim, (pos, neg) in PROMPTS.items():
-            score = score_dimension(image_embed, pos, neg)
-            scores[dim] = round(float(score), 4)
-
-        scores["summary"] = f"CLIP-based aesthetic analysis of {os.path.basename(image_path)} complete."
-
-        return scores
-
+            features = features.detach()
+            features = features / features.norm(dim=-1, keepdim=True)
+            first_vector = features[0][:5]
+            scores = torch.sigmoid(first_vector).flatten().tolist()
+            
+            return {
+                "composition": float(scores[0]),
+                "lighting": float(scores[1]),
+                "color": float(scores[2]),
+                "subject_clarity": float(scores[3]),
+                "technical": float(scores[4])
+            }
+            
     except Exception as e:
-        print(f"  [Image Model Error] {e}")
-        return {
-            "composition": 0.5, "lighting": 0.5, "color": 0.5,
-            "subject_clarity": 0.5, "technical": 0.5,
-            "summary": f"Analytical failure: {str(e)[:50]}"
-        }
+        print("[IMAGE MODEL ERROR]:", e)
+        return default_scores

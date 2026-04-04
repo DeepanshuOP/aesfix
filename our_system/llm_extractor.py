@@ -11,12 +11,20 @@ COMPOSITION_NEGATIVE = ["cropped", "horizon crooked", "off center", "no focal",
     "confusing", "cluttered", "busy background", "poor framing", "tilted",
     "cut off", "wrong crop", "bad framing", "distracting background"]
 
+
 LIGHTING_POSITIVE = ["golden hour", "well lit", "natural light", "beautiful light",
     "rim light", "soft light", "dramatic light", "catchlights", "exposed well",
     "balanced exposure", "good exposure", "window light", "backlit nicely"]
 LIGHTING_NEGATIVE = ["too dark", "underexposed", "overexposed", "blown out",
     "flat lighting", "harsh", "shadows", "muddy", "dark", "bright spots",
     "poor lighting", "bad exposure", "blown highlights", "crushed blacks"]
+# --- ADD THESE IMPORTANT KEYWORDS ---
+
+COMPOSITION_POSITIVE += ["good composition", "nice composition"]
+COMPOSITION_NEGATIVE += ["poor composition", "bad composition"]
+
+LIGHTING_POSITIVE += ["good lighting", "nice lighting"]
+LIGHTING_NEGATIVE += ["poor lighting", "bad lighting"]
 
 COLOR_POSITIVE = ["vibrant", "vivid", "colorful", "color harmony", "rich colors",
     "well saturated", "natural colors", "accurate colors", "color grading",
@@ -39,21 +47,22 @@ TECHNICAL_NEGATIVE = ["noisy", "grainy", "low quality", "artifacts", "pixelated"
     "heavy handed", "too much sharpening", "oversharpened"]
 
 
+
 def _score_dimension(text: str, positives: list, negatives: list) -> float:
     text_lower = text.lower()
-    pos_count = sum(1 for p in positives if p in text_lower)
-    neg_count = sum(1 for n in negatives if n in text_lower)
+
+    # --- word-level matching instead of phrase matching ---
+    pos_count = sum(1 for p in positives if any(word in text_lower for word in p.split()))
+    neg_count = sum(1 for n in negatives if any(word in text_lower for word in n.split()))
 
     if pos_count == 0 and neg_count == 0:
-        return 0.5  # neutral — not mentioned
+        return 0.5
 
     total = pos_count + neg_count
     raw = pos_count / total
-    # Scale: 0.3 to 0.9 range (avoid extremes for fuzzy system)
+
     scaled = 0.3 + (raw * 0.6)
     return round(float(scaled), 4)
-
-
 def _sentiment_score(text: str) -> float:
     text_lower = text.lower()
     positive_words = ["great", "excellent", "beautiful", "fantastic", "perfect",

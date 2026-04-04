@@ -15,6 +15,7 @@ from our_system.explainer import generate_explanation
 from our_system.counterfactual_generator import generate_counterfactual
 from our_system.pipeline import run_pipeline, load_dataset, save_results
 from our_system.evaluate import load_results, evaluate
+from our_system.image_model import extract_image_features
 
 
 def parse_args():
@@ -32,6 +33,7 @@ def parse_args():
 
 def main():
     args = parse_args()
+    user_critique = args.critique if hasattr(args, "critique") else None
 
     if args.mode == "eval":
         if not os.path.exists(args.output):
@@ -53,9 +55,35 @@ def main():
         # Handle image input
         if args.image and os.path.exists(args.image):
             print(f"\nImage mode: {args.image}")
-            from our_system.image_features import extract_image_features
+
+            # ---- IMAGE FEATURES ----
             img_features = extract_image_features(args.image)
-            agg, disagreement, subjectivity = aggregate_critiques([img_features])
+
+            # ---- TEXT FEATURES ----
+            if args.critique:
+                text_features = extract_aesthetic_features(args.critique, model)
+            else:
+                text_features = {
+                    "composition": 0.5,
+                    "lighting": 0.5,
+                    "color": 0.5,
+                    "subject_clarity": 0.5,
+                    "technical": 0.5
+                }
+
+            # DEBUG (you MUST see this now)
+            print("DEBUG TEXT FEATURES:", text_features)
+            print("DEBUG IMAGE FEATURES:", img_features)
+
+            # ---- FUSION ----
+            agg = {}
+            for key in ["composition", "lighting", "color", "subject_clarity", "technical"]:
+                agg[key] = round(
+                    0.85 * text_features[key] + 0.15 * img_features[key], 4
+                )
+
+            disagreement = 0.0
+            subjectivity = "LOW"
             label, score = evaluate_aesthetics(
                 fuzzy_sim,
                 agg["composition"], agg["lighting"], agg["color"],
@@ -91,7 +119,7 @@ def main():
         # Check if --critique is actually an image path
         if critique and os.path.exists(critique):
             print("  Detected image path input")
-            from our_system.image_features import extract_image_features
+            
             features = extract_image_features(critique)
         else:
             features = extract_aesthetic_features(critique, model)
@@ -133,7 +161,7 @@ def main():
         sys.exit(1)
 
     data = load_dataset(args.data)
-    results = run_pipeline(data, model, fuzzy_sim, limit=args.limit)
+    results = run_pipeline(data, model, fuzzy_sim, user_critique=user_critique)
     save_results(results, args.output)
     evaluate(results)
 

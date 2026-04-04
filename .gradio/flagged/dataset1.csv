@@ -1,0 +1,16 @@
+Upload Image,Enter Critique (optional),Analysis Result,timestamp
+.gradio\flagged\Upload Image\adc4a81daeda78b90b3b\Screenshot 2026-04-04 202627.png,excellent lighting and composition,"'
+Label: MEDIUM
+Score: 0.52
+Aspect Driver: subject_clarity (score: 0.84)
+
+Features:
+composition: 0.64
+lighting: 0.67
+color: 0.50
+subject_clarity: 0.84
+technical: 0.84
+
+Explanation:
+This image sits in the MEDIUM range (0.52) with adequate but unexceptional performance. Subject clarity (0.84) is the relative strength, while color (0.50) holds the image back from a HIGH rating. More deliberate attention to the weaker dimensions would push this further.
+",2026-04-04 20:27:34.451921

@@ -12,6 +12,7 @@ from our_system.aggregator import aggregate_critiques, identify_aspect_driver
 from our_system.explainer import generate_explanation
 from our_system.counterfactual_generator import generate_counterfactual
 from our_system.image_model import extract_image_features
+print("🔥 PIPELINE FILE LOADED 🔥")
 
 
 def load_dataset(json_path: str) -> list:
@@ -19,7 +20,7 @@ def load_dataset(json_path: str) -> list:
         return json.load(f)
 
 
-def run_pipeline(data: list, model, fuzzy_sim, limit: int = 30) -> list:
+def run_pipeline(data, model, fuzzy_sim, limit=30, user_critique=None):
     results = []
     subset = data[:limit]
     total = len(subset)
@@ -32,7 +33,11 @@ def run_pipeline(data: list, model, fuzzy_sim, limit: int = 30) -> list:
         print("-" * 40)
         print(f"Sample: {item_id}")
 
-        comments = item.get("comments", item.get("comment", []))
+        if user_critique:
+            comments = [user_critique]
+        else:
+            comments = item.get("comments", item.get("comment", []))
+        print("DEBUG COMMENTS:", comments)
         if isinstance(comments, str):
             comments = [comments]
         if not comments:
@@ -43,21 +48,39 @@ def run_pipeline(data: list, model, fuzzy_sim, limit: int = 30) -> list:
         # Check for image input
         image_path = item.get("image_path", item.get("image", None))
 
+        # ---- TEXT FEATURES ----
+        feature_list = []
+        print(f"  Extracting features from {len(comments)} critique(s)...")
+
+        for comment in comments:
+            features = extract_aesthetic_features(comment, model)
+            feature_list.append(features)
+            time.sleep(1)  # reduced delay
+
+        text_features, disagreement, subjectivity = aggregate_critiques(feature_list)
+
+        # ---- IMAGE FEATURES ----
         if image_path and os.path.exists(str(image_path)):
             print(f"  Using image-based feature extraction: {image_path}")
-            agg = extract_image_features(str(image_path))
-            disagreement = 0.0
-            subjectivity = "LOW"
-            feature_list = [agg]
+            image_features = extract_image_features(str(image_path))
         else:
-            print(f"  Extracting features from {len(comments)} critique(s)...")
-            feature_list = []
-            for comment in comments:
-                features = extract_aesthetic_features(comment, model)
-                feature_list.append(features)
-                time.sleep(4)
+            image_features = {
+                "composition": 0.5,
+                "lighting": 0.5,
+                "color": 0.5,
+                "subject_clarity": 0.5,
+                "technical": 0.5
+            }
+        print("\nDEBUG TEXT FEATURES:", text_features)
+        print("DEBUG IMAGE FEATURES:", image_features)
 
-            agg, disagreement, subjectivity = aggregate_critiques(feature_list)
+        # ---- FUSION ----
+        
+        agg = {}
+        for key in ["composition", "lighting", "color", "subject_clarity", "technical"]:
+            agg[key] = round(
+                0.85 * text_features[key] + 0.15 * image_features[key]
+            )
 
         label, fuzzy_score = evaluate_aesthetics(
             fuzzy_sim,
