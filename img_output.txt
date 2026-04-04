@@ -1,5 +1,0 @@
-﻿Usage: python our_system/image_features.py path/to/image.jpg
-
-Running self-test with synthetic values...
-Fallback result: {'composition': 0.5, 'lighting': 0.5, 'color': 0.5, 'subject_clarity': 0.5, 'technical': 0.5, 'summary': 'Extracted from image features.'}
-image_features.py OK
