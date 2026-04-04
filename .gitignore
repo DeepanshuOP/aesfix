@@ -144,3 +144,26 @@ testing.ipynb
 bsub.txt
 *.old
 *.out
+# AI / Tool folders
+.agent/
+.claude/
+.codebuddy/
+.codex/
+.continue/
+.cursor/
+.gemini/
+.gradio/
+.kiro/
+.opencode/
+.qoder/
+.roo/
+.trae/
+.windsurf/
+
+# Cache & temp
+cache/
+__pycache__/
+*.pyc
+
+# Logs
+*.txt
