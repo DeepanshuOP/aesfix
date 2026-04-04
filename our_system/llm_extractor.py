@@ -1,100 +1,184 @@
-import google.generativeai as genai
+import re
 import json
 import os
-import re
+import hashlib
+
+# ── Keyword dictionaries for rule-based extraction ──────────
+COMPOSITION_POSITIVE = ["rule of thirds", "composition", "framing", "leading lines",
+    "symmetry", "balance", "well composed", "great framing", "diagonal",
+    "negative space", "foreground", "layered", "depth", "centered well"]
+COMPOSITION_NEGATIVE = ["cropped", "horizon crooked", "off center", "no focal",
+    "confusing", "cluttered", "busy background", "poor framing", "tilted",
+    "cut off", "wrong crop", "bad framing", "distracting background"]
+
+LIGHTING_POSITIVE = ["golden hour", "well lit", "natural light", "beautiful light",
+    "rim light", "soft light", "dramatic light", "catchlights", "exposed well",
+    "balanced exposure", "good exposure", "window light", "backlit nicely"]
+LIGHTING_NEGATIVE = ["too dark", "underexposed", "overexposed", "blown out",
+    "flat lighting", "harsh", "shadows", "muddy", "dark", "bright spots",
+    "poor lighting", "bad exposure", "blown highlights", "crushed blacks"]
+
+COLOR_POSITIVE = ["vibrant", "vivid", "colorful", "color harmony", "rich colors",
+    "well saturated", "natural colors", "accurate colors", "color grading",
+    "warm tones", "cool tones", "cohesive palette", "good colors"]
+COLOR_NEGATIVE = ["washed out", "oversaturated", "color cast", "green cast",
+    "flat colors", "dull", "muted", "wrong white balance", "garish",
+    "unnatural colors", "color grading hurts", "overdone"]
+
+CLARITY_POSITIVE = ["sharp", "tack sharp", "in focus", "crisp", "clear subject",
+    "well focused", "subject pops", "excellent detail", "good focus",
+    "beautifully sharp", "perfectly focused"]
+CLARITY_NEGATIVE = ["blurry", "out of focus", "soft", "motion blur", "unsharp",
+    "camera shake", "missed focus", "not sharp", "blur", "hazy subject"]
+
+TECHNICAL_POSITIVE = ["technically sound", "well exposed", "no noise", "clean",
+    "technically flawless", "excellent quality", "high quality", "crisp",
+    "technically excellent", "sharp throughout", "no grain"]
+TECHNICAL_NEGATIVE = ["noisy", "grainy", "low quality", "artifacts", "pixelated",
+    "chromatic aberration", "lens distortion", "overprocessed", "HDR effect",
+    "heavy handed", "too much sharpening", "oversharpened"]
+
+
+def _score_dimension(text: str, positives: list, negatives: list) -> float:
+    text_lower = text.lower()
+    pos_count = sum(1 for p in positives if p in text_lower)
+    neg_count = sum(1 for n in negatives if n in text_lower)
+
+    if pos_count == 0 and neg_count == 0:
+        return 0.5  # neutral — not mentioned
+
+    total = pos_count + neg_count
+    raw = pos_count / total
+    # Scale: 0.3 to 0.9 range (avoid extremes for fuzzy system)
+    scaled = 0.3 + (raw * 0.6)
+    return round(float(scaled), 4)
+
+
+def _sentiment_score(text: str) -> float:
+    text_lower = text.lower()
+    positive_words = ["great", "excellent", "beautiful", "fantastic", "perfect",
+        "love", "amazing", "stunning", "wonderful", "superb", "good",
+        "nice", "well done", "impressive", "sharp", "clean"]
+    negative_words = ["terrible", "awful", "bad", "poor", "ugly", "boring",
+        "disappointing", "wrong", "horrible", "worst", "failed",
+        "problem", "issue", "unfortunately", "unfortunately"]
+    pos = sum(1 for w in positive_words if w in text_lower)
+    neg = sum(1 for w in negative_words if w in text_lower)
+    if pos + neg == 0:
+        return 0.5
+    return round(float(pos / (pos + neg)), 4)
+
+
+CACHE_FILE = "cache/llm_cache.json"
+
+def _load_cache() -> dict:
+    if not os.path.exists(CACHE_FILE):
+        return {}
+    try:
+        with open(CACHE_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except:
+        return {}
+
+def _save_cache(cache: dict):
+    os.makedirs("cache", exist_ok=True)
+    with open(CACHE_FILE, "w", encoding="utf-8") as f:
+        json.dump(cache, f, indent=2)
+
+def _cache_key(text: str) -> str:
+    return hashlib.md5(text.strip().lower().encode()).hexdigest()
+
 
 def configure_gemini(api_key: str):
-    genai.configure(api_key=api_key)
+    """Keep this for compatibility — model used only as fallback now."""
+    if api_key and api_key != "DUMMY":
+        try:
+            import google.generativeai as genai
+            genai.configure(api_key=api_key)
+        except:
+            pass
 
-def extract_aesthetic_features(critique_text: str, model) -> dict:
+
+def extract_aesthetic_features(critique_text: str, model=None) -> dict:
     """
-    Takes raw critique text, returns structured aesthetic feature scores.
+    Extract aesthetic features using rule-based NLP.
+    Zero API calls. Falls back to Gemini only if model provided
+    AND rule-based returns mostly neutral scores.
     """
     if not critique_text or critique_text.strip() == "":
         return {
-            "composition": 0.5,
-            "lighting": 0.5,
-            "color": 0.5,
-            "subject_clarity": 0.5,
-            "technical": 0.5,
+            "composition": 0.5, "lighting": 0.5, "color": 0.5,
+            "subject_clarity": 0.5, "technical": 0.5,
             "summary": "No critique available."
         }
 
-    prompt = f"""You are an expert photography critic AI.
+    # Check cache first
+    cache = _load_cache()
+    key = _cache_key(critique_text)
+    if key in cache:
+        return cache[key]
 
-Analyze this photo critique text and extract structured aesthetic scores.
+    # Rule-based extraction — zero API calls
+    composition     = _score_dimension(critique_text, COMPOSITION_POSITIVE, COMPOSITION_NEGATIVE)
+    lighting        = _score_dimension(critique_text, LIGHTING_POSITIVE,    LIGHTING_NEGATIVE)
+    color           = _score_dimension(critique_text, COLOR_POSITIVE,       COLOR_NEGATIVE)
+    subject_clarity = _score_dimension(critique_text, CLARITY_POSITIVE,     CLARITY_NEGATIVE)
+    technical       = _score_dimension(critique_text, TECHNICAL_POSITIVE,   TECHNICAL_NEGATIVE)
 
+    # Check if everything is neutral (nothing was found)
+    scores = [composition, lighting, color, subject_clarity, technical]
+    all_neutral = all(s == 0.5 for s in scores)
+
+    # If all neutral AND we have a model, use LLM as fallback
+    if all_neutral and model is not None:
+        try:
+            import google.generativeai as genai
+            prompt = f"""Extract aesthetic scores from this photo critique as JSON only.
 Critique: "{critique_text}"
+Return only: {{"composition":0.0-1.0,"lighting":0.0-1.0,"color":0.0-1.0,"subject_clarity":0.0-1.0,"technical":0.0-1.0,"summary":"one sentence"}}"""
+            response = model.generate_content(prompt)
+            raw = response.text.strip()
+            raw = re.sub(r'^```json\s*', '', raw)
+            raw = re.sub(r'```$', '', raw).strip()
+            result = json.loads(raw)
+            for k in ["composition","lighting","color","subject_clarity","technical"]:
+                result[k] = float(max(0.01, min(0.99, result.get(k, 0.5))))
+            cache[key] = result
+            _save_cache(cache)
+            return result
+        except Exception as e:
+            pass  # Fall through to rule-based result
 
-Return ONLY a valid JSON object with exactly these keys. No explanation, no markdown, no code blocks. Just raw JSON:
-{{
-  "composition": <float 0.0 to 1.0>,
-  "lighting": <float 0.0 to 1.0>,
-  "color": <float 0.0 to 1.0>,
-  "subject_clarity": <float 0.0 to 1.0>,
-  "technical": <float 0.0 to 1.0>,
-  "summary": "<one sentence capturing the overall critique tone>"
-}}
+    # Generate summary from sentiment
+    overall = _sentiment_score(critique_text)
+    tone = "positive" if overall > 0.6 else ("negative" if overall < 0.4 else "mixed")
+    summary = f"Rule-based analysis: {tone} critique. Composition={composition:.2f}, Lighting={lighting:.2f}."
 
-Scoring guide:
-- 0.0 to 0.3 = poor / strongly criticized
-- 0.4 to 0.6 = average / mixed feedback  
-- 0.7 to 1.0 = good / praised
+    result = {
+        "composition":     composition,
+        "lighting":        lighting,
+        "color":           color,
+        "subject_clarity": subject_clarity,
+        "technical":       technical,
+        "summary":         summary
+    }
 
-Base scores on what the critique actually says. If not mentioned, use 0.5."""
-
-    try:
-        response = model.generate_content(prompt)
-        raw = response.text.strip()
-        
-        # Strip markdown if Gemini wraps it
-        raw = re.sub(r'^```json\s*', '', raw)
-        raw = re.sub(r'^```\s*', '', raw)
-        raw = re.sub(r'\s*```$', '', raw)
-        raw = raw.strip()
-        
-        features = json.loads(raw)
-        
-        # Validate and clamp all scores
-        for key in ["composition", "lighting", "color", "subject_clarity", "technical"]:
-            if key not in features:
-                features[key] = 0.5
-            features[key] = float(max(0.01, min(0.99, features[key])))
-        
-        if "summary" not in features:
-            features["summary"] = "Critique analyzed."
-            
-        return features
-        
-    except Exception as e:
-        print(f"  [LLM Error] {e} — using neutral defaults")
-        return {
-            "composition": 0.5,
-            "lighting": 0.5,
-            "color": 0.5,
-            "subject_clarity": 0.5,
-            "technical": 0.5,
-            "summary": "Could not parse critique."
-        }
+    cache[key] = result
+    _save_cache(cache)
+    return result
 
 
 if __name__ == "__main__":
-    api_key = input("Enter your Gemini API key: ").strip()
-    configure_gemini(api_key)
-    model = genai.GenerativeModel("gemini-2.5-flash")
-    
-    test_critiques = [
-        "The composition is fantastic, rule of thirds used perfectly. Lighting is a bit flat though, could use more contrast. Colors are vivid and well saturated.",
-        "This is terrible. The horizon is crooked, subject is blurry, and the exposure is way off. Very disappointing shot.",
-        "Nice shot overall! The subject is sharp and well-placed. Background is a little busy but the lighting is beautiful. Colors feel natural.",
+    print("Testing rule-based extractor (zero API calls)...\n")
+    tests = [
+        "The composition is excellent, rule of thirds applied perfectly. Lighting is natural and flattering. Colors are vibrant.",
+        "This is terrible. The horizon is crooked, subject is blurry, and the exposure is blown out.",
+        "Nice shot overall! Subject is sharp and well placed. Background is a little busy but lighting is beautiful.",
     ]
-    
-    print("\nTesting LLM Extractor...\n")
-    for i, critique in enumerate(test_critiques):
-        print(f"Test {i+1}: {critique[:60]}...")
-        result = extract_aesthetic_features(critique, model)
-        print(f"  Composition: {result['composition']}")
-        print(f"  Lighting:    {result['lighting']}")
-        print(f"  Color:       {result['color']}")
-        print(f"  Summary:     {result['summary']}")
-        print()
+    for i, t in enumerate(tests):
+        r = extract_aesthetic_features(t)
+        print(f"Test {i+1}: {t[:55]}...")
+        for k in ["composition","lighting","color","subject_clarity","technical"]:
+            bar = "█" * int(r[k] * 20)
+            print(f"  {k:<18} {r[k]:.2f}  {bar}")
+        print(f"  Summary: {r['summary']}\n")

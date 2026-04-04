@@ -1,5 +1,9 @@
 [
   {
+    "id": "test_image",
+    "image_path": "test.jpg"
+  },
+  {
     "id": "post_0170",
     "image": "data/images/medium/image_0170.jpg",
     "comments": [

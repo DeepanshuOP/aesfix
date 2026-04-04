@@ -1,0 +1,26 @@
+﻿Testing rule-based extractor (zero API calls)...
+
+Test 1: The composition is excellent, rule of thirds applied pe...
+  composition        0.90  ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûê
+  lighting           0.50  ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûê
+  color              0.90  ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûê
+  subject_clarity    0.50  ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûê
+  technical          0.50  ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûê
+  Summary: Rule-based analysis: positive critique. Composition=0.90, Lighting=0.50.
+
+Test 2: This is terrible. The horizon is crooked, subject is bl...
+  composition        0.50  ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûê
+  lighting           0.30  ΓûêΓûêΓûêΓûêΓûêΓûê
+  color              0.50  ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûê
+  subject_clarity    0.30  ΓûêΓûêΓûêΓûêΓûêΓûê
+  technical          0.50  ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûê
+  Summary: Rule-based analysis: negative critique. Composition=0.50, Lighting=0.30.
+
+Test 3: Nice shot overall! Subject is sharp and well placed. Ba...
+  composition        0.50  ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûê
+  lighting           0.50  ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûê
+  color              0.50  ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûê
+  subject_clarity    0.90  ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûê
+  technical          0.50  ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûê
+  Summary: Rule-based analysis: positive critique. Composition=0.50, Lighting=0.50.
+

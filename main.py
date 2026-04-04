@@ -3,7 +3,10 @@ import os
 import argparse
 import json
 import time
-import google.generativeai as genai
+try:
+    import google.generativeai as genai
+except Exception:
+    genai = None
 
 from our_system.fuzzy_system import build_fuzzy_system, evaluate_aesthetics
 from our_system.llm_extractor import extract_aesthetic_features, configure_gemini
@@ -22,6 +25,8 @@ def parse_args():
     parser.add_argument("--output", type=str, default="results/critiq_output.json")
     parser.add_argument("--limit", type=int, default=20)
     parser.add_argument("--critique", type=str, default=None)
+    parser.add_argument("--image", type=str, default=None,
+                        help="Path to image file for image-based evaluation")
     return parser.parse_args()
 
 
@@ -37,21 +42,59 @@ def main():
         evaluate(results)
         return
 
-    api_key = args.api_key
-    if api_key is None:
-        api_key = input("Enter Gemini API key: ").strip()
-
+    api_key = args.api_key or "DUMMY"
     configure_gemini(api_key)
-    model = genai.GenerativeModel("gemini-2.5-flash")
+    model = None  # Zero API calls - rule-based system
     fuzzy_sim = build_fuzzy_system()
 
     if args.mode == "single":
         critique = args.critique
+
+        # Handle image input
+        if args.image and os.path.exists(args.image):
+            print(f"\nImage mode: {args.image}")
+            from our_system.image_features import extract_image_features
+            img_features = extract_image_features(args.image)
+            agg, disagreement, subjectivity = aggregate_critiques([img_features])
+            label, score = evaluate_aesthetics(
+                fuzzy_sim,
+                agg["composition"], agg["lighting"], agg["color"],
+                agg["subject_clarity"], agg["technical"]
+            )
+            driver = identify_aspect_driver(agg, label)
+            explanation = generate_explanation(label, score, agg, model)
+            counterfactual = generate_counterfactual(label, agg, model)
+
+            print("\n" + "="*55)
+            print("  CritiQ — Image Analysis Result")
+            print("="*55)
+            print(f"  Image          : {args.image}")
+            print(f"  Label          : {label}")
+            print(f"  Confidence     : {score:.4f}")
+            print(f"  Aspect Driver  : {driver}")
+            print(f"\n  Feature Breakdown:")
+            for k in ["composition","lighting","color","subject_clarity","technical"]:
+                bar = "█" * int(agg[k] * 20)
+                print(f"    {k:<18} {agg[k]:.2f}  {bar}")
+            print(f"\n  Explanation:")
+            print(f"  {explanation}")
+            print(f"\n  To Improve:")
+            print(f"  {counterfactual}")
+            print("="*55 + "\n")
+            return
+
         if critique is None:
             critique = input("Enter critique text: ").strip()
 
         print("\nProcessing single critique...")
-        features = extract_aesthetic_features(critique, model)
+
+        # Check if --critique is actually an image path
+        if critique and os.path.exists(critique):
+            print("  Detected image path input")
+            from our_system.image_features import extract_image_features
+            features = extract_image_features(critique)
+        else:
+            features = extract_aesthetic_features(critique, model)
         agg, disagreement, subjectivity = aggregate_critiques([features])
         label, score = evaluate_aesthetics(
             fuzzy_sim,

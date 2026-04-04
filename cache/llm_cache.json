@@ -1,0 +1,218 @@
+{
+  "a1ce9093a13c22ee5962726031871be7": {
+    "composition": 0.9,
+    "lighting": 0.5,
+    "color": 0.9,
+    "subject_clarity": 0.5,
+    "technical": 0.5,
+    "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.50."
+  },
+  "73253b9ed35a8ef2a9f9f5cbdf60e3f1": {
+    "composition": 0.5,
+    "lighting": 0.3,
+    "color": 0.5,
+    "subject_clarity": 0.3,
+    "technical": 0.5,
+    "summary": "Rule-based analysis: negative critique. Composition=0.50, Lighting=0.30."
+  },
+  "b51911a7fda58ef22dbd0fc267041f50": {
+    "composition": 0.5,
+    "lighting": 0.5,
+    "color": 0.5,
+    "subject_clarity": 0.9,
+    "technical": 0.5,
+    "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.50."
+  },
+  "7a889adacf3c60132076ae445235fd06": {
+    "composition": 0.9,
+    "lighting": 0.5,
+    "color": 0.5,
+    "subject_clarity": 0.5,
+    "technical": 0.5,
+    "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50."
+  },
+  "e6a6c8c17d91b203c4ba9035e7f30a4c": {
+    "composition": 0.9,
+    "lighting": 0.5,
+    "color": 0.3,
+    "subject_clarity": 0.5,
+    "technical": 0.9,
+    "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.50."
+  },
+  "564d721b25400c0de1f90d844074aedf": {
+    "composition": 0.9,
+    "lighting": 0.5,
+    "color": 0.5,
+    "subject_clarity": 0.5,
+    "technical": 0.5,
+    "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50."
+  },
+  "4d201c80cc1dcf95e4c9dd0235f29445": {
+    "composition": 0.9,
+    "lighting": 0.9,
+    "color": 0.5,
+    "subject_clarity": 0.5,
+    "technical": 0.9,
+    "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.90."
+  },
+  "9aac91e754bd213f446c3965f80b30d2": {
+    "composition": 0.5,
+    "lighting": 0.9,
+    "color": 0.5,
+    "subject_clarity": 0.5,
+    "technical": 0.5,
+    "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.90."
+  },
+  "f63a1e402564c602ee408262dbac394b": {
+    "composition": 0.9,
+    "lighting": 0.3,
+    "color": 0.5,
+    "subject_clarity": 0.5,
+    "technical": 0.5,
+    "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.30."
+  },
+  "f58fac319bb8b14401a26012535917e2": {
+    "composition": 0.5,
+    "lighting": 0.9,
+    "color": 0.5,
+    "subject_clarity": 0.9,
+    "technical": 0.5,
+    "summary": "Rule-based analysis: mixed critique. Composition=0.50, Lighting=0.90."
+  },
+  "1bce79fb36d56b74e814870539017a75": {
+    "composition": 0.9,
+    "lighting": 0.5,
+    "color": 0.3,
+    "subject_clarity": 0.5,
+    "technical": 0.5,
+    "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50."
+  },
+  "2aa643908471670086947f778e356f87": {
+    "composition": 0.5,
+    "lighting": 0.3,
+    "color": 0.5,
+    "subject_clarity": 0.3,
+    "technical": 0.3,
+    "summary": "Rule-based analysis: mixed critique. Composition=0.50, Lighting=0.30."
+  },
+  "4e2fb53e7ad7a745130e82d91682e1f1": {
+    "composition": 0.5,
+    "lighting": 0.5,
+    "color": 0.5,
+    "subject_clarity": 0.5,
+    "technical": 0.5,
+    "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.50."
+  },
+  "17fbf795cd3b4b21ba9081f04d7ab82d": {
+    "composition": 0.9,
+    "lighting": 0.5,
+    "color": 0.5,
+    "subject_clarity": 0.5,
+    "technical": 0.5,
+    "summary": "Rule-based analysis: negative critique. Composition=0.90, Lighting=0.50."
+  },
+  "70ef34d1a51f33069e645e93fc52d595": {
+    "composition": 0.5,
+    "lighting": 0.5,
+    "color": 0.3,
+    "subject_clarity": 0.5,
+    "technical": 0.5,
+    "summary": "Rule-based analysis: mixed critique. Composition=0.50, Lighting=0.50."
+  },
+  "9ad6f54b148b22d72e3a27a9826f4884": {
+    "composition": 0.9,
+    "lighting": 0.5,
+    "color": 0.9,
+    "subject_clarity": 0.5,
+    "technical": 0.5,
+    "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50."
+  },
+  "73cb0f59b3d0e7cd550e2af7cade4525": {
+    "composition": 0.5,
+    "lighting": 0.3,
+    "color": 0.5,
+    "subject_clarity": 0.5,
+    "technical": 0.5,
+    "summary": "Rule-based analysis: negative critique. Composition=0.50, Lighting=0.30."
+  },
+  "a7da06473b8bbe2e24701c1c4615d17c": {
+    "composition": 0.9,
+    "lighting": 0.5,
+    "color": 0.5,
+    "subject_clarity": 0.5,
+    "technical": 0.5,
+    "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.50."
+  },
+  "9bae33a65f6a90a35a40fffb78749d74": {
+    "composition": 0.5,
+    "lighting": 0.3,
+    "color": 0.5,
+    "subject_clarity": 0.5,
+    "technical": 0.5,
+    "summary": "Rule-based analysis: mixed critique. Composition=0.50, Lighting=0.30."
+  },
+  "5cc711c1a9fb2def90825e180cb70d88": {
+    "composition": 0.7,
+    "lighting": 0.5,
+    "color": 0.3,
+    "subject_clarity": 0.9,
+    "technical": 0.5,
+    "summary": "Rule-based analysis: mixed critique. Composition=0.70, Lighting=0.50."
+  },
+  "7db2dc5a0587f5a3028ae5f45670ece7": {
+    "composition": 0.5,
+    "lighting": 0.5,
+    "color": 0.5,
+    "subject_clarity": 0.9,
+    "technical": 0.5,
+    "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.50."
+  },
+  "5e38e7617899bb9b20affdd3bd27dfd7": {
+    "composition": 0.9,
+    "lighting": 0.5,
+    "color": 0.9,
+    "subject_clarity": 0.5,
+    "technical": 0.5,
+    "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.50."
+  },
+  "21fd35359e3f3c5fdc1b6c40520cf7d2": {
+    "composition": 0.9,
+    "lighting": 0.5,
+    "color": 0.5,
+    "subject_clarity": 0.5,
+    "technical": 0.9,
+    "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.50."
+  },
+  "1ea3e976b0d6cb64989a1618b46f535a": {
+    "composition": 0.9,
+    "lighting": 0.9,
+    "color": 0.3,
+    "subject_clarity": 0.5,
+    "technical": 0.5,
+    "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.90."
+  },
+  "a7cef37727248cf24957cadd7e5f365d": {
+    "composition": 0.5,
+    "lighting": 0.5,
+    "color": 0.5,
+    "subject_clarity": 0.9,
+    "technical": 0.5,
+    "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.50."
+  },
+  "b441f04773af52bc1effe805416e034c": {
+    "composition": 0.9,
+    "lighting": 0.5,
+    "color": 0.5,
+    "subject_clarity": 0.9,
+    "technical": 0.5,
+    "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.50."
+  },
+  "159b95b90ffe58644533938bc1c1b13e": {
+    "composition": 0.9,
+    "lighting": 0.3,
+    "color": 0.5,
+    "subject_clarity": 0.5,
+    "technical": 0.5,
+    "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.30."
+  }
+}

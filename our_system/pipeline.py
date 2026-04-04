@@ -11,6 +11,7 @@ from our_system.llm_extractor import extract_aesthetic_features, configure_gemin
 from our_system.aggregator import aggregate_critiques, identify_aspect_driver
 from our_system.explainer import generate_explanation
 from our_system.counterfactual_generator import generate_counterfactual
+from our_system.image_model import extract_image_features
 
 
 def load_dataset(json_path: str) -> list:
@@ -27,7 +28,9 @@ def run_pipeline(data: list, model, fuzzy_sim, limit: int = 30) -> list:
     print("=" * 60)
 
     for i, item in enumerate(subset):
-        print(f"\n[{i+1}/{total}] Sample: {item.get('id', item.get('image', f'sample_{i}'))}")
+        item_id = item.get('id', item.get('image', f'sample_{i}'))
+        print("-" * 40)
+        print(f"Sample: {item_id}")
 
         comments = item.get("comments", item.get("comment", []))
         if isinstance(comments, str):
@@ -37,15 +40,24 @@ def run_pipeline(data: list, model, fuzzy_sim, limit: int = 30) -> list:
 
         original_score = item.get("sentiment_score", item.get("score", None))
 
-        print(f"  Extracting features from {len(comments)} critique(s)...")
-        feature_list = []
-        for comment in comments:
-            features = extract_aesthetic_features(comment, model)
-            feature_list.append(features)
-            time.sleep(1.5)
+        # Check for image input
+        image_path = item.get("image_path", item.get("image", None))
 
-        agg, disagreement, subjectivity = aggregate_critiques(feature_list)
-        print(f"  Disagreement: {disagreement:.4f} | Subjectivity: {subjectivity}")
+        if image_path and os.path.exists(str(image_path)):
+            print(f"  Using image-based feature extraction: {image_path}")
+            agg = extract_image_features(str(image_path))
+            disagreement = 0.0
+            subjectivity = "LOW"
+            feature_list = [agg]
+        else:
+            print(f"  Extracting features from {len(comments)} critique(s)...")
+            feature_list = []
+            for comment in comments:
+                features = extract_aesthetic_features(comment, model)
+                feature_list.append(features)
+                time.sleep(4)
+
+            agg, disagreement, subjectivity = aggregate_critiques(feature_list)
 
         label, fuzzy_score = evaluate_aesthetics(
             fuzzy_sim,
@@ -55,14 +67,18 @@ def run_pipeline(data: list, model, fuzzy_sim, limit: int = 30) -> list:
             agg["subject_clarity"],
             agg["technical"]
         )
-        driver = identify_aspect_driver(agg, agg)
-        print(f"  Label: {label} | Score: {fuzzy_score:.4f}")
+        driver = identify_aspect_driver(agg, label)
+        print(f"Label: {label}")
+        print(f"Score: {fuzzy_score:.2f}\n")
 
-        explanation = generate_explanation(label, fuzzy_score, agg, model)
-        time.sleep(1.5)
-
-        counterfactual = generate_counterfactual(label, agg, model)
-        time.sleep(1.5)
+        # Skip extra API calls
+        try:
+            explanation = generate_explanation(label, fuzzy_score, agg, model)
+            time.sleep(4)
+        except Exception:
+            explanation = "Explanation unavailable."
+            
+        counterfactual = "Skipped to save API usage."
 
         result = {
             "index": i,
@@ -83,7 +99,12 @@ def run_pipeline(data: list, model, fuzzy_sim, limit: int = 30) -> list:
         }
 
         results.append(result)
-        print(f"  Explanation: {explanation[:80]}...")
+        
+        print("Explanation:")
+        print(f"{explanation}\n")
+        print("Suggestions:")
+        print(counterfactual)
+        print("-" * 40)
 
     print("\n" + "=" * 60)
     return results

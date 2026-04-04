@@ -1,117 +1,11 @@
 [
   {
     "index": 0,
-    "id": "post_0170",
-    "image": "data/images/medium/image_0170.jpg",
-    "n_critiques": 4,
-    "original_sentiment_score": 0.4322,
-    "ground_truth_quality": "medium",
-    "per_critique_features": [
-      {
-        "composition": 0.45,
-        "lighting": 0.4,
-        "color": 0.5,
-        "subject_clarity": 0.5,
-        "technical": 0.5,
-        "summary": "The photo features decent composition and adequate lighting, though both lack elements that would elevate the shot."
-      },
-      {
-        "composition": 0.5,
-        "lighting": 0.45,
-        "color": 0.6,
-        "subject_clarity": 0.5,
-        "technical": 0.5,
-        "summary": "The photo shows adequate composition and natural colors, but the lighting is flat and lacks drama."
-      },
-      {
-        "composition": 0.45,
-        "lighting": 0.5,
-        "color": 0.5,
-        "subject_clarity": 0.8,
-        "technical": 0.8,
-        "summary": "The photo captures a nice moment with clean post-processing, though the framing is a bit tight and the lighting lacks character."
-      },
-      {
-        "composition": 0.2,
-        "lighting": 0.2,
-        "color": 0.5,
-        "subject_clarity": 0.7,
-        "technical": 0.5,
-        "summary": "Despite an interesting moment, the photograph suffers from significant compositional flaws and poor lighting."
-      }
-    ],
-    "aggregated_features": {
-      "composition": 0.2625,
-      "lighting": 0.2722,
-      "color": 0.6,
-      "subject_clarity": 0.76,
-      "technical": 0.8,
-      "summary": "The photo features decent composition and adequate lighting, though both lack elements that would elevate the shot."
-    },
-    "disagreement_score": 0.0413,
-    "subjectivity_flag": "LOW",
-    "fuzzy_label": "MEDIUM",
-    "fuzzy_score": 0.4465,
-    "aspect_driver": "technical (score: 0.80)",
-    "explanation": "Your photo received a MEDIUM aesthetic rating because, despite strong scores in technical quality, subject clarity, and color, the fundamental aspects of composition and lighting scored quite low at 0.26 and 0.27 respectively. These lower scores in crucial areas significantly prevented the overall aesthetic from reaching a higher evaluation, as how the scene was framed and lit did not enhance the image.",
-    "counterfactual": "To reach a HIGH rating, reframe your shot using the Rule of Thirds to place your subject off-center, or seek out leading lines to draw the viewer's eye into the scene. Additionally, improve your lighting by shooting during the golden hour for softer, warmer light, or move your subject into open shade to eliminate harsh shadows and create more even illumination."
-  },
-  {
-    "index": 1,
-    "id": "post_0171",
-    "image": "data/images/high/image_0171.jpg",
-    "n_critiques": 3,
-    "original_sentiment_score": 0.7176,
-    "ground_truth_quality": "high",
-    "per_critique_features": [
-      {
-        "composition": 0.5,
-        "lighting": 0.8,
-        "color": 0.9,
-        "subject_clarity": 0.99,
-        "technical": 0.99,
-        "summary": "The photo is technically flawless, featuring perfectly calibrated depth of field and accurate skin tones that bring the portrait to life."
-      },
-      {
-        "composition": 0.3,
-        "lighting": 0.2,
-        "color": 0.5,
-        "subject_clarity": 0.3,
-        "technical": 0.5,
-        "summary": "The photo captures an interesting moment, but its composition and lighting are weak, and the subject is awkwardly cropped."
-      },
-      {
-        "composition": 0.5,
-        "lighting": 0.5,
-        "color": 0.5,
-        "subject_clarity": 0.5,
-        "technical": 0.5,
-        "summary": "Could not parse critique."
-      }
-    ],
-    "aggregated_features": {
-      "composition": 0.3,
-      "lighting": 0.5,
-      "color": 0.9,
-      "subject_clarity": 0.79,
-      "technical": 0.99,
-      "summary": "The photo is technically flawless, featuring perfectly calibrated depth of field and accurate skin tones that bring the portrait to life."
-    },
-    "disagreement_score": 0.0394,
-    "subjectivity_flag": "LOW",
-    "fuzzy_label": "MEDIUM",
-    "fuzzy_score": 0.4623,
-    "aspect_driver": "technical (score: 0.99)",
-    "explanation": "This photo received a MEDIUM aesthetic rating with a confidence of 0.46.",
-    "counterfactual": "To reach a high rating, significantly improve your composition by actively applying the Rule of Thirds or utilizing leading lines to guide the viewer's eye and create a more dynamic and engaging frame. For lighting, seek out softer, more diffused light sources, such as open shade or golden hour light, to minimize harsh shadows and create more flattering, even illumination across your scene."
-  },
-  {
-    "index": 2,
-    "id": "post_0172",
-    "image": "data/images/medium/image_0172.jpg",
-    "n_critiques": 4,
-    "original_sentiment_score": 0.4698,
-    "ground_truth_quality": "medium",
+    "id": "test_image",
+    "image": "",
+    "n_critiques": 1,
+    "original_sentiment_score": null,
+    "ground_truth_quality": "unknown",
     "per_critique_features": [
       {
         "composition": 0.5,
@@ -119,145 +13,7 @@
         "color": 0.5,
         "subject_clarity": 0.5,
         "technical": 0.5,
-        "summary": "Could not parse critique."
-      },
-      {
-        "composition": 0.5,
-        "lighting": 0.5,
-        "color": 0.5,
-        "subject_clarity": 0.5,
-        "technical": 0.5,
-        "summary": "Could not parse critique."
-      },
-      {
-        "composition": 0.5,
-        "lighting": 0.5,
-        "color": 0.5,
-        "subject_clarity": 0.5,
-        "technical": 0.5,
-        "summary": "Could not parse critique."
-      },
-      {
-        "composition": 0.8,
-        "lighting": 0.5,
-        "color": 0.4,
-        "subject_clarity": 0.5,
-        "technical": 0.7,
-        "summary": "The photo demonstrates competent framing and a straight horizon, but the colors appear slightly washed out and would benefit from editing."
-      }
-    ],
-    "aggregated_features": {
-      "composition": 0.8,
-      "lighting": 0.5,
-      "color": 0.4,
-      "subject_clarity": 0.5,
-      "technical": 0.7,
-      "summary": "Could not parse critique."
-    },
-    "disagreement_score": 0.0153,
-    "subjectivity_flag": "LOW",
-    "fuzzy_label": "MEDIUM",
-    "fuzzy_score": 0.5878,
-    "aspect_driver": "composition (score: 0.80)",
-    "explanation": "Your photo achieved a MEDIUM aesthetic rating because its strong composition at 0.80 and solid technical quality at 0.70 were unfortunately counterbalanced by moderate scores for lighting and subject clarity, both at 0.50. The overall rating was significantly pulled down by a notably low color score of 0.40, preventing it from reaching a higher tier despite its strengths.",
-    "counterfactual": "To achieve a HIGH rating, focus on enhancing your colors by utilizing warmer, natural light like the golden hour, or by making targeted post-processing adjustments to boost vibrancy and white balance. Improve subject clarity by simplifying your background to minimize distractions and using a wider aperture to create a shallower depth of field, ensuring your main subject is perfectly sharp."
-  },
-  {
-    "index": 3,
-    "id": "post_0173",
-    "image": "data/images/low/image_0173.jpg",
-    "n_critiques": 4,
-    "original_sentiment_score": 0.0648,
-    "ground_truth_quality": "low",
-    "per_critique_features": [
-      {
-        "composition": 0.5,
-        "lighting": 0.1,
-        "color": 0.5,
-        "subject_clarity": 0.1,
-        "technical": 0.1,
-        "summary": "The photo is severely flawed by blur, an unrecognizable subject, and significant underexposure leading to a muddy and noisy appearance."
-      },
-      {
-        "composition": 0.5,
-        "lighting": 0.2,
-        "color": 0.5,
-        "subject_clarity": 0.1,
-        "technical": 0.1,
-        "summary": "The photo is severely flawed by significant subject motion blur and incorrect exposure, making it unusable."
-      },
-      {
-        "composition": 0.55,
-        "lighting": 0.45,
-        "color": 0.6,
-        "subject_clarity": 0.5,
-        "technical": 0.5,
-        "summary": "The photo demonstrates adequate composition and lighting, though both lack dramatic impact, while the colors are natural."
-      },
-      {
-        "composition": 0.5,
-        "lighting": 0.5,
-        "color": 0.5,
-        "subject_clarity": 0.5,
-        "technical": 0.5,
-        "summary": "Could not parse critique."
-      }
-    ],
-    "aggregated_features": {
-      "composition": 0.55,
-      "lighting": 0.1633,
-      "color": 0.6,
-      "subject_clarity": 0.1,
-      "technical": 0.1,
-      "summary": "The photo is severely flawed by blur, an unrecognizable subject, and significant underexposure leading to a muddy and noisy appearance."
-    },
-    "disagreement_score": 0.1095,
-    "subjectivity_flag": "LOW",
-    "fuzzy_label": "LOW",
-    "fuzzy_score": 0.3901,
-    "aspect_driver": "subject_clarity (score: 0.10)",
-    "explanation": "This photo received a LOW aesthetic rating primarily because of severe deficiencies in its lighting, subject clarity, and technical quality. The extremely poor lighting resulted in significant underexposure and a muddy, noisy appearance, while the subject was largely unrecognizable due to blur and a critical lack of clarity, significantly dragging down the overall appeal.",
-    "counterfactual": "To improve this image, focus primarily on subject clarity which is the weakest dimension. Consider seeking professional feedback on lighting and composition."
-  },
-  {
-    "index": 4,
-    "id": "post_0174",
-    "image": "data/images/low/image_0174.jpg",
-    "n_critiques": 4,
-    "original_sentiment_score": 0.3123,
-    "ground_truth_quality": "low",
-    "per_critique_features": [
-      {
-        "composition": 0.5,
-        "lighting": 0.5,
-        "color": 0.5,
-        "subject_clarity": 0.5,
-        "technical": 0.5,
-        "summary": "Could not parse critique."
-      },
-      {
-        "composition": 0.5,
-        "lighting": 0.5,
-        "color": 0.5,
-        "subject_clarity": 0.5,
-        "technical": 0.5,
-        "summary": "Could not parse critique."
-      },
-      {
-        "composition": 0.5,
-        "lighting": 0.5,
-        "color": 0.5,
-        "subject_clarity": 0.5,
-        "technical": 0.5,
-        "summary": "Could not parse critique."
-      },
-      {
-        "composition": 0.5,
-        "lighting": 0.5,
-        "color": 0.5,
-        "subject_clarity": 0.5,
-        "technical": 0.5,
-        "summary": "Could not parse critique."
+        "summary": "Analytical failure: 'BaseModelOutputWithPooling' object has no attribu"
       }
     ],
     "aggregated_features": {
@@ -266,63 +22,120 @@
       "color": 0.5,
       "subject_clarity": 0.5,
       "technical": 0.5,
-      "summary": "Could not parse critique."
+      "summary": "Analytical failure: 'BaseModelOutputWithPooling' object has no attribu"
     },
     "disagreement_score": 0.0,
     "subjectivity_flag": "LOW",
     "fuzzy_label": "MEDIUM",
     "fuzzy_score": 0.5,
     "aspect_driver": "composition (score: 0.50)",
-    "explanation": "This photo received a MEDIUM aesthetic rating with a confidence of 0.50.",
-    "counterfactual": "To improve this image, focus primarily on composition which is the weakest dimension. Consider seeking professional feedback on lighting and composition."
+    "explanation": "This image sits in the MEDIUM range (0.50) with adequate but unexceptional performance. Composition (0.50) is the relative strength, while composition (0.50) holds the image back from a HIGH rating. More deliberate attention to the weaker dimensions would push this further.",
+    "counterfactual": "Skipped to save API usage."
   },
   {
-    "index": 5,
-    "id": "post_0175",
-    "image": "data/images/high/image_0175.jpg",
-    "n_critiques": 3,
-    "original_sentiment_score": 0.9746,
-    "ground_truth_quality": "high",
+    "index": 1,
+    "id": "post_0170",
+    "image": "data/images/medium/image_0170.jpg",
+    "n_critiques": 4,
+    "original_sentiment_score": 0.4322,
+    "ground_truth_quality": "medium",
     "per_critique_features": [
       {
-        "composition": 0.5,
+        "composition": 0.9,
         "lighting": 0.5,
         "color": 0.5,
         "subject_clarity": 0.5,
         "technical": 0.5,
-        "summary": "Could not parse critique."
-      },
-      {
-        "composition": 0.5,
-        "lighting": 0.5,
-        "color": 0.5,
-        "subject_clarity": 0.5,
-        "technical": 0.5,
-        "summary": "Could not parse critique."
+        "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50."
       },
       {
         "composition": 0.9,
-        "lighting": 0.95,
+        "lighting": 0.5,
         "color": 0.5,
-        "subject_clarity": 0.95,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50."
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.3,
+        "subject_clarity": 0.5,
         "technical": 0.9,
-        "summary": "The critique praises exceptional macro work, precise focus, beautiful background separation, and stunning detail revealed by natural lighting."
+        "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.50."
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50."
       }
     ],
     "aggregated_features": {
       "composition": 0.9,
-      "lighting": 0.95,
-      "color": 0.5,
-      "subject_clarity": 0.95,
+      "lighting": 0.5,
+      "color": 0.3,
+      "subject_clarity": 0.5,
       "technical": 0.9,
-      "summary": "Could not parse critique."
+      "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50."
     },
-    "disagreement_score": 0.0135,
+    "disagreement_score": 0.0225,
     "subjectivity_flag": "LOW",
     "fuzzy_label": "HIGH",
-    "fuzzy_score": 0.7325,
-    "aspect_driver": "lighting (score: 0.95)",
-    "explanation": "Your photo achieved a high aesthetic rating thanks to its exceptional lighting, very clear subject, and strong composition and technical execution. These key strengths significantly elevated the overall quality, allowing the image to excel despite a more moderate performance in color.",
-    "counterfactual": "This image already rates HIGH. To maintain quality, keep the same approach to composition and lighting."
+    "fuzzy_score": 0.6725,
+    "aspect_driver": "composition (score: 0.90)",
+    "explanation": "This image achieved a HIGH aesthetic rating with strong confidence (0.67). The standout quality is composition (0.90), which clearly elevates the overall impression. Supporting dimensions including color (0.30) are also well executed, resulting in a cohesive and visually compelling photograph.",
+    "counterfactual": "Skipped to save API usage."
+  },
+  {
+    "index": 2,
+    "id": "post_0171",
+    "image": "data/images/high/image_0171.jpg",
+    "n_critiques": 3,
+    "original_sentiment_score": 0.7176,
+    "ground_truth_quality": "high",
+    "per_critique_features": [
+      {
+        "composition": 0.9,
+        "lighting": 0.9,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.9,
+        "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.90."
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50."
+      },
+      {
+        "composition": 0.5,
+        "lighting": 0.9,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.90."
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.9,
+      "lighting": 0.9,
+      "color": 0.5,
+      "subject_clarity": 0.5,
+      "technical": 0.9,
+      "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.90."
+    },
+    "disagreement_score": 0.0564,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "HIGH",
+    "fuzzy_score": 0.6725,
+    "aspect_driver": "composition (score: 0.90)",
+    "explanation": "This image achieved a HIGH aesthetic rating with strong confidence (0.67). The standout quality is composition (0.90), which clearly elevates the overall impression. Supporting dimensions including color (0.50) are also well executed, resulting in a cohesive and visually compelling photograph.",
+    "counterfactual": "Skipped to save API usage."
   }
 ]
