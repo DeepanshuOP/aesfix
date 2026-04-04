@@ -159,6 +159,7 @@ bsub.txt
 .roo/
 .trae/
 .windsurf/
+.github/
 
 # Cache & temp
 cache/
