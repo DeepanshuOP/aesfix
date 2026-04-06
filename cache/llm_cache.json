@@ -86,5 +86,21 @@
     "subject_clarity": 0.8,
     "technical": 0.9,
     "summary": "Rule-based analysis: positive critique. Composition=0.75, Lighting=0.74."
+  },
+  "0060a77ce52daf2374a26ac24c8d8e12": {
+    "composition": 0.9,
+    "lighting": 0.66,
+    "color": 0.9,
+    "subject_clarity": 0.9,
+    "technical": 0.5,
+    "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.66."
+  },
+  "e6868eab26c38bda55e2a72b6414c123": {
+    "composition": 0.6,
+    "lighting": 0.3,
+    "color": 0.5,
+    "subject_clarity": 0.3,
+    "technical": 0.5,
+    "summary": "Rule-based analysis: negative critique. Composition=0.60, Lighting=0.30."
   }
 }

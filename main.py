@@ -4,6 +4,8 @@ import argparse
 import json
 import time
 try:
+    import warnings
+    warnings.filterwarnings("ignore", category=FutureWarning)
     import google.generativeai as genai
 except Exception:
     genai = None
@@ -60,16 +62,11 @@ def main():
             img_features = extract_image_features(args.image)
 
             # ---- TEXT FEATURES ----
-            if args.critique:
+            has_critique = bool(args.critique and args.critique.strip())
+            if has_critique:
                 text_features = extract_aesthetic_features(args.critique, model)
             else:
-                text_features = {
-                    "composition": 0.5,
-                    "lighting": 0.5,
-                    "color": 0.5,
-                    "subject_clarity": 0.5,
-                    "technical": 0.5
-                }
+                text_features = None
 
             # DEBUG (you MUST see this now)
             print("DEBUG TEXT FEATURES:", text_features)
@@ -77,10 +74,16 @@ def main():
 
             # ---- FUSION ----
             agg = {}
-            for key in ["composition", "lighting", "color", "subject_clarity", "technical"]:
-                agg[key] = round(
-                    0.85 * text_features[key] + 0.15 * img_features[key], 4
-                )
+            if has_critique and text_features:
+                # Multimodal: 70% text + 30% image (both signals meaningful)
+                for key in ["composition", "lighting", "color", "subject_clarity", "technical"]:
+                    agg[key] = round(
+                        0.70 * text_features[key] + 0.30 * img_features[key], 4
+                    )
+            else:
+                # Image-only: 100% CLIP zero-shot features
+                for key in ["composition", "lighting", "color", "subject_clarity", "technical"]:
+                    agg[key] = round(img_features[key], 4)
 
             disagreement = 0.0
             subjectivity = "LOW"

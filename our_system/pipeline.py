@@ -2,8 +2,9 @@ import json
 import os
 import sys
 import time
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
 import google.generativeai as genai
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from our_system.fuzzy_system import build_fuzzy_system, evaluate_aesthetics
@@ -12,7 +13,11 @@ from our_system.aggregator import aggregate_critiques, identify_aspect_driver
 from our_system.explainer import generate_explanation
 from our_system.counterfactual_generator import generate_counterfactual
 from our_system.image_model import extract_image_features
-print("🔥 PIPELINE FILE LOADED 🔥")
+
+# ✅ NEW IMPORT
+from our_system.auto_critic import generate_auto_critique
+
+print("[INFO] PIPELINE FILE LOADED")
 
 
 def load_dataset(json_path: str) -> list:
@@ -37,16 +42,29 @@ def run_pipeline(data, model, fuzzy_sim, limit=30, user_critique=None):
             comments = [user_critique]
         else:
             comments = item.get("comments", item.get("comment", []))
+
         print("DEBUG COMMENTS:", comments)
+
         if isinstance(comments, str):
             comments = [comments]
-        if not comments:
-            comments = ["No critique available."]
 
         original_score = item.get("sentiment_score", item.get("score", None))
 
         # Check for image input
         image_path = item.get("image_path", item.get("image", None))
+
+        # ✅ HANDLE EMPTY / BLANK CRITIQUE PROPERLY
+        if (
+            not comments
+            or comments == ["No critique available."]
+            or all(c.strip() == "" for c in comments)
+        ):
+            if image_path and os.path.exists(str(image_path)):
+                auto_critique = generate_auto_critique(str(image_path))
+                print("⚡ Auto-generated critique:", auto_critique)
+                comments = [auto_critique]
+            else:
+                comments = ["Average image quality."]
 
         # ---- TEXT FEATURES ----
         feature_list = []
@@ -55,7 +73,7 @@ def run_pipeline(data, model, fuzzy_sim, limit=30, user_critique=None):
         for comment in comments:
             features = extract_aesthetic_features(comment, model)
             feature_list.append(features)
-            time.sleep(1)  # reduced delay
+            time.sleep(1)
 
         text_features, disagreement, subjectivity = aggregate_critiques(feature_list)
 
@@ -71,15 +89,15 @@ def run_pipeline(data, model, fuzzy_sim, limit=30, user_critique=None):
                 "subject_clarity": 0.5,
                 "technical": 0.5
             }
+
         print("\nDEBUG TEXT FEATURES:", text_features)
         print("DEBUG IMAGE FEATURES:", image_features)
 
         # ---- FUSION ----
-        
         agg = {}
         for key in ["composition", "lighting", "color", "subject_clarity", "technical"]:
             agg[key] = round(
-                0.85 * text_features[key] + 0.15 * image_features[key]
+                0.85 * text_features[key] + 0.15 * image_features[key],4
             )
 
         label, fuzzy_score = evaluate_aesthetics(
@@ -90,7 +108,9 @@ def run_pipeline(data, model, fuzzy_sim, limit=30, user_critique=None):
             agg["subject_clarity"],
             agg["technical"]
         )
+
         driver = identify_aspect_driver(agg, label)
+
         print(f"Label: {label}")
         print(f"Score: {fuzzy_score:.2f}\n")
 
@@ -100,7 +120,7 @@ def run_pipeline(data, model, fuzzy_sim, limit=30, user_critique=None):
             time.sleep(4)
         except Exception:
             explanation = "Explanation unavailable."
-            
+
         counterfactual = "Skipped to save API usage."
 
         result = {
@@ -122,7 +142,7 @@ def run_pipeline(data, model, fuzzy_sim, limit=30, user_critique=None):
         }
 
         results.append(result)
-        
+
         print("Explanation:")
         print(f"{explanation}\n")
         print("Suggestions:")

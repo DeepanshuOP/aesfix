@@ -2,7 +2,8 @@ import re
 import json
 import os
 import hashlib
-
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
 # ── Keyword dictionaries for rule-based extraction ──────────
 COMPOSITION_POSITIVE = ["rule of thirds", "composition", "framing", "leading lines",
     "symmetry", "balance", "well composed", "great framing", "diagonal",
