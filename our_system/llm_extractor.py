@@ -46,24 +46,52 @@ TECHNICAL_POSITIVE = ["technically sound", "well exposed", "no noise", "clean",
 TECHNICAL_NEGATIVE = ["noisy", "grainy", "low quality", "artifacts", "pixelated",
     "chromatic aberration", "lens distortion", "overprocessed", "HDR effect",
     "heavy handed", "too much sharpening", "oversharpened"]
+NEGATIONS = ["not", "no", "never", "isn't", "wasn't", "aren't"]
+INTENSIFIERS = {
+    "very": 1.2,
+    "extremely": 1.4,
+    "slightly": 0.8,
+    "somewhat": 0.9
+}
 
 
+def _split_sentences(text: str):
+    return re.split(r'[.,;]| but | however ', text.lower())
 
 def _score_dimension(text: str, positives: list, negatives: list) -> float:
-    text_lower = text.lower()
+    sentences = _split_sentences(text)
 
-    # --- word-level matching instead of phrase matching ---
-    pos_count = sum(1 for p in positives if any(word in text_lower for word in p.split()))
-    neg_count = sum(1 for n in negatives if any(word in text_lower for word in n.split()))
+    total_score = 0
+    count = 0
 
-    if pos_count == 0 and neg_count == 0:
+    for sentence in sentences:
+        pos_count = sum(1 for p in positives if any(word in sentence for word in p.split()))
+        neg_count = sum(1 for n in negatives if any(word in sentence for word in n.split()))
+
+        if pos_count == 0 and neg_count == 0:
+            continue
+
+        total = pos_count + neg_count
+        raw = pos_count / total if total > 0 else 0.5
+
+        score = 0.3 + (raw * 0.6)
+
+        # 🔥 NEGATION HANDLING
+        if any(neg in sentence for neg in NEGATIONS):
+            score = 1 - score
+
+        # 🔥 INTENSIFIER HANDLING
+        for word, factor in INTENSIFIERS.items():
+            if word in sentence:
+                score = (score - 0.5) * factor + 0.5
+
+        total_score += score
+        count += 1
+
+    if count == 0:
         return 0.5
 
-    total = pos_count + neg_count
-    raw = pos_count / total
-
-    scaled = 0.3 + (raw * 0.6)
-    return round(float(scaled), 4)
+    return round(float(total_score / count), 4)
 def _sentiment_score(text: str) -> float:
     text_lower = text.lower()
     positive_words = ["great", "excellent", "beautiful", "fantastic", "perfect",
@@ -76,6 +104,10 @@ def _sentiment_score(text: str) -> float:
     neg = sum(1 for w in negative_words if w in text_lower)
     if pos + neg == 0:
         return 0.5
+        
+    if any(neg in text_lower for neg in NEGATIONS):
+        return round(float(1 - (pos / (pos + neg + 1e-6))), 4)
+        
     return round(float(pos / (pos + neg)), 4)
 
 
@@ -135,6 +167,14 @@ def extract_aesthetic_features(critique_text: str, model=None) -> dict:
     subject_clarity = _score_dimension(critique_text, CLARITY_POSITIVE,     CLARITY_NEGATIVE)
     technical       = _score_dimension(critique_text, TECHNICAL_POSITIVE,   TECHNICAL_NEGATIVE)
 
+    # 🔥 NEW: confidence based on whether feature deviates from neutral
+    confidence = {
+        "composition": 1.0 if composition != 0.5 else 0.0,
+        "lighting": 1.0 if lighting != 0.5 else 0.0,
+        "color": 1.0 if color != 0.5 else 0.0,
+        "subject_clarity": 1.0 if subject_clarity != 0.5 else 0.0,
+        "technical": 1.0 if technical != 0.5 else 0.0,
+    }
     # Check if everything is neutral (nothing was found)
     scores = [composition, lighting, color, subject_clarity, technical]
     all_neutral = all(s == 0.5 for s in scores)
@@ -144,8 +184,8 @@ def extract_aesthetic_features(critique_text: str, model=None) -> dict:
         try:
             import google.generativeai as genai
             prompt = f"""Extract aesthetic scores from this photo critique as JSON only.
-Critique: "{critique_text}"
-Return only: {{"composition":0.0-1.0,"lighting":0.0-1.0,"color":0.0-1.0,"subject_clarity":0.0-1.0,"technical":0.0-1.0,"summary":"one sentence"}}"""
+            Critique: "{critique_text}"
+            Return only: {{"composition":0.0-1.0,"lighting":0.0-1.0,"color":0.0-1.0,"subject_clarity":0.0-1.0,"technical":0.0-1.0,"summary":"one sentence"}}"""
             response = model.generate_content(prompt)
             raw = response.text.strip()
             raw = re.sub(r'^```json\s*', '', raw)
@@ -170,7 +210,8 @@ Return only: {{"composition":0.0-1.0,"lighting":0.0-1.0,"color":0.0-1.0,"subject
         "color":           color,
         "subject_clarity": subject_clarity,
         "technical":       technical,
-        "summary":         summary
+        "summary":         summary,
+        "confidence":      confidence   
     }
 
     cache[key] = result

@@ -57,8 +57,37 @@ def identify_aspect_driver(features: Dict, label: str) -> str:
         driver = max(variance, key=variance.get)
         return f"{driver} (score: {scores[driver]:.2f})"
 
+def adaptive_fusion(text_output: Dict, image_features: Dict) -> Dict:
+    final_features = {}
+
+    confidence = text_output.get("confidence", {})
+
+    for key in FEATURE_KEYS:
+        text_val = text_output.get(key, 0.5)
+        img_val = image_features.get(key, 0.5)
+
+        wt = confidence.get(key, 0.0)
+        wi = 1.0 - wt
+
+        final_features[key] = round(wt * text_val + wi * img_val, 4)
+
+    final_features["summary"] = text_output.get("summary", "")
+
+    return final_features
+
 def aggregate_critiques(feature_list: List[Dict]) -> Tuple[Dict, float, str]:
     disagreement = compute_disagreement(feature_list)
     subjectivity = subjectivity_label(disagreement)
-    aggregated = confidence_weighted_aggregate(feature_list)
+    # 🔥 Detect if multimodal (text + image)
+    if len(feature_list) == 2 and "confidence" in feature_list[0]:
+        text_output = feature_list[0]
+        image_features = feature_list[1]
+
+        aggregated = adaptive_fusion(text_output, image_features)
+    else:
+        aggregated = confidence_weighted_aggregate(feature_list)
     return aggregated, disagreement, subjectivity
+    print("\n[DEBUG] feature_list received:")
+    for i, f in enumerate(feature_list):
+        print(f"--- Item {i} ---")
+        print(f)

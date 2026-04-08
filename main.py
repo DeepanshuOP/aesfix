@@ -124,9 +124,23 @@ def main():
             print("  Detected image path input")
             
             features = extract_image_features(critique)
+            agg, disagreement, subjectivity = aggregate_critiques([features])
+
         else:
-            features = extract_aesthetic_features(critique, model)
-        agg, disagreement, subjectivity = aggregate_critiques([features])
+            text_features = extract_aesthetic_features(critique, model)
+
+            image_features = {
+                "composition": 0.5,
+                "lighting": 0.5,
+                "color": 0.5,
+                "subject_clarity": 0.5,
+                "technical": 0.5
+            }
+
+            agg, disagreement, subjectivity = aggregate_critiques(
+                [text_features, image_features]
+            )
+
         label, score = evaluate_aesthetics(
             fuzzy_sim,
             agg["composition"],
