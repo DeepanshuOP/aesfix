@@ -94,11 +94,9 @@ def run_pipeline(data, model, fuzzy_sim, limit=30, user_critique=None):
         print("DEBUG IMAGE FEATURES:", image_features)
 
         # ---- FUSION ----
-        agg = {}
-        for key in ["composition", "lighting", "color", "subject_clarity", "technical"]:
-            agg[key] = round(
-                0.85 * text_features[key] + 0.15 * image_features[key],4
-            )
+        agg, disagreement, subjectivity = aggregate_critiques(
+            [text_features, image_features]
+        )
 
         label, fuzzy_score = evaluate_aesthetics(
             fuzzy_sim,

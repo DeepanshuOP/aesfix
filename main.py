@@ -73,20 +73,14 @@ def main():
             print("DEBUG IMAGE FEATURES:", img_features)
 
             # ---- FUSION ----
-            agg = {}
             if has_critique and text_features:
-                # Multimodal: 70% text + 30% image (both signals meaningful)
-                for key in ["composition", "lighting", "color", "subject_clarity", "technical"]:
-                    agg[key] = round(
-                        0.70 * text_features[key] + 0.30 * img_features[key], 4
-                    )
+                agg, disagreement, subjectivity = aggregate_critiques(
+                    [text_features, img_features]
+                )
             else:
-                # Image-only: 100% CLIP zero-shot features
-                for key in ["composition", "lighting", "color", "subject_clarity", "technical"]:
-                    agg[key] = round(img_features[key], 4)
-
-            disagreement = 0.0
-            subjectivity = "LOW"
+                agg, disagreement, subjectivity = aggregate_critiques(
+                    [img_features]
+                )
             label, score = evaluate_aesthetics(
                 fuzzy_sim,
                 agg["composition"], agg["lighting"], agg["color"],

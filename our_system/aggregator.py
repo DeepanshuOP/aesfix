@@ -75,19 +75,37 @@ def adaptive_fusion(text_output: Dict, image_features: Dict) -> Dict:
 
     return final_features
 
-def aggregate_critiques(feature_list: List[Dict]) -> Tuple[Dict, float, str]:
-    disagreement = compute_disagreement(feature_list)
-    subjectivity = subjectivity_label(disagreement)
-    # 🔥 Detect if multimodal (text + image)
-    if len(feature_list) == 2 and "confidence" in feature_list[0]:
-        text_output = feature_list[0]
-        image_features = feature_list[1]
+def is_text_feature(f):
+    return isinstance(f, dict) and "confidence" in f
 
-        aggregated = adaptive_fusion(text_output, image_features)
-    else:
-        aggregated = confidence_weighted_aggregate(feature_list)
-    return aggregated, disagreement, subjectivity
+def is_image_feature(f):
+    return isinstance(f, dict) and "confidence" not in f
+
+def aggregate_critiques(feature_list: List[Dict]) -> Tuple[Dict, float, str]:
     print("\n[DEBUG] feature_list received:")
     for i, f in enumerate(feature_list):
-        print(f"--- Item {i} ---")
-        print(f)
+        print(f"--- Item {i} --- keys:", list(f.keys()))
+
+    disagreement = compute_disagreement(feature_list)
+    subjectivity = subjectivity_label(disagreement)
+
+    # ✅ SMART MULTIMODAL DETECTION
+    if len(feature_list) == 2:
+        f1, f2 = feature_list
+
+        if is_text_feature(f1) and is_image_feature(f2):
+            print("✅ Adaptive Fusion Triggered (text first)")
+            aggregated = adaptive_fusion(f1, f2)
+
+        elif is_text_feature(f2) and is_image_feature(f1):
+            print("✅ Adaptive Fusion Triggered (image first)")
+            aggregated = adaptive_fusion(f2, f1)
+
+        else:
+            print("⚠️ Falling back to weighted aggregation")
+            aggregated = confidence_weighted_aggregate(feature_list)
+
+    else:
+        aggregated = confidence_weighted_aggregate(feature_list)
+
+    return aggregated, disagreement, subjectivity

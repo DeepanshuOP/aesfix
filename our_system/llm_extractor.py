@@ -65,8 +65,8 @@ def _score_dimension(text: str, positives: list, negatives: list) -> float:
     count = 0
 
     for sentence in sentences:
-        pos_count = sum(1 for p in positives if any(word in sentence for word in p.split()))
-        neg_count = sum(1 for n in negatives if any(word in sentence for word in n.split()))
+        pos_count = sum(1 for p in positives if p in sentence)
+        neg_count = sum(1 for n in negatives if n in sentence)
 
         if pos_count == 0 and neg_count == 0:
             continue
@@ -79,6 +79,7 @@ def _score_dimension(text: str, positives: list, negatives: list) -> float:
         # 🔥 NEGATION HANDLING
         if any(neg in sentence for neg in NEGATIONS):
             score = 1 - score
+            score = (score + 0.5) / 2   # soften inversion
 
         # 🔥 INTENSIFIER HANDLING
         for word, factor in INTENSIFIERS.items():
@@ -169,11 +170,14 @@ def extract_aesthetic_features(critique_text: str, model=None) -> dict:
 
     # 🔥 NEW: confidence based on whether feature deviates from neutral
     confidence = {
-        "composition": 1.0 if composition != 0.5 else 0.0,
-        "lighting": 1.0 if lighting != 0.5 else 0.0,
-        "color": 1.0 if color != 0.5 else 0.0,
-        "subject_clarity": 1.0 if subject_clarity != 0.5 else 0.0,
-        "technical": 1.0 if technical != 0.5 else 0.0,
+        key: abs(val - 0.5) * 2   # continuous confidence
+        for key, val in {
+            "composition": composition,
+            "lighting": lighting,
+            "color": color,
+            "subject_clarity": subject_clarity,
+            "technical": technical
+        }.items()
     }
     # Check if everything is neutral (nothing was found)
     scores = [composition, lighting, color, subject_clarity, technical]

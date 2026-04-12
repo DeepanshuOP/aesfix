@@ -33,7 +33,7 @@ from transformers import CLIPModel, CLIPProcessor
 from PIL import Image
 import os
 
-# ── Module-level singletons (lazy-loaded) ────────────────────────
+# ── Module-level singletons (lazy-loaded) ───────────────────────
 _processor = None
 _model = None
 _text_embeds_cache = None  # Computed once, reused for every image
@@ -44,36 +44,69 @@ _text_embeds_cache = None  # Computed once, reused for every image
 # CLIP compares the image against both and returns a probability.
 # Prompts are crafted to be descriptive and complementary.
 AESTHETIC_PROMPTS = {
-    "composition": (
-        "a photograph with excellent composition, balanced framing, "
-        "leading lines, and rule of thirds",
-        "a photograph with poor composition, bad framing, cluttered "
-        "layout, and distracting background"
-    ),
-    "lighting": (
-        "a photograph with beautiful natural lighting, golden hour, "
-        "well exposed, soft light, balanced exposure",
-        "a photograph with harsh lighting, underexposed, overexposed, "
-        "dark shadows, blown highlights, flat lighting"
-    ),
-    "color": (
-        "a photograph with vibrant harmonious colors, rich color "
-        "palette, warm tones, good white balance",
-        "a photograph with washed out dull colors, poor white balance, "
-        "color cast, oversaturated garish colors"
-    ),
-    "subject_clarity": (
-        "a photograph with tack sharp focus, clear subject, crisp "
-        "details, excellent depth of field, subject pops",
-        "a photograph that is blurry, out of focus, soft, motion blur, "
-        "camera shake, missed focus"
-    ),
-    "technical": (
-        "a photograph with excellent technical quality, clean image, "
-        "no noise, sharp throughout, well processed",
-        "a photograph with poor technical quality, noisy, grainy, "
-        "pixelated, artifacts, overprocessed, low quality"
-    ),
+    "composition": {
+        "positive": [
+            "well composed photograph",
+            "balanced composition",
+            "professional framing",
+        ],
+        "negative": [
+            "poor composition",
+            "bad framing",
+            "cluttered image",
+        ]
+    },
+    "lighting": {
+        "positive": [
+            "well lit photo",
+            "natural lighting",
+            "soft lighting",
+        ],
+        "negative": [
+            "poor lighting",
+            "underexposed photo",
+            "overexposed photo",
+        ]
+    },
+    "color": {
+        "positive": [
+            "vibrant colors",
+            "good color grading",
+            "natural colors",
+        ],
+        "negative": [
+            "dull colors",
+            "washed out colors",
+            "bad color grading",
+        ]
+    },
+    "subject_clarity": {
+        "positive": [
+            "sharp image",
+            "clear subject",
+            "high detail",
+            "clear animal photo",
+            "focused subject",
+            "well defined subject"
+        ],
+        "negative": [
+            "blurry image",
+            "out of focus",
+            "low detail",
+        ]
+    },
+    "technical": {
+        "positive": [
+            "high quality photo",
+            "clean image",
+            "professional quality",
+        ],
+        "negative": [
+            "noisy image",
+            "grainy photo",
+            "low quality image",
+        ]
+    },
 }
 
 
@@ -109,26 +142,28 @@ def _get_text_embeddings():
     _text_embeds_cache = {}
 
     with torch.no_grad():
-        for dim, (pos_prompt, neg_prompt) in AESTHETIC_PROMPTS.items():
-            # Tokenize both prompts together as a batch
+        for dim, prompts in AESTHETIC_PROMPTS.items():
+            pos_list = prompts["positive"]
+            neg_list = prompts["negative"]
+
+            all_prompts = pos_list + neg_list
+
             text_inputs = _processor(
-                text=[pos_prompt, neg_prompt],
+                text=all_prompts,
                 return_tensors="pt",
                 padding=True,
                 truncation=True,
             )
 
-            # Forward: text_model → text_projection (into shared space)
             text_outputs = _model.text_model(
                 input_ids=text_inputs["input_ids"],
                 attention_mask=text_inputs["attention_mask"],
             )
-            text_embeds = _model.text_projection(text_outputs.pooler_output)
 
-            # L2 normalize to unit sphere for cosine similarity
+            text_embeds = _model.text_projection(text_outputs.pooler_output)
             text_embeds = text_embeds / text_embeds.norm(dim=-1, keepdim=True)
 
-            _text_embeds_cache[dim] = text_embeds  # Shape: [2, 512]
+            _text_embeds_cache[dim] = text_embeds
 
     print("[CLIP] Text embeddings cached for 5 aesthetic dimensions.")
     return _text_embeds_cache
@@ -195,12 +230,20 @@ def extract_image_features(image_path: str) -> dict:
                 # Cosine similarity (already normalized) scaled by temperature
                 # image_embeds: [1, 512]  ×  text_embeds.T: [512, 2]
                 similarities = (image_embeds @ text_embeds.T) * logit_scale
-
-                # Softmax over [positive_sim, negative_sim]
                 probs = F.softmax(similarities.squeeze(0), dim=0)
 
-                # Score = probability of matching the POSITIVE prompt
-                scores[dim] = round(float(probs[0].item()), 4)
+                # Split into positive & negative groups
+                pos_probs = probs[:3]
+                neg_probs = probs[3:]
+
+                pos_score = pos_probs.mean()
+                neg_score = neg_probs.mean()
+
+                raw_score = pos_score / (pos_score + neg_score + 1e-6)
+
+                score = 0.2 + 0.6 * raw_score
+
+                scores[dim] = round(float(score), 4)
 
         print(f"[CLIP] Extracted: comp={scores['composition']:.3f}  "
               f"light={scores['lighting']:.3f}  "
