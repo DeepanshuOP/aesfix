@@ -61,18 +61,6 @@ def evaluate(results: list):
     print(f"    MEDIUM : {medium:3d} ({100*medium/total:.1f}%)")
     print(f"    LOW    : {low:3d} ({100*low/total:.1f}%)")
 
-    print("\n  Comparison with RPCD baselines (from base paper):")
-    print("  ┌─────────────────────┬────────┬────────┐")
-    print("  │ Method              │  SRCC  │  PLCC  │")
-    print("  ├─────────────────────┼────────┼────────┤")
-    print("  │ NIMA                │ 0.1200 │ 0.1160 │")
-    print("  │ ViT + Linear Probe  │ 0.1720 │ 0.1730 │")
-    print("  │ AestheticViT        │ 0.2500 │ 0.2530 │")
-    srcc_val = srcc if len(our_scores) >= 3 else 0.0
-    plcc_val = plcc if len(our_scores) >= 3 else 0.0
-    print(f"  │ CritiQ (Ours)       │ {srcc_val:6.4f} │ {plcc_val:6.4f} │")
-    print("  └─────────────────────┴────────┴────────┘")
-
     print("\n  Sample Outputs (first 3):")
     for r in results[:3]:
         print(f"\n  [{r.get('fuzzy_label')}] {r.get('id', 'N/A')} | score: {r.get('fuzzy_score', 0):.4f} | gt: {r.get('ground_truth_quality', 'N/A')}")

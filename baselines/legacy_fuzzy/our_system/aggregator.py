@@ -42,6 +42,17 @@ def confidence_weighted_aggregate(feature_list: List[Dict]) -> Dict:
             weighted = sum(v * c for v, c in zip(values, certainties))
             aggregated[key] = round(float(weighted / total_certainty), 4)
     aggregated["summary"] = feature_list[0].get("summary", "Aggregated from multiple critiques.")
+    # Preserve modality so a later fusion step (e.g. text-critiques-then-image)
+    # can still tell this apart from a raw image-feature dict. Only tag it when
+    # every input shares one modality; a mixed-modality aggregate has none.
+    modalities = {f.get("modality") for f in feature_list}
+    if len(modalities) == 1:
+        aggregated["modality"] = modalities.pop()
+    # Re-derive per-key confidence for the aggregate itself (same "distance
+    # from neutral" definition extract_aesthetic_features uses), so a later
+    # adaptive_fusion step still has real weights instead of defaulting every
+    # key to wt=0 (i.e. 100% image, text silently ignored).
+    aggregated["confidence"] = {k: round(abs(aggregated[k] - 0.5) * 2, 4) for k in FEATURE_KEYS}
     return aggregated
 
 def identify_aspect_driver(features: Dict, label: str) -> str:
@@ -76,10 +87,10 @@ def adaptive_fusion(text_output: Dict, image_features: Dict) -> Dict:
     return final_features
 
 def is_text_feature(f):
-    return isinstance(f, dict) and "confidence" in f
+    return isinstance(f, dict) and f.get("modality") == "text"
 
 def is_image_feature(f):
-    return isinstance(f, dict) and "confidence" not in f
+    return isinstance(f, dict) and f.get("modality") == "image"
 
 def aggregate_critiques(feature_list: List[Dict]) -> Tuple[Dict, float, str]:
     print("\n[DEBUG] feature_list received:")

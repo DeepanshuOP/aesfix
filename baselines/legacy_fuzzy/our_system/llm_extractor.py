@@ -152,14 +152,17 @@ def extract_aesthetic_features(critique_text: str, model=None) -> dict:
         return {
             "composition": 0.5, "lighting": 0.5, "color": 0.5,
             "subject_clarity": 0.5, "technical": 0.5,
-            "summary": "No critique available."
+            "summary": "No critique available.",
+            "modality": "text"
         }
 
     # Check cache first
     cache = _load_cache()
     key = _cache_key(critique_text)
     if key in cache:
-        return cache[key]
+        cached = cache[key]
+        cached.setdefault("modality", "text")  # older cache entries predate the field
+        return cached
 
     # Rule-based extraction — zero API calls
     composition     = _score_dimension(critique_text, COMPOSITION_POSITIVE, COMPOSITION_NEGATIVE)
@@ -197,6 +200,7 @@ def extract_aesthetic_features(critique_text: str, model=None) -> dict:
             result = json.loads(raw)
             for k in ["composition","lighting","color","subject_clarity","technical"]:
                 result[k] = float(max(0.01, min(0.99, result.get(k, 0.5))))
+            result["modality"] = "text"
             cache[key] = result
             _save_cache(cache)
             return result
@@ -215,7 +219,8 @@ def extract_aesthetic_features(critique_text: str, model=None) -> dict:
         "subject_clarity": subject_clarity,
         "technical":       technical,
         "summary":         summary,
-        "confidence":      confidence   
+        "confidence":      confidence,
+        "modality":        "text"
     }
 
     cache[key] = result

@@ -2,11 +2,11 @@ import gradio as gr
 import os
 
 # Import your system
-from our_system.image_model import extract_image_features
-from our_system.llm_extractor import extract_aesthetic_features
-from our_system.fuzzy_system import build_fuzzy_system, evaluate_aesthetics
-from our_system.aggregator import identify_aspect_driver
-from our_system.explainer import generate_explanation
+from .our_system.image_model import extract_image_features
+from .our_system.llm_extractor import extract_aesthetic_features
+from .our_system.fuzzy_system import build_fuzzy_system, evaluate_aesthetics
+from .our_system.aggregator import aggregate_critiques, identify_aspect_driver, FEATURE_KEYS
+from .our_system.explainer import generate_explanation
 
 # Load fuzzy system once
 fuzzy_sim = build_fuzzy_system()
@@ -250,36 +250,32 @@ def analyze(image, critique):
             text_features = None
 
         # ---- FUSION ----
-        agg = {}
+        # Same aggregator the CLI (main.py/pipeline.py) uses, so the dashboard
+        # and the CLI return the same score for identical input.
         if has_critique and text_features:
-            # Multimodal: 70% text + 30% image
-            for key in ["composition", "lighting", "color", "subject_clarity", "technical"]:
-                agg[key] = round(
-                    0.70 * text_features.get(key, 0.5) + 0.30 * img_features.get(key, 0.5), 4
-                )
+            agg, _disagreement, _subjectivity = aggregate_critiques([text_features, img_features])
         else:
-            # Image-only: 100% CLIP zero-shot features
-            for key in ["composition", "lighting", "color", "subject_clarity", "technical"]:
-                agg[key] = round(img_features.get(key, 0.5), 4)
+            agg, _disagreement, _subjectivity = aggregate_critiques([img_features])
+        display_features = {k: agg.get(k, 0.5) for k in FEATURE_KEYS}
 
         # ---- FUZZY ----
         label, score = evaluate_aesthetics(
             fuzzy_sim,
-            agg["composition"],
-            agg["lighting"],
-            agg["color"],
-            agg["subject_clarity"],
-            agg["technical"]
+            display_features["composition"],
+            display_features["lighting"],
+            display_features["color"],
+            display_features["subject_clarity"],
+            display_features["technical"]
         )
 
         # ---- DRIVER ----
-        driver = identify_aspect_driver(agg, label)
+        driver = identify_aspect_driver(display_features, label)
 
         # ---- EXPLANATION ----
-        explanation = generate_explanation(label, score, agg, None)
+        explanation = generate_explanation(label, score, display_features, None)
 
         score_html = generate_score_html(label, score)
-        features_html = generate_features_html(agg)
+        features_html = generate_features_html(display_features)
         explanation_html = generate_explanation_html(explanation, driver)
 
         return score_html, features_html, explanation_html

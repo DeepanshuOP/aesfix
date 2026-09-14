@@ -10,14 +10,14 @@ try:
 except Exception:
     genai = None
 
-from our_system.fuzzy_system import build_fuzzy_system, evaluate_aesthetics
-from our_system.llm_extractor import extract_aesthetic_features, configure_gemini
-from our_system.aggregator import aggregate_critiques, identify_aspect_driver
-from our_system.explainer import generate_explanation
-from our_system.counterfactual_generator import generate_counterfactual
-from our_system.pipeline import run_pipeline, load_dataset, save_results
-from our_system.evaluate import load_results, evaluate
-from our_system.image_model import extract_image_features
+from .our_system.fuzzy_system import build_fuzzy_system, evaluate_aesthetics
+from .our_system.llm_extractor import extract_aesthetic_features, configure_gemini
+from .our_system.aggregator import aggregate_critiques, identify_aspect_driver
+from .our_system.explainer import generate_explanation
+from .our_system.counterfactual_generator import generate_counterfactual
+from .our_system.pipeline import run_pipeline, load_dataset, save_results
+from .our_system.evaluate import load_results, evaluate
+from .our_system.image_model import extract_image_features
 
 
 def parse_args():
@@ -128,7 +128,8 @@ def main():
                 "lighting": 0.5,
                 "color": 0.5,
                 "subject_clarity": 0.5,
-                "technical": 0.5
+                "technical": 0.5,
+                "modality": "image"
             }
 
             agg, disagreement, subjectivity = aggregate_critiques(

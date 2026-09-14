@@ -159,7 +159,6 @@ bsub.txt
 .roo/
 .trae/
 .windsurf/
-.github/
 
 # Cache & temp
 cache/
@@ -168,3 +167,5 @@ __pycache__/
 
 # Logs
 *.txt
+!requirements.txt
+!requirements-dev.txt

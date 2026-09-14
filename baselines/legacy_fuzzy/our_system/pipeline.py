@@ -1,21 +1,18 @@
 import json
 import os
-import sys
 import time
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
-import google.generativeai as genai
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from our_system.fuzzy_system import build_fuzzy_system, evaluate_aesthetics
-from our_system.llm_extractor import extract_aesthetic_features, configure_gemini
-from our_system.aggregator import aggregate_critiques, identify_aspect_driver
-from our_system.explainer import generate_explanation
-from our_system.counterfactual_generator import generate_counterfactual
-from our_system.image_model import extract_image_features
+from .fuzzy_system import build_fuzzy_system, evaluate_aesthetics
+from .llm_extractor import extract_aesthetic_features, configure_gemini
+from .aggregator import aggregate_critiques, identify_aspect_driver
+from .explainer import generate_explanation
+from .counterfactual_generator import generate_counterfactual
+from .image_model import extract_image_features
 
 # ✅ NEW IMPORT
-from our_system.auto_critic import generate_auto_critique
+from .auto_critic import generate_auto_critique
 
 print("[INFO] PIPELINE FILE LOADED")
 
@@ -87,7 +84,8 @@ def run_pipeline(data, model, fuzzy_sim, limit=30, user_critique=None):
                 "lighting": 0.5,
                 "color": 0.5,
                 "subject_clarity": 0.5,
-                "technical": 0.5
+                "technical": 0.5,
+                "modality": "image"
             }
 
         print("\nDEBUG TEXT FEATURES:", text_features)

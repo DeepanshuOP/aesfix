@@ -169,6 +169,15 @@ def _get_text_embeddings():
     return _text_embeds_cache
 
 
+class ImageModelError(RuntimeError):
+    """Raised when CLIP feature extraction fails.
+
+    Deliberately not caught anywhere: a caller that silently substitutes
+    default 0.5 scores on failure produces a confident-looking verdict from
+    numbers that mean nothing. Callers must handle this explicitly.
+    """
+
+
 def extract_image_features(image_path: str) -> dict:
     """
     Extract 5 aesthetic feature scores from an image using CLIP zero-shot
@@ -182,22 +191,18 @@ def extract_image_features(image_path: str) -> dict:
 
     Returns:
         dict with keys: composition, lighting, color,
-        subject_clarity, technical — each a float in [0, 1].
-        Higher = better aesthetic quality for that dimension.
+        subject_clarity, technical — each a float in [0, 1] — plus
+        "modality": "image". Higher = better aesthetic quality for that
+        dimension.
+
+    Raises:
+        ImageModelError: if the image path is invalid/missing, or if model
+        loading or inference fails for any reason. Never fails silently.
     """
-    default_scores = {
-        "composition": 0.5,
-        "lighting": 0.5,
-        "color": 0.5,
-        "subject_clarity": 0.5,
-        "technical": 0.5,
-    }
+    if not image_path or not os.path.exists(image_path):
+        raise ImageModelError(f"Image path invalid or missing: {image_path!r}")
 
     try:
-        if not image_path or not os.path.exists(image_path):
-            print("[CLIP] Image path invalid or missing:", image_path)
-            return default_scores
-
         _load_model()
 
         # ── 1. Load and preprocess image ─────────────────────────
@@ -232,9 +237,11 @@ def extract_image_features(image_path: str) -> dict:
                 similarities = (image_embeds @ text_embeds.T) * logit_scale
                 probs = F.softmax(similarities.squeeze(0), dim=0)
 
-                # Split into positive & negative groups
-                pos_probs = probs[:3]
-                neg_probs = probs[3:]
+                # Split into positive & negative groups (prompt counts vary per
+                # dimension, e.g. subject_clarity has 6 positive prompts)
+                n_pos = len(AESTHETIC_PROMPTS[dim]["positive"])
+                pos_probs = probs[:n_pos]
+                neg_probs = probs[n_pos:]
 
                 pos_score = pos_probs.mean()
                 neg_score = neg_probs.mean()
@@ -245,6 +252,8 @@ def extract_image_features(image_path: str) -> dict:
 
                 scores[dim] = round(float(score), 4)
 
+        scores["modality"] = "image"
+
         print(f"[CLIP] Extracted: comp={scores['composition']:.3f}  "
               f"light={scores['lighting']:.3f}  "
               f"color={scores['color']:.3f}  "
@@ -253,10 +262,7 @@ def extract_image_features(image_path: str) -> dict:
         return scores
 
     except Exception as e:
-        print(f"[IMAGE MODEL ERROR]: {e}")
-        import traceback
-        traceback.print_exc()
-        return default_scores
+        raise ImageModelError(f"CLIP feature extraction failed for {image_path!r}: {e}") from e
 
 
 # ── Quick self-test ──────────────────────────────────────────────

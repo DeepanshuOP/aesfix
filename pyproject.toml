@@ -1,0 +1,8 @@
+[tool.ruff]
+line-length = 120
+# baselines/legacy_fuzzy is frozen legacy code (preserved as an ablation
+# baseline, not rewritten for style) — lint new aesfix/ and tests/ code only.
+exclude = ["baselines", "venv", "cache"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

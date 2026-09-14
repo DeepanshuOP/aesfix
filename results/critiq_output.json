@@ -1,0 +1,2112 @@
+[
+  {
+    "index": 0,
+    "id": "test_image",
+    "image": "",
+    "n_critiques": 1,
+    "original_sentiment_score": null,
+    "ground_truth_quality": "unknown",
+    "per_critique_features": [
+      {
+        "composition": 0.5,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.9,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.0,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.8,
+          "technical": 0.0
+        },
+        "modality": "text"
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.6875,
+      "lighting": 0.7751,
+      "color": 0.7652,
+      "subject_clarity": 0.8493,
+      "technical": 0.6484,
+      "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.50."
+    },
+    "disagreement_score": 0.0499,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "MEDIUM",
+    "fuzzy_score": 0.5627,
+    "aspect_driver": "subject_clarity (score: 0.85)",
+    "explanation": "This image sits in the MEDIUM range (0.56) with adequate but unexceptional performance. Subject clarity (0.85) is the relative strength, while technical quality (0.65) holds the image back from a HIGH rating. More deliberate attention to the weaker dimensions would push this further.",
+    "counterfactual": "Skipped to save API usage."
+  },
+  {
+    "index": 1,
+    "id": "post_0170",
+    "image": "data/images/medium/image_0170.jpg",
+    "n_critiques": 4,
+    "original_sentiment_score": 0.4322,
+    "ground_truth_quality": "medium",
+    "per_critique_features": [
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.82,
+        "lighting": 0.5,
+        "color": 0.6,
+        "subject_clarity": 0.5,
+        "technical": 0.3,
+        "summary": "Rule-based analysis: negative critique. Composition=0.82, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.6399999999999999,
+          "lighting": 0.0,
+          "color": 0.19999999999999996,
+          "subject_clarity": 0.0,
+          "technical": 0.4
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.7937,
+      "lighting": 0.5,
+      "color": 0.52,
+      "subject_clarity": 0.5,
+      "technical": 0.42,
+      "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50."
+    },
+    "disagreement_score": 0.0537,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "MEDIUM",
+    "fuzzy_score": 0.5838,
+    "aspect_driver": "composition (score: 0.79)",
+    "explanation": "This image sits in the MEDIUM range (0.58) with adequate but unexceptional performance. Composition (0.79) is the relative strength, while technical quality (0.42) holds the image back from a HIGH rating. More deliberate attention to the weaker dimensions would push this further.",
+    "counterfactual": "Skipped to save API usage."
+  },
+  {
+    "index": 2,
+    "id": "post_0171",
+    "image": "data/images/high/image_0171.jpg",
+    "n_critiques": 3,
+    "original_sentiment_score": 0.7176,
+    "ground_truth_quality": "high",
+    "per_critique_features": [
+      {
+        "composition": 0.9,
+        "lighting": 0.9,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.9,
+        "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.90.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.8,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.8
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.5,
+        "lighting": 0.9,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.90.",
+        "confidence": {
+          "composition": 0.0,
+          "lighting": 0.8,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.82,
+      "lighting": 0.82,
+      "color": 0.5,
+      "subject_clarity": 0.5,
+      "technical": 0.82,
+      "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.90."
+    },
+    "disagreement_score": 0.0333,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "MEDIUM",
+    "fuzzy_score": 0.6013,
+    "aspect_driver": "composition (score: 0.82)",
+    "explanation": "This image sits in the MEDIUM range (0.60) with adequate but unexceptional performance. Composition (0.82) is the relative strength, while color (0.50) holds the image back from a HIGH rating. More deliberate attention to the weaker dimensions would push this further.",
+    "counterfactual": "Skipped to save API usage."
+  },
+  {
+    "index": 3,
+    "id": "post_0172",
+    "image": "data/images/medium/image_0172.jpg",
+    "n_critiques": 4,
+    "original_sentiment_score": 0.4698,
+    "ground_truth_quality": "medium",
+    "per_critique_features": [
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.3,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.30.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.4,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.5,
+        "lighting": 0.9,
+        "color": 0.5,
+        "subject_clarity": 0.9,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.50, Lighting=0.90.",
+        "confidence": {
+          "composition": 0.0,
+          "lighting": 0.8,
+          "color": 0.0,
+          "subject_clarity": 0.8,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.34,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.31999999999999995,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.82,
+      "lighting": 0.58,
+      "color": 0.4488,
+      "subject_clarity": 0.82,
+      "technical": 0.5,
+      "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50."
+    },
+    "disagreement_score": 0.0507,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "MEDIUM",
+    "fuzzy_score": 0.6013,
+    "aspect_driver": "composition (score: 0.82)",
+    "explanation": "This image sits in the MEDIUM range (0.60) with adequate but unexceptional performance. Composition (0.82) is the relative strength, while color (0.45) holds the image back from a HIGH rating. More deliberate attention to the weaker dimensions would push this further.",
+    "counterfactual": "Skipped to save API usage."
+  },
+  {
+    "index": 4,
+    "id": "post_0173",
+    "image": "data/images/low/image_0173.jpg",
+    "n_critiques": 4,
+    "original_sentiment_score": 0.0648,
+    "ground_truth_quality": "low",
+    "per_critique_features": [
+      {
+        "composition": 0.5,
+        "lighting": 0.6,
+        "color": 0.5,
+        "subject_clarity": 0.26,
+        "technical": 0.6,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.50, Lighting=0.60.",
+        "confidence": {
+          "composition": 0.0,
+          "lighting": 0.19999999999999996,
+          "color": 0.0,
+          "subject_clarity": 0.48,
+          "technical": 0.19999999999999996
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.5,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.45,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.0,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.09999999999999998,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.94,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: negative critique. Composition=0.94, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8799999999999999,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.8545,
+      "lighting": 0.52,
+      "color": 0.5,
+      "subject_clarity": 0.4141,
+      "technical": 0.52,
+      "summary": "Rule-based analysis: mixed critique. Composition=0.50, Lighting=0.60."
+    },
+    "disagreement_score": 0.0556,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "MEDIUM",
+    "fuzzy_score": 0.6282,
+    "aspect_driver": "composition (score: 0.85)",
+    "explanation": "This image sits in the MEDIUM range (0.63) with adequate but unexceptional performance. Composition (0.85) is the relative strength, while subject clarity (0.41) holds the image back from a HIGH rating. More deliberate attention to the weaker dimensions would push this further.",
+    "counterfactual": "Skipped to save API usage."
+  },
+  {
+    "index": 5,
+    "id": "post_0174",
+    "image": "data/images/low/image_0174.jpg",
+    "n_critiques": 4,
+    "original_sentiment_score": 0.3123,
+    "ground_truth_quality": "low",
+    "per_critique_features": [
+      {
+        "composition": 0.5,
+        "lighting": 0.5,
+        "color": 0.3,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.50, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.0,
+          "lighting": 0.0,
+          "color": 0.4,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.5,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.45,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.0,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.09999999999999998,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.5,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.45,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.0,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.09999999999999998,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.5,
+        "lighting": 0.6,
+        "color": 0.5,
+        "subject_clarity": 0.26,
+        "technical": 0.6,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.50, Lighting=0.60.",
+        "confidence": {
+          "composition": 0.0,
+          "lighting": 0.19999999999999996,
+          "color": 0.0,
+          "subject_clarity": 0.48,
+          "technical": 0.19999999999999996
+        },
+        "modality": "text"
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.5,
+      "lighting": 0.52,
+      "color": 0.42,
+      "subject_clarity": 0.4322,
+      "technical": 0.52,
+      "summary": "Rule-based analysis: mixed critique. Composition=0.50, Lighting=0.50."
+    },
+    "disagreement_score": 0.0383,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "MEDIUM",
+    "fuzzy_score": 0.5,
+    "aspect_driver": "color (score: 0.42)",
+    "explanation": "This image sits in the MEDIUM range (0.50) with adequate but unexceptional performance. Lighting (0.52) is the relative strength, while color (0.42) holds the image back from a HIGH rating. More deliberate attention to the weaker dimensions would push this further.",
+    "counterfactual": "Skipped to save API usage."
+  },
+  {
+    "index": 6,
+    "id": "post_0175",
+    "image": "data/images/high/image_0175.jpg",
+    "n_critiques": 3,
+    "original_sentiment_score": 0.9746,
+    "ground_truth_quality": "high",
+    "per_critique_features": [
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.34,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.31999999999999995,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.9,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.8,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.5,
+        "lighting": 0.9,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.90.",
+        "confidence": {
+          "composition": 0.0,
+          "lighting": 0.8,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.82,
+      "lighting": 0.82,
+      "color": 0.6152,
+      "subject_clarity": 0.5,
+      "technical": 0.5,
+      "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50."
+    },
+    "disagreement_score": 0.0307,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "MEDIUM",
+    "fuzzy_score": 0.6013,
+    "aspect_driver": "composition (score: 0.82)",
+    "explanation": "This image sits in the MEDIUM range (0.60) with adequate but unexceptional performance. Composition (0.82) is the relative strength, while subject clarity (0.50) holds the image back from a HIGH rating. More deliberate attention to the weaker dimensions would push this further.",
+    "counterfactual": "Skipped to save API usage."
+  },
+  {
+    "index": 7,
+    "id": "post_0176",
+    "image": "data/images/low/image_0176.jpg",
+    "n_critiques": 4,
+    "original_sentiment_score": 0.3512,
+    "ground_truth_quality": "low",
+    "per_critique_features": [
+      {
+        "composition": 0.5,
+        "lighting": 0.3,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.30.",
+        "confidence": {
+          "composition": 0.0,
+          "lighting": 0.4,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.3,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.30.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.4,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.3,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.30.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.4,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.82,
+      "lighting": 0.42,
+      "color": 0.5,
+      "subject_clarity": 0.5,
+      "technical": 0.5,
+      "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.30."
+    },
+    "disagreement_score": 0.06,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "MEDIUM",
+    "fuzzy_score": 0.6013,
+    "aspect_driver": "composition (score: 0.82)",
+    "explanation": "This image sits in the MEDIUM range (0.60) with adequate but unexceptional performance. Composition (0.82) is the relative strength, while lighting (0.42) holds the image back from a HIGH rating. More deliberate attention to the weaker dimensions would push this further.",
+    "counterfactual": "Skipped to save API usage."
+  },
+  {
+    "index": 8,
+    "id": "post_0177",
+    "image": "data/images/low/image_0177.jpg",
+    "n_critiques": 3,
+    "original_sentiment_score": 0.1473,
+    "ground_truth_quality": "low",
+    "per_critique_features": [
+      {
+        "composition": 0.5,
+        "lighting": 0.45,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.50, Lighting=0.45.",
+        "confidence": {
+          "composition": 0.0,
+          "lighting": 0.09999999999999998,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.94,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: negative critique. Composition=0.94, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8799999999999999,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.79,
+        "lighting": 0.5,
+        "color": 0.26,
+        "subject_clarity": 0.26,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.79, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.5800000000000001,
+          "lighting": 0.0,
+          "color": 0.48,
+          "subject_clarity": 0.48,
+          "technical": 0.0
+        },
+        "modality": "text"
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.7894,
+      "lighting": 0.495,
+      "color": 0.3848,
+      "subject_clarity": 0.3848,
+      "technical": 0.5,
+      "summary": "Rule-based analysis: mixed critique. Composition=0.50, Lighting=0.45."
+    },
+    "disagreement_score": 0.0996,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "MEDIUM",
+    "fuzzy_score": 0.5811,
+    "aspect_driver": "composition (score: 0.79)",
+    "explanation": "This image receives a MEDIUM rating (0.58) because strong composition (0.79) is offset by weak color (0.38). The technical inconsistency between dimensions prevents a higher rating — addressing color would significantly improve the overall result.",
+    "counterfactual": "Skipped to save API usage."
+  },
+  {
+    "index": 9,
+    "id": "post_0178",
+    "image": "data/images/low/image_0178.jpg",
+    "n_critiques": 1,
+    "original_sentiment_score": 0.1429,
+    "ground_truth_quality": "low",
+    "per_critique_features": [
+      {
+        "composition": 0.5,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.45,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.0,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.09999999999999998,
+          "technical": 0.0
+        },
+        "modality": "text"
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.5,
+      "lighting": 0.5,
+      "color": 0.5,
+      "subject_clarity": 0.495,
+      "technical": 0.5,
+      "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.50."
+    },
+    "disagreement_score": 0.0008,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "MEDIUM",
+    "fuzzy_score": 0.5,
+    "aspect_driver": "subject_clarity (score: 0.49)",
+    "explanation": "This image sits in the MEDIUM range (0.50) with adequate but unexceptional performance. Composition (0.50) is the relative strength, while subject clarity (0.49) holds the image back from a HIGH rating. More deliberate attention to the weaker dimensions would push this further.",
+    "counterfactual": "Skipped to save API usage."
+  },
+  {
+    "index": 10,
+    "id": "post_0179",
+    "image": "data/images/medium/image_0179.jpg",
+    "n_critiques": 3,
+    "original_sentiment_score": 0.5439,
+    "ground_truth_quality": "medium",
+    "per_critique_features": [
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.82,
+        "lighting": 0.5,
+        "color": 0.6,
+        "subject_clarity": 0.5,
+        "technical": 0.3,
+        "summary": "Rule-based analysis: negative critique. Composition=0.82, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.6399999999999999,
+          "lighting": 0.0,
+          "color": 0.19999999999999996,
+          "subject_clarity": 0.0,
+          "technical": 0.4
+        },
+        "modality": "text"
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.7844,
+      "lighting": 0.5,
+      "color": 0.52,
+      "subject_clarity": 0.5,
+      "technical": 0.42,
+      "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50."
+    },
+    "disagreement_score": 0.0528,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "MEDIUM",
+    "fuzzy_score": 0.5782,
+    "aspect_driver": "composition (score: 0.78)",
+    "explanation": "This image sits in the MEDIUM range (0.58) with adequate but unexceptional performance. Composition (0.78) is the relative strength, while technical quality (0.42) holds the image back from a HIGH rating. More deliberate attention to the weaker dimensions would push this further.",
+    "counterfactual": "Skipped to save API usage."
+  },
+  {
+    "index": 11,
+    "id": "post_0180",
+    "image": "data/images/high/image_0180.jpg",
+    "n_critiques": 4,
+    "original_sentiment_score": 0.7287,
+    "ground_truth_quality": "high",
+    "per_critique_features": [
+      {
+        "composition": 0.5,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.9,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.0,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.8,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.9,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.8,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.82,
+        "lighting": 0.5,
+        "color": 0.6,
+        "subject_clarity": 0.5,
+        "technical": 0.3,
+        "summary": "Rule-based analysis: negative critique. Composition=0.82, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.6399999999999999,
+          "lighting": 0.0,
+          "color": 0.19999999999999996,
+          "subject_clarity": 0.0,
+          "technical": 0.4
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.9,
+        "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.8
+        },
+        "modality": "text"
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.7844,
+      "lighting": 0.5,
+      "color": 0.7312,
+      "subject_clarity": 0.82,
+      "technical": 0.58,
+      "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.50."
+    },
+    "disagreement_score": 0.0185,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "MEDIUM",
+    "fuzzy_score": 0.5782,
+    "aspect_driver": "subject_clarity (score: 0.82)",
+    "explanation": "This image sits in the MEDIUM range (0.58) with adequate but unexceptional performance. Subject clarity (0.82) is the relative strength, while lighting (0.50) holds the image back from a HIGH rating. More deliberate attention to the weaker dimensions would push this further.",
+    "counterfactual": "Skipped to save API usage."
+  },
+  {
+    "index": 12,
+    "id": "post_0181",
+    "image": "data/images/high/image_0181.jpg",
+    "n_critiques": 3,
+    "original_sentiment_score": 0.7984,
+    "ground_truth_quality": "high",
+    "per_critique_features": [
+      {
+        "composition": 0.5,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.9,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.0,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.8,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.9,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.8,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.5,
+        "lighting": 0.9,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.90.",
+        "confidence": {
+          "composition": 0.0,
+          "lighting": 0.8,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.82,
+      "lighting": 0.82,
+      "color": 0.82,
+      "subject_clarity": 0.82,
+      "technical": 0.5,
+      "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.50."
+    },
+    "disagreement_score": 0.0185,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "MEDIUM",
+    "fuzzy_score": 0.6013,
+    "aspect_driver": "composition (score: 0.82)",
+    "explanation": "This image sits in the MEDIUM range (0.60) with adequate but unexceptional performance. Composition (0.82) is the relative strength, while technical quality (0.50) holds the image back from a HIGH rating. More deliberate attention to the weaker dimensions would push this further.",
+    "counterfactual": "Skipped to save API usage."
+  },
+  {
+    "index": 13,
+    "id": "post_0182",
+    "image": "data/images/high/image_0182.jpg",
+    "n_critiques": 1,
+    "original_sentiment_score": 0.8722,
+    "ground_truth_quality": "high",
+    "per_critique_features": [
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.9,
+        "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.8
+        },
+        "modality": "text"
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.82,
+      "lighting": 0.5,
+      "color": 0.5,
+      "subject_clarity": 0.5,
+      "technical": 0.82,
+      "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.50."
+    },
+    "disagreement_score": 0.0414,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "MEDIUM",
+    "fuzzy_score": 0.6013,
+    "aspect_driver": "composition (score: 0.82)",
+    "explanation": "This image sits in the MEDIUM range (0.60) with adequate but unexceptional performance. Composition (0.82) is the relative strength, while lighting (0.50) holds the image back from a HIGH rating. More deliberate attention to the weaker dimensions would push this further.",
+    "counterfactual": "Skipped to save API usage."
+  },
+  {
+    "index": 14,
+    "id": "post_0183",
+    "image": "data/images/high/image_0183.jpg",
+    "n_critiques": 4,
+    "original_sentiment_score": 0.9376,
+    "ground_truth_quality": "high",
+    "per_critique_features": [
+      {
+        "composition": 0.9,
+        "lighting": 0.9,
+        "color": 0.3,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.90.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.8,
+          "color": 0.4,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.9,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.8,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.9,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.8,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.82,
+      "lighting": 0.82,
+      "color": 0.6568,
+      "subject_clarity": 0.5,
+      "technical": 0.5,
+      "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.90."
+    },
+    "disagreement_score": 0.0307,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "MEDIUM",
+    "fuzzy_score": 0.6013,
+    "aspect_driver": "composition (score: 0.82)",
+    "explanation": "This image sits in the MEDIUM range (0.60) with adequate but unexceptional performance. Composition (0.82) is the relative strength, while subject clarity (0.50) holds the image back from a HIGH rating. More deliberate attention to the weaker dimensions would push this further.",
+    "counterfactual": "Skipped to save API usage."
+  },
+  {
+    "index": 15,
+    "id": "post_0184",
+    "image": "data/images/high/image_0184.jpg",
+    "n_critiques": 4,
+    "original_sentiment_score": 0.9657,
+    "ground_truth_quality": "high",
+    "per_critique_features": [
+      {
+        "composition": 0.5,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.9,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.0,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.8,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.9,
+        "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.8
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.9,
+        "color": 0.3,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.90.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.8,
+          "color": 0.4,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.5,
+        "lighting": 0.9,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.90.",
+        "confidence": {
+          "composition": 0.0,
+          "lighting": 0.8,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.82,
+      "lighting": 0.82,
+      "color": 0.42,
+      "subject_clarity": 0.82,
+      "technical": 0.82,
+      "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.50."
+    },
+    "disagreement_score": 0.0442,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "MEDIUM",
+    "fuzzy_score": 0.6013,
+    "aspect_driver": "composition (score: 0.82)",
+    "explanation": "This image sits in the MEDIUM range (0.60) with adequate but unexceptional performance. Composition (0.82) is the relative strength, while color (0.42) holds the image back from a HIGH rating. More deliberate attention to the weaker dimensions would push this further.",
+    "counterfactual": "Skipped to save API usage."
+  },
+  {
+    "index": 16,
+    "id": "post_0185",
+    "image": "data/images/medium/image_0185.jpg",
+    "n_critiques": 3,
+    "original_sentiment_score": 0.4724,
+    "ground_truth_quality": "medium",
+    "per_critique_features": [
+      {
+        "composition": 0.5,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.9,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.0,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.8,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.34,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.31999999999999995,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.5,
+        "lighting": 0.9,
+        "color": 0.5,
+        "subject_clarity": 0.9,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.50, Lighting=0.90.",
+        "confidence": {
+          "composition": 0.0,
+          "lighting": 0.8,
+          "color": 0.0,
+          "subject_clarity": 0.8,
+          "technical": 0.0
+        },
+        "modality": "text"
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.82,
+      "lighting": 0.82,
+      "color": 0.4488,
+      "subject_clarity": 0.82,
+      "technical": 0.5,
+      "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.50."
+    },
+    "disagreement_score": 0.0532,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "MEDIUM",
+    "fuzzy_score": 0.6013,
+    "aspect_driver": "composition (score: 0.82)",
+    "explanation": "This image sits in the MEDIUM range (0.60) with adequate but unexceptional performance. Composition (0.82) is the relative strength, while color (0.45) holds the image back from a HIGH rating. More deliberate attention to the weaker dimensions would push this further.",
+    "counterfactual": "Skipped to save API usage."
+  },
+  {
+    "index": 17,
+    "id": "post_0186",
+    "image": "data/images/low/image_0186.jpg",
+    "n_critiques": 1,
+    "original_sentiment_score": 0.2197,
+    "ground_truth_quality": "low",
+    "per_critique_features": [
+      {
+        "composition": 0.82,
+        "lighting": 0.5,
+        "color": 0.6,
+        "subject_clarity": 0.5,
+        "technical": 0.3,
+        "summary": "Rule-based analysis: negative critique. Composition=0.82, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.6399999999999999,
+          "lighting": 0.0,
+          "color": 0.19999999999999996,
+          "subject_clarity": 0.0,
+          "technical": 0.4
+        },
+        "modality": "text"
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.7048,
+      "lighting": 0.5,
+      "color": 0.52,
+      "subject_clarity": 0.5,
+      "technical": 0.42,
+      "summary": "Rule-based analysis: negative critique. Composition=0.82, Lighting=0.50."
+    },
+    "disagreement_score": 0.045,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "MEDIUM",
+    "fuzzy_score": 0.5395,
+    "aspect_driver": "composition (score: 0.70)",
+    "explanation": "This image sits in the MEDIUM range (0.54) with adequate but unexceptional performance. Composition (0.70) is the relative strength, while technical quality (0.42) holds the image back from a HIGH rating. More deliberate attention to the weaker dimensions would push this further.",
+    "counterfactual": "Skipped to save API usage."
+  },
+  {
+    "index": 18,
+    "id": "post_0187",
+    "image": "data/images/high/image_0187.jpg",
+    "n_critiques": 4,
+    "original_sentiment_score": 0.8943,
+    "ground_truth_quality": "high",
+    "per_critique_features": [
+      {
+        "composition": 0.9,
+        "lighting": 0.9,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.9,
+        "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.90.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.8,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.8
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.5,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.9,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.0,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.8,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.9,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.8,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.5,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.9,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.0,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.8,
+          "technical": 0.0
+        },
+        "modality": "text"
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.82,
+      "lighting": 0.82,
+      "color": 0.5,
+      "subject_clarity": 0.82,
+      "technical": 0.82,
+      "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.90."
+    },
+    "disagreement_score": 0.0185,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "MEDIUM",
+    "fuzzy_score": 0.6013,
+    "aspect_driver": "composition (score: 0.82)",
+    "explanation": "This image sits in the MEDIUM range (0.60) with adequate but unexceptional performance. Composition (0.82) is the relative strength, while color (0.50) holds the image back from a HIGH rating. More deliberate attention to the weaker dimensions would push this further.",
+    "counterfactual": "Skipped to save API usage."
+  },
+  {
+    "index": 19,
+    "id": "post_0188",
+    "image": "data/images/low/image_0188.jpg",
+    "n_critiques": 4,
+    "original_sentiment_score": 0.2771,
+    "ground_truth_quality": "low",
+    "per_critique_features": [
+      {
+        "composition": 0.5,
+        "lighting": 0.3,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.30.",
+        "confidence": {
+          "composition": 0.0,
+          "lighting": 0.4,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.94,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: negative critique. Composition=0.94, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8799999999999999,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.94,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: negative critique. Composition=0.94, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8799999999999999,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.5,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.45,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.0,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.09999999999999998,
+          "technical": 0.0
+        },
+        "modality": "text"
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.8872,
+      "lighting": 0.42,
+      "color": 0.5,
+      "subject_clarity": 0.495,
+      "technical": 0.5,
+      "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.30."
+    },
+    "disagreement_score": 0.0708,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "HIGH",
+    "fuzzy_score": 0.6589,
+    "aspect_driver": "composition (score: 0.89)",
+    "explanation": "This image achieved a HIGH aesthetic rating with strong confidence (0.66). The standout quality is composition (0.89), which clearly elevates the overall impression. Supporting dimensions including lighting (0.42) are also well executed, resulting in a cohesive and visually compelling photograph.",
+    "counterfactual": "Skipped to save API usage."
+  },
+  {
+    "index": 20,
+    "id": "post_0189",
+    "image": "data/images/low/image_0189.jpg",
+    "n_critiques": 1,
+    "original_sentiment_score": 0.3531,
+    "ground_truth_quality": "low",
+    "per_critique_features": [
+      {
+        "composition": 0.5,
+        "lighting": 0.5,
+        "color": 0.3,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.50, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.0,
+          "lighting": 0.0,
+          "color": 0.4,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.5,
+      "lighting": 0.5,
+      "color": 0.42,
+      "subject_clarity": 0.5,
+      "technical": 0.5,
+      "summary": "Rule-based analysis: mixed critique. Composition=0.50, Lighting=0.50."
+    },
+    "disagreement_score": 0.0148,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "MEDIUM",
+    "fuzzy_score": 0.5,
+    "aspect_driver": "color (score: 0.42)",
+    "explanation": "This image sits in the MEDIUM range (0.50) with adequate but unexceptional performance. Composition (0.50) is the relative strength, while color (0.42) holds the image back from a HIGH rating. More deliberate attention to the weaker dimensions would push this further.",
+    "counterfactual": "Skipped to save API usage."
+  },
+  {
+    "index": 21,
+    "id": "post_0190",
+    "image": "data/images/high/image_0190.jpg",
+    "n_critiques": 2,
+    "original_sentiment_score": 0.734,
+    "ground_truth_quality": "high",
+    "per_critique_features": [
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.9,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.8,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.9,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.8,
+          "technical": 0.0
+        },
+        "modality": "text"
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.82,
+      "lighting": 0.5,
+      "color": 0.82,
+      "subject_clarity": 0.82,
+      "technical": 0.5,
+      "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50."
+    },
+    "disagreement_score": 0.0333,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "MEDIUM",
+    "fuzzy_score": 0.6013,
+    "aspect_driver": "composition (score: 0.82)",
+    "explanation": "This image sits in the MEDIUM range (0.60) with adequate but unexceptional performance. Composition (0.82) is the relative strength, while lighting (0.50) holds the image back from a HIGH rating. More deliberate attention to the weaker dimensions would push this further.",
+    "counterfactual": "Skipped to save API usage."
+  },
+  {
+    "index": 22,
+    "id": "post_0191",
+    "image": "data/images/low/image_0191.jpg",
+    "n_critiques": 2,
+    "original_sentiment_score": 0.1727,
+    "ground_truth_quality": "low",
+    "per_critique_features": [
+      {
+        "composition": 0.79,
+        "lighting": 0.5,
+        "color": 0.26,
+        "subject_clarity": 0.26,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.79, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.5800000000000001,
+          "lighting": 0.0,
+          "color": 0.48,
+          "subject_clarity": 0.48,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.3,
+        "lighting": 0.3,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.30, Lighting=0.30.",
+        "confidence": {
+          "composition": 0.4,
+          "lighting": 0.4,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.5162,
+      "lighting": 0.42,
+      "color": 0.3848,
+      "subject_clarity": 0.3848,
+      "technical": 0.5,
+      "summary": "Rule-based analysis: mixed critique. Composition=0.79, Lighting=0.50."
+    },
+    "disagreement_score": 0.0586,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "MEDIUM",
+    "fuzzy_score": 0.4942,
+    "aspect_driver": "color (score: 0.38)",
+    "explanation": "This image sits in the MEDIUM range (0.49) with adequate but unexceptional performance. Composition (0.52) is the relative strength, while color (0.38) holds the image back from a HIGH rating. More deliberate attention to the weaker dimensions would push this further.",
+    "counterfactual": "Skipped to save API usage."
+  },
+  {
+    "index": 23,
+    "id": "post_0192",
+    "image": "data/images/high/image_0192.jpg",
+    "n_critiques": 3,
+    "original_sentiment_score": 0.9799,
+    "ground_truth_quality": "high",
+    "per_critique_features": [
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.9,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.8,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.9,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.9,
+        "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.90.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.8,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.8
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.82,
+      "lighting": 0.82,
+      "color": 0.82,
+      "subject_clarity": 0.5,
+      "technical": 0.82,
+      "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50."
+    },
+    "disagreement_score": 0.0185,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "MEDIUM",
+    "fuzzy_score": 0.6013,
+    "aspect_driver": "composition (score: 0.82)",
+    "explanation": "This image sits in the MEDIUM range (0.60) with adequate but unexceptional performance. Composition (0.82) is the relative strength, while subject clarity (0.50) holds the image back from a HIGH rating. More deliberate attention to the weaker dimensions would push this further.",
+    "counterfactual": "Skipped to save API usage."
+  },
+  {
+    "index": 24,
+    "id": "post_0193",
+    "image": "data/images/high/image_0193.jpg",
+    "n_critiques": 4,
+    "original_sentiment_score": 0.8304,
+    "ground_truth_quality": "high",
+    "per_critique_features": [
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.9,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.8,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.9,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.9,
+        "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.90.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.8,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.8
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.34,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.31999999999999995,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.5,
+        "lighting": 0.9,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: positive critique. Composition=0.50, Lighting=0.90.",
+        "confidence": {
+          "composition": 0.0,
+          "lighting": 0.8,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.82,
+      "lighting": 0.82,
+      "color": 0.6152,
+      "subject_clarity": 0.5,
+      "technical": 0.82,
+      "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.50."
+    },
+    "disagreement_score": 0.0192,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "MEDIUM",
+    "fuzzy_score": 0.6013,
+    "aspect_driver": "composition (score: 0.82)",
+    "explanation": "This image sits in the MEDIUM range (0.60) with adequate but unexceptional performance. Composition (0.82) is the relative strength, while subject clarity (0.50) holds the image back from a HIGH rating. More deliberate attention to the weaker dimensions would push this further.",
+    "counterfactual": "Skipped to save API usage."
+  },
+  {
+    "index": 25,
+    "id": "post_0194",
+    "image": "data/images/high/image_0194.jpg",
+    "n_critiques": 3,
+    "original_sentiment_score": 0.9328,
+    "ground_truth_quality": "high",
+    "per_critique_features": [
+      {
+        "composition": 0.82,
+        "lighting": 0.5,
+        "color": 0.6,
+        "subject_clarity": 0.5,
+        "technical": 0.3,
+        "summary": "Rule-based analysis: negative critique. Composition=0.82, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.6399999999999999,
+          "lighting": 0.0,
+          "color": 0.19999999999999996,
+          "subject_clarity": 0.0,
+          "technical": 0.4
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.9,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.8,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.9,
+        "color": 0.3,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.90.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.8,
+          "color": 0.4,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.7844,
+      "lighting": 0.82,
+      "color": 0.569,
+      "subject_clarity": 0.5,
+      "technical": 0.42,
+      "summary": "Rule-based analysis: negative critique. Composition=0.82, Lighting=0.50."
+    },
+    "disagreement_score": 0.056,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "MEDIUM",
+    "fuzzy_score": 0.5903,
+    "aspect_driver": "lighting (score: 0.82)",
+    "explanation": "This image sits in the MEDIUM range (0.59) with adequate but unexceptional performance. Lighting (0.82) is the relative strength, while technical quality (0.42) holds the image back from a HIGH rating. More deliberate attention to the weaker dimensions would push this further.",
+    "counterfactual": "Skipped to save API usage."
+  },
+  {
+    "index": 26,
+    "id": "post_0195",
+    "image": "data/images/medium/image_0195.jpg",
+    "n_critiques": 2,
+    "original_sentiment_score": 0.5003,
+    "ground_truth_quality": "medium",
+    "per_critique_features": [
+      {
+        "composition": 0.82,
+        "lighting": 0.5,
+        "color": 0.6,
+        "subject_clarity": 0.5,
+        "technical": 0.3,
+        "summary": "Rule-based analysis: negative critique. Composition=0.82, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.6399999999999999,
+          "lighting": 0.0,
+          "color": 0.19999999999999996,
+          "subject_clarity": 0.0,
+          "technical": 0.4
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.3,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.30.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.4,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.7656,
+      "lighting": 0.42,
+      "color": 0.52,
+      "subject_clarity": 0.5,
+      "technical": 0.42,
+      "summary": "Rule-based analysis: negative critique. Composition=0.82, Lighting=0.50."
+    },
+    "disagreement_score": 0.075,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "MEDIUM",
+    "fuzzy_score": 0.5597,
+    "aspect_driver": "composition (score: 0.77)",
+    "explanation": "This image sits in the MEDIUM range (0.56) with adequate but unexceptional performance. Composition (0.77) is the relative strength, while lighting (0.42) holds the image back from a HIGH rating. More deliberate attention to the weaker dimensions would push this further.",
+    "counterfactual": "Skipped to save API usage."
+  },
+  {
+    "index": 27,
+    "id": "post_0196",
+    "image": "data/images/low/image_0196.jpg",
+    "n_critiques": 3,
+    "original_sentiment_score": 0.2589,
+    "ground_truth_quality": "low",
+    "per_critique_features": [
+      {
+        "composition": 0.5,
+        "lighting": 0.5,
+        "color": 0.3,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.50, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.0,
+          "lighting": 0.0,
+          "color": 0.4,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.5,
+        "lighting": 0.5,
+        "color": 0.3,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.50, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.0,
+          "lighting": 0.0,
+          "color": 0.4,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.5,
+        "lighting": 0.9,
+        "color": 0.5,
+        "subject_clarity": 0.9,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.50, Lighting=0.90.",
+        "confidence": {
+          "composition": 0.0,
+          "lighting": 0.8,
+          "color": 0.0,
+          "subject_clarity": 0.8,
+          "technical": 0.0
+        },
+        "modality": "text"
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.5,
+      "lighting": 0.82,
+      "color": 0.42,
+      "subject_clarity": 0.82,
+      "technical": 0.5,
+      "summary": "Rule-based analysis: mixed critique. Composition=0.50, Lighting=0.50."
+    },
+    "disagreement_score": 0.0674,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "MEDIUM",
+    "fuzzy_score": 0.5,
+    "aspect_driver": "lighting (score: 0.82)",
+    "explanation": "This image sits in the MEDIUM range (0.50) with adequate but unexceptional performance. Lighting (0.82) is the relative strength, while color (0.42) holds the image back from a HIGH rating. More deliberate attention to the weaker dimensions would push this further.",
+    "counterfactual": "Skipped to save API usage."
+  },
+  {
+    "index": 28,
+    "id": "post_0197",
+    "image": "data/images/high/image_0197.jpg",
+    "n_critiques": 1,
+    "original_sentiment_score": 0.8657,
+    "ground_truth_quality": "high",
+    "per_critique_features": [
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.9,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.8,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.82,
+      "lighting": 0.5,
+      "color": 0.82,
+      "subject_clarity": 0.5,
+      "technical": 0.5,
+      "summary": "Rule-based analysis: mixed critique. Composition=0.90, Lighting=0.50."
+    },
+    "disagreement_score": 0.0414,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "MEDIUM",
+    "fuzzy_score": 0.6013,
+    "aspect_driver": "composition (score: 0.82)",
+    "explanation": "This image sits in the MEDIUM range (0.60) with adequate but unexceptional performance. Composition (0.82) is the relative strength, while lighting (0.50) holds the image back from a HIGH rating. More deliberate attention to the weaker dimensions would push this further.",
+    "counterfactual": "Skipped to save API usage."
+  },
+  {
+    "index": 29,
+    "id": "post_0198",
+    "image": "data/images/high/image_0198.jpg",
+    "n_critiques": 2,
+    "original_sentiment_score": 0.9311,
+    "ground_truth_quality": "high",
+    "per_critique_features": [
+      {
+        "composition": 0.9,
+        "lighting": 0.5,
+        "color": 0.5,
+        "subject_clarity": 0.5,
+        "technical": 0.9,
+        "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.50.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.0,
+          "color": 0.0,
+          "subject_clarity": 0.0,
+          "technical": 0.8
+        },
+        "modality": "text"
+      },
+      {
+        "composition": 0.9,
+        "lighting": 0.9,
+        "color": 0.3,
+        "subject_clarity": 0.5,
+        "technical": 0.5,
+        "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.90.",
+        "confidence": {
+          "composition": 0.8,
+          "lighting": 0.8,
+          "color": 0.4,
+          "subject_clarity": 0.0,
+          "technical": 0.0
+        },
+        "modality": "text"
+      }
+    ],
+    "aggregated_features": {
+      "composition": 0.82,
+      "lighting": 0.82,
+      "color": 0.42,
+      "subject_clarity": 0.5,
+      "technical": 0.82,
+      "summary": "Rule-based analysis: positive critique. Composition=0.90, Lighting=0.50."
+    },
+    "disagreement_score": 0.0595,
+    "subjectivity_flag": "LOW",
+    "fuzzy_label": "MEDIUM",
+    "fuzzy_score": 0.6013,
+    "aspect_driver": "composition (score: 0.82)",
+    "explanation": "This image sits in the MEDIUM range (0.60) with adequate but unexceptional performance. Composition (0.82) is the relative strength, while color (0.42) holds the image back from a HIGH rating. More deliberate attention to the weaker dimensions would push this further.",
+    "counterfactual": "Skipped to save API usage."
+  }
+]
