@@ -17,8 +17,9 @@ import os
 import statistics as stats
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence
 
+import torch
 from PIL import Image
 
 logger = logging.getLogger("aesfix.judges")
@@ -124,24 +125,23 @@ class AestheticPredictorV25Judge(BaseJudge):
 
     def __init__(self, model_id: str = "discus0434/aesthetic-predictor-v2-5") -> None:
         self.model_id = model_id
-        self._model = None
-        self._processor = None
+        self._model: Optional[Any] = None
+        self._processor: Optional[Any] = None
 
     def _ensure_loaded(self) -> None:
-        if self._model is not None:
+        if self._model is not None and self._processor is not None:
             return
         try:
-            from aesthetic_predictor_v2_5 import (
+            from aesthetic_predictor_v2_5 import (  # type: ignore[import-untyped,import-not-found]
                 AestheticPredictorV2_5Model,
                 AestheticPredictorV2_5Processor,
             )
-            import torch
 
             # Load in eval mode to prevent gradient tracking during reward/verification passes
-            self._model = AestheticPredictorV2_5Model.from_pretrained(self.model_id)
+            model = AestheticPredictorV2_5Model.from_pretrained(self.model_id)
+            model.eval()
+            self._model = model
             self._processor = AestheticPredictorV2_5Processor.from_pretrained(self.model_id)
-            self._model.eval()
-            self._torch = torch
             logger.info("Loaded AestheticPredictorV2_5Model from %s", self.model_id)
         except Exception as exc:
             raise JudgeEvaluationError(
@@ -151,11 +151,13 @@ class AestheticPredictorV25Judge(BaseJudge):
     def evaluate(self, image_path: str) -> JudgeScore:
         self._validate_image_path(image_path)
         self._ensure_loaded()
+        if self._model is None or self._processor is None:
+            raise JudgeEvaluationError(f"AestheticPredictor not initialized for {self.model_id}")
 
         try:
             pil_image = Image.open(image_path).convert("RGB")
             inputs = self._processor(images=pil_image, return_tensors="pt")
-            with self._torch.no_grad():
+            with torch.no_grad():
                 outputs = self._model(**inputs)
                 raw_val = float(outputs.logits.squeeze().item())
 
@@ -184,18 +186,17 @@ class ImscoreLaionJudge(BaseJudge):
 
     def __init__(self, model_id: str = "RE-N-Y/laion-aesthetic") -> None:
         self.model_id = model_id
-        self._scorer = None
+        self._scorer: Optional[Any] = None
 
     def _ensure_loaded(self) -> None:
         if self._scorer is not None:
             return
         try:
-            from imscore.aesthetic.model import LAIONAestheticScorer
-            import torch
+            from imscore.aesthetic.model import LAIONAestheticScorer  # type: ignore[import-untyped,import-not-found]
 
-            self._scorer = LAIONAestheticScorer.from_pretrained(self.model_id)
-            self._scorer.eval()
-            self._torch = torch
+            scorer = LAIONAestheticScorer.from_pretrained(self.model_id)
+            scorer.eval()
+            self._scorer = scorer
             logger.info("Loaded LAIONAestheticScorer from %s", self.model_id)
         except Exception as exc:
             raise JudgeEvaluationError(
@@ -205,18 +206,21 @@ class ImscoreLaionJudge(BaseJudge):
     def evaluate(self, image_path: str) -> JudgeScore:
         self._validate_image_path(image_path)
         self._ensure_loaded()
+        if self._scorer is None:
+            raise JudgeEvaluationError(f"Imscore scorer not initialized for {self.model_id}")
 
         try:
-            import torchvision.transforms as T
+            import torchvision.transforms as T  # type: ignore[import-untyped,import-not-found]
             pil_image = Image.open(image_path).convert("RGB")
             # LAION scorer expects normalized tensor [0, 1]
             transform = T.Compose([
                 T.Resize((224, 224)),
                 T.ToTensor(),
             ])
-            tensor_img = transform(pil_image).unsqueeze(0)
+            t_out = transform(pil_image)
+            tensor_img = t_out.unsqueeze(0) if isinstance(t_out, torch.Tensor) else torch.as_tensor(t_out).unsqueeze(0)
 
-            with self._torch.no_grad():
+            with torch.no_grad():
                 raw_val = float(self._scorer(tensor_img).squeeze().item())
 
             # LAION aesthetic scores typically range from ~1.0 to ~10.0

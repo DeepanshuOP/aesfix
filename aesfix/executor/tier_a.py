@@ -29,6 +29,9 @@ try:
     import kornia.geometry.transform as kg
     _HAS_KORNIA = True
 except ImportError:
+    ke = None  # type: ignore[assignment]
+    kf = None  # type: ignore[assignment]
+    kg = None  # type: ignore[assignment]
     _HAS_KORNIA = False
 
 from aesfix.critic.critic import CriticFix
@@ -127,7 +130,7 @@ class TierAExecutor:
                 contrast_val = float(params.get("contrast", params.get("value", 0.0)))
                 factor = 1.0 + (contrast_val / 100.0)
             factor = max(0.1, min(float(factor), 3.0))
-            if _HAS_KORNIA:
+            if _HAS_KORNIA and ke is not None:
                 tensor = ke.adjust_contrast(tensor, factor)
             else:
                 tensor = torch.clamp(0.5 + factor * (tensor - 0.5), 0.0, 1.0)
@@ -166,7 +169,7 @@ class TierAExecutor:
                 sat_val = float(params.get("saturation", params.get("value", 0.0)))
                 factor = 1.0 + (sat_val / 100.0)
             factor = max(0.0, min(float(factor), 3.0))
-            if _HAS_KORNIA:
+            if _HAS_KORNIA and ke is not None:
                 tensor = ke.adjust_saturation(tensor, factor)
             else:
                 lum = 0.299 * tensor[:, 0:1] + 0.587 * tensor[:, 1:2] + 0.114 * tensor[:, 2:3]
@@ -188,7 +191,7 @@ class TierAExecutor:
             # Midtone local contrast: unsharp mask with large radius on midtone frequencies
             clarity = float(params.get("clarity", params.get("value", 0.0))) / 100.0
             if abs(clarity) > 1e-4:
-                if _HAS_KORNIA:
+                if _HAS_KORNIA and kf is not None:
                     blurred = kf.gaussian_blur2d(tensor, (9, 9), (2.5, 2.5))
                 else:
                     # Fallback average pool as box blur
@@ -208,7 +211,7 @@ class TierAExecutor:
             radius = float(params.get("radius", 1.0))
             kernel_size = max(3, int(radius * 3) * 2 + 1)
             sigma = max(0.5, radius)
-            if _HAS_KORNIA:
+            if _HAS_KORNIA and kf is not None:
                 blurred = kf.gaussian_blur2d(tensor, (kernel_size, kernel_size), (sigma, sigma))
             else:
                 blurred = torch.nn.functional.avg_pool2d(
@@ -222,7 +225,7 @@ class TierAExecutor:
             # Edge-preserving luminance smoothing
             strength = float(params.get("strength", params.get("luminance_smoothing", 20.0))) / 100.0
             if strength > 1e-4:
-                if _HAS_KORNIA:
+                if _HAS_KORNIA and kf is not None:
                     blurred = kf.gaussian_blur2d(tensor, (5, 5), (1.0 + strength * 1.5, 1.0 + strength * 1.5))
                 else:
                     blurred = torch.nn.functional.avg_pool2d(
@@ -254,7 +257,7 @@ class TierAExecutor:
             angle = float(params.get("angle", params.get("crop_angle", 0.0)))
             if abs(angle) > 1e-3:
                 angle_rad = abs(math.radians(angle))
-                if _HAS_KORNIA:
+                if _HAS_KORNIA and kg is not None:
                     angle_t = torch.tensor([angle], dtype=torch.float32, device=tensor.device)
                     tensor = kg.rotate(tensor, angle_t)
                 else:
