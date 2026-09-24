@@ -22,6 +22,12 @@ from .frontier_benchmark import (
     make_frontier_vlm_generic_policy,
     make_random_advice_policy,
 )
+from .human_study import (
+    EvaluatedPairResult,
+    HumanAgreementReport,
+    HumanAgreementStudy,
+    HumanPairRating,
+)
 
 __all__ = [
     "FaithfulnessMetrics",
@@ -36,5 +42,10 @@ __all__ = [
     "make_random_advice_policy",
     "make_frontier_vlm_generic_policy",
     "make_aesfix_grounded_critic_policy",
+    "HumanPairRating",
+    "EvaluatedPairResult",
+    "HumanAgreementReport",
+    "HumanAgreementStudy",
 ]
+
 
