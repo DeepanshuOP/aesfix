@@ -9,6 +9,11 @@ from aesfix.executor.guard import (
     IdentityGuard,
     compute_ssim_tensor,
 )
+from aesfix.executor.region import (
+    MaskGenerator,
+    MaskedTierAExecutor,
+    RegionMask,
+)
 from aesfix.executor.tier_a import (
     TIER_A_OPERATIONS,
     TierAExecutor,
@@ -24,4 +29,7 @@ __all__ = [
     "IdentityGuard",
     "GuardVerdict",
     "compute_ssim_tensor",
+    "RegionMask",
+    "MaskGenerator",
+    "MaskedTierAExecutor",
 ]
