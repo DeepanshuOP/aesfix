@@ -12,6 +12,11 @@ from .loaders import (
     PCCDLoader,
     compute_correlation_metrics,
 )
+from .synthetic import (
+    SUPPORTED_DEGRADATIONS,
+    SyntheticCounterfactualEngine,
+    SyntheticTriplet,
+)
 
 __all__ = [
     "ASPECT_DIMENSIONS",
@@ -20,4 +25,7 @@ __all__ = [
     "EvaluationHarness",
     "PCCDLoader",
     "compute_correlation_metrics",
+    "SUPPORTED_DEGRADATIONS",
+    "SyntheticCounterfactualEngine",
+    "SyntheticTriplet",
 ]
