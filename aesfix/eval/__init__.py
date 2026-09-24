@@ -28,6 +28,11 @@ from .human_study import (
     HumanAgreementStudy,
     HumanPairRating,
 )
+from .leaderboard import (
+    LEADERBOARD_VERSION,
+    AGXLeaderboard,
+    LeaderboardEntry,
+)
 
 __all__ = [
     "FaithfulnessMetrics",
@@ -46,6 +51,10 @@ __all__ = [
     "EvaluatedPairResult",
     "HumanAgreementReport",
     "HumanAgreementStudy",
+    "AGXLeaderboard",
+    "LeaderboardEntry",
+    "LEADERBOARD_VERSION",
 ]
+
 
 
