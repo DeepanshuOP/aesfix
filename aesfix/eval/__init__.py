@@ -15,6 +15,13 @@ from .faithfulness import (
     evaluate_deletion_insertion,
     evaluate_monotonic_compliance,
 )
+from .frontier_benchmark import (
+    FrontierBenchmarkSuite,
+    FrontierComparisonTable,
+    make_aesfix_grounded_critic_policy,
+    make_frontier_vlm_generic_policy,
+    make_random_advice_policy,
+)
 
 __all__ = [
     "FaithfulnessMetrics",
@@ -24,4 +31,10 @@ __all__ = [
     "AGEvaluationHarness",
     "AGBenchmarkReport",
     "AGSampleResult",
+    "FrontierBenchmarkSuite",
+    "FrontierComparisonTable",
+    "make_random_advice_policy",
+    "make_frontier_vlm_generic_policy",
+    "make_aesfix_grounded_critic_policy",
 ]
+
