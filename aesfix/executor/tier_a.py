@@ -24,14 +24,19 @@ import torch
 from PIL import Image
 
 try:
-    import kornia.enhance as ke  # type: ignore
-    import kornia.filters as kf  # type: ignore
-    import kornia.geometry.transform as kg  # type: ignore
-    _HAS_KORNIA = True
+    import kornia
+    # Why dynamic resolution: Pylance and Pyright frequently flag 'kornia.enhance/filters/geometry'
+    # as unresolvable submodule imports depending on the user's active Python environment or stub state.
+    # Dynamically binding top-level attributes resolves cleanly without language-server squiggles.
+    ke: Any = getattr(kornia, "enhance", None)
+    kf: Any = getattr(kornia, "filters", None)
+    _kgeom: Any = getattr(kornia, "geometry", None)
+    kg: Any = getattr(_kgeom, "transform", None) if _kgeom is not None else None
+    _HAS_KORNIA = bool(ke is not None and kf is not None and kg is not None)
 except (ImportError, ModuleNotFoundError):
-    ke = None  # type: ignore
-    kf = None  # type: ignore
-    kg = None  # type: ignore
+    ke = None
+    kf = None
+    kg = None
     _HAS_KORNIA = False
 
 from aesfix.critic.critic import CriticFix
