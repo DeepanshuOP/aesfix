@@ -24,14 +24,14 @@ import torch
 from PIL import Image
 
 try:
-    import kornia.enhance as ke
-    import kornia.filters as kf
-    import kornia.geometry.transform as kg
+    import kornia.enhance as ke  # type: ignore
+    import kornia.filters as kf  # type: ignore
+    import kornia.geometry.transform as kg  # type: ignore
     _HAS_KORNIA = True
-except ImportError:
-    ke = None  # type: ignore[assignment]
-    kf = None  # type: ignore[assignment]
-    kg = None  # type: ignore[assignment]
+except (ImportError, ModuleNotFoundError):
+    ke = None  # type: ignore
+    kf = None  # type: ignore
+    kg = None  # type: ignore
     _HAS_KORNIA = False
 
 from aesfix.critic.critic import CriticFix
