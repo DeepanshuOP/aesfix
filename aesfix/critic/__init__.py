@@ -14,6 +14,13 @@ from .critic import (
     HeuristicAspectCritic,
     parse_critic_json,
 )
+from .live_coach import (
+    LiveShootingCoach,
+    NudgeSeverity,
+    ShutterRecommendation,
+    ViewfinderFrameTelemetry,
+    ViewfinderNudge,
+)
 
 __all__ = [
     "VALID_FIX_OPERATIONS",
@@ -23,4 +30,9 @@ __all__ = [
     "CriticPromptBuilder",
     "HeuristicAspectCritic",
     "parse_critic_json",
+    "LiveShootingCoach",
+    "NudgeSeverity",
+    "ShutterRecommendation",
+    "ViewfinderFrameTelemetry",
+    "ViewfinderNudge",
 ]
