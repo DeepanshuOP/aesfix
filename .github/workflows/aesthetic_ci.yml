@@ -1,0 +1,107 @@
+name: Aesthetic CI/CD (Visual Quality Gate)
+
+on:
+  pull_request:
+    paths:
+      - "**/*.jpg"
+      - "**/*.jpeg"
+      - "**/*.png"
+      - "**/*.webp"
+  workflow_dispatch:
+    inputs:
+      threshold:
+        description: "Minimum overall aesthetic score threshold (0.0 to 1.0)"
+        required: false
+        default: "0.55"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  aesthetic-qa-gate:
+    name: Lint Visual Assets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Discover Changed Images
+        id: changed-images
+        run: |
+          # Extract newly added or modified image assets in this PR
+          IMAGES=$(git diff --name-only --diff-filter=AM HEAD~1 HEAD | grep -E '\.(jpg|jpeg|png|webp)$' || true)
+          if [ -z "$IMAGES" ]; then
+            echo "No changed image assets found in commit diff."
+            echo "has_images=false" >> $GITHUB_OUTPUT
+          else
+            echo "Found image assets: $IMAGES"
+            echo "has_images=true" >> $GITHUB_OUTPUT
+            echo "images<<EOF" >> $GITHUB_OUTPUT
+            echo "$IMAGES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run AesFix Aesthetic Linter
+        if: steps.changed-images.outputs.has_images == 'true'
+        id: run-linter
+        continue-on-error: true
+        run: |
+          THRESHOLD="${{ github.event.inputs.threshold || '0.55' }}"
+          python -m aesfix.eval.aesthetic_ci \
+            ${{ steps.changed-images.outputs.images }} \
+            --threshold "$THRESHOLD" \
+            --format markdown \
+            --output-file pr_aesthetic_report.md
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+
+      - name: Post PR Comment
+        if: steps.changed-images.outputs.has_images == 'true' && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            if (fs.existsSync('pr_aesthetic_report.md')) {
+              const body = fs.readFileSync('pr_aesthetic_report.md', 'utf8');
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+              });
+              const botComment = comments.find(c => c.body.includes('AesFix Aesthetic CI/CD Quality Report'));
+              if (botComment) {
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: botComment.id,
+                  body: body,
+                });
+              } else {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body: body,
+                });
+              }
+            }
+
+      - name: Enforce Quality Gate (Fail on Regression)
+        if: steps.changed-images.outputs.has_images == 'true' && steps.run-linter.outputs.exit_code != '0'
+        run: |
+          echo "::error::One or more visual assets failed the AesFix aesthetic quality threshold."
+          exit 1
