@@ -169,3 +169,16 @@ __pycache__/
 *.txt
 !requirements.txt
 !requirements-dev.txt
+
+# Frontend & Node dependencies
+node_modules/
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+
+# Local Environment Variables
+.env
+.env*.local
