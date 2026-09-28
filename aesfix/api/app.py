@@ -83,7 +83,12 @@ def create_app() -> FastAPI:
     app.include_router(trust_router)
     app.include_router(beta_router)
 
-    # 4. Root Welcome Endpoint
+    # 4. Mount MCP Server for AI Agent Integration (AF-6.1 & Roadmap §25 F4.6)
+    from aesfix.api.mcp_server import create_mcp_server
+    mcp_instance = create_mcp_server()
+    app.mount("/mcp", mcp_instance.sse_app())
+
+    # 5. Root Welcome Endpoint
     @app.get("/", tags=["root"])
     def root_welcome() -> Dict[str, Any]:
         """Root API metadata, research preprint link, and documentation gateway."""
@@ -94,6 +99,7 @@ def create_app() -> FastAPI:
             "status": "operational",
             "paper_preprint": "docs/paper/arxiv_preprint_draft.md",
             "agx_leaderboard": "https://huggingface.co/spaces/aesfix/agx-leaderboard",
+            "mcp_endpoint": "/mcp/sse",
             "docs": "/docs",
         }
 
