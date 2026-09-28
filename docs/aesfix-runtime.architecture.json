@@ -1,0 +1,399 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "AesFix Runtime Architecture",
+    "subtitle": "Closed-loop photo critique · deterministic edit · verified aesthetic gain · XMP export",
+    "output": "docs/aesfix-runtime.architecture.html",
+    "animation": "trace",
+    "visual_preset": "signal-flow",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/DeepanshuOP/CritiQ",
+      "revision": "bfe3d556ad053f3e74b33a59d8164d1f5d68eb2a"
+    },
+    "views": [
+      {
+        "id": "critique-loop",
+        "label": "Closed-loop AG@k path",
+        "focus": ["client", "api-gateway", "pipeline-queue", "aspect-critic", "anfis-head", "tier-a-executor", "identity-guard", "judge-ensemble"],
+        "note": "Photo → critique → ANFIS → edit → guard → verified gain."
+      },
+      {
+        "id": "saas-boundary",
+        "label": "SaaS trust boundary",
+        "focus": ["client", "api-gateway", "billing-engine", "trust-layer", "pipeline-queue"],
+        "note": "Stripe webhooks, quota gating, C2PA provenance, and GDPR purge."
+      },
+      {
+        "id": "moonshots-ecosystem",
+        "label": "Moonshots & Agentic Ecosystem",
+        "focus": ["mcp-server", "aesthetic-ci", "taste-engine", "curriculum-engine", "live-coach", "api-gateway", "judge-ensemble"],
+        "note": "MCP native agent tools, Aesthetic CI/CD GitHub PR linting, Taste Personalization, Duolingo Curriculum, and Live Viewfinder Guidance."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "client",
+      "type": "external",
+      "label": "Client",
+      "sublabel": "Next.js 15 · Gradio",
+      "pos": [10, 210],
+      "size": [120, 55]
+    },
+    {
+      "id": "api-gateway",
+      "type": "frontend",
+      "label": "FastAPI Gateway",
+      "sublabel": "CORS · X-Request-ID · mux",
+      "pos": [190, 210],
+      "size": [150, 55],
+      "sources": [
+        { "path": "aesfix/api/app.py", "line": 36, "label": "create_app()" }
+      ]
+    },
+    {
+      "id": "billing-engine",
+      "type": "security",
+      "label": "Billing & Quota",
+      "sublabel": "Supabase · Stripe tiers",
+      "pos": [190, 50],
+      "size": [150, 50],
+      "sources": [
+        { "path": "aesfix/api/billing.py", "line": 1, "label": "QuotaManager" }
+      ]
+    },
+    {
+      "id": "pipeline-queue",
+      "type": "backend",
+      "label": "Pipeline Queue",
+      "sublabel": "async orchestrator · SSE",
+      "pos": [400, 210],
+      "size": [155, 55],
+      "sources": [
+        { "path": "aesfix/api/pipeline_queue.py", "line": 142, "label": "PipelineQueueManager" }
+      ]
+    },
+    {
+      "id": "aspect-critic",
+      "type": "backend",
+      "label": "Aspect Critic",
+      "sublabel": "5-dim scores · CriticFix",
+      "pos": [615, 210],
+      "size": [155, 55],
+      "sources": [
+        { "path": "aesfix/critic/critic.py", "line": 42, "label": "CriticFix schema" }
+      ]
+    },
+    {
+      "id": "anfis-head",
+      "type": "backend",
+      "label": "ANFIS Head",
+      "sublabel": "Takagi-Sugeno · 24 rules",
+      "pos": [830, 210],
+      "size": [155, 55],
+      "sources": [
+        { "path": "aesfix/head/anfis.py", "line": 86, "label": "ANFISHead" }
+      ]
+    },
+    {
+      "id": "tier-a-executor",
+      "type": "backend",
+      "label": "Tier-A Executor",
+      "sublabel": "12 ops · Kornia · XMP",
+      "pos": [1045, 210],
+      "size": [155, 55],
+      "sources": [
+        { "path": "aesfix/executor/tier_a.py", "line": 108, "label": "TierAExecutor" }
+      ]
+    },
+    {
+      "id": "identity-guard",
+      "type": "security",
+      "label": "Identity Guard",
+      "sublabel": "SSIM + SPP · drift gate",
+      "pos": [1045, 390],
+      "size": [155, 55],
+      "sources": [
+        { "path": "aesfix/executor/guard.py", "line": 110, "label": "IdentityGuard" }
+      ]
+    },
+    {
+      "id": "judge-ensemble",
+      "type": "backend",
+      "label": "Judge Ensemble",
+      "sublabel": "CLIP · APv2.5 · LAION",
+      "pos": [830, 390],
+      "size": [155, 55],
+      "sources": [
+        { "path": "aesfix/judges/ensemble.py", "line": 238, "label": "JudgeEnsemble" }
+      ]
+    },
+    {
+      "id": "trust-layer",
+      "type": "security",
+      "label": "Trust & Provenance",
+      "sublabel": "C2PA · GDPR · watermark",
+      "pos": [400, 390],
+      "size": [155, 50],
+      "sources": [
+        { "path": "aesfix/api/trust.py", "line": 1, "label": "Trust Layer" }
+      ]
+    },
+    {
+      "id": "mcp-server",
+      "type": "backend",
+      "label": "MCP Server",
+      "sublabel": "FastMCP · 5 tools · SSE",
+      "pos": [190, 390],
+      "size": [150, 50],
+      "sources": [
+        { "path": "aesfix/api/mcp_server.py", "line": 1, "label": "MCPServer" }
+      ]
+    },
+    {
+      "id": "aesthetic-ci",
+      "type": "external",
+      "label": "Aesthetic CI/CD",
+      "sublabel": "GitHub Action · PR Gate",
+      "pos": [10, 50],
+      "size": [120, 50],
+      "sources": [
+        { "path": "aesfix/eval/aesthetic_ci.py", "line": 1, "label": "AestheticCILinter" }
+      ]
+    },
+    {
+      "id": "curriculum-engine",
+      "type": "backend",
+      "label": "Skill Curriculum",
+      "sublabel": "Trajectories · Drills",
+      "pos": [400, 50],
+      "size": [155, 50],
+      "sources": [
+        { "path": "aesfix/eval/curriculum.py", "line": 1, "label": "SkillCurriculumEngine" }
+      ]
+    },
+    {
+      "id": "live-coach",
+      "type": "frontend",
+      "label": "Live Shooting Coach",
+      "sublabel": "<30ms Viewfinder HUD",
+      "pos": [615, 50],
+      "size": [155, 50],
+      "sources": [
+        { "path": "aesfix/critic/live_coach.py", "line": 1, "label": "LiveShootingCoach" }
+      ]
+    },
+    {
+      "id": "taste-engine",
+      "type": "backend",
+      "label": "Taste Fingerprint",
+      "sublabel": "Bradley-Terry · Taste-Packs",
+      "pos": [830, 50],
+      "size": [155, 50],
+      "sources": [
+        { "path": "aesfix/judges/taste.py", "line": 1, "label": "TasteFingerprint" }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "from": "client",
+      "to": "api-gateway",
+      "label": "HTTPS + SSE",
+      "variant": "emphasis",
+      "labelDy": -28
+    },
+    {
+      "from": "api-gateway",
+      "to": "billing-engine",
+      "label": "quota check",
+      "labelDx": 30
+    },
+    {
+      "from": "api-gateway",
+      "to": "pipeline-queue",
+      "label": "submit job",
+      "variant": "emphasis",
+      "labelDy": -28
+    },
+    {
+      "from": "pipeline-queue",
+      "to": "aspect-critic",
+      "label": "Stage 1",
+      "variant": "emphasis"
+    },
+    {
+      "from": "aspect-critic",
+      "to": "anfis-head",
+      "label": "5-aspect scores",
+      "variant": "emphasis",
+      "labelAt": [800, 280]
+    },
+    {
+      "from": "anfis-head",
+      "to": "tier-a-executor",
+      "label": "Stage 3",
+      "variant": "emphasis",
+      "labelDy": -28
+    },
+    {
+      "from": "tier-a-executor",
+      "to": "identity-guard",
+      "label": "edited image",
+      "variant": "emphasis",
+      "labelAt": [1150, 278],
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "from": "identity-guard",
+      "to": "judge-ensemble",
+      "label": "drift ≤ 0.35",
+      "variant": "emphasis",
+      "labelDy": -28
+    },
+    {
+      "from": "judge-ensemble",
+      "to": "pipeline-queue",
+      "label": "AG@k verified",
+      "labelDy": 28
+    },
+    {
+      "from": "pipeline-queue",
+      "to": "trust-layer",
+      "label": "provenance",
+      "labelAt": [500, 278],
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "from": "aspect-critic",
+      "to": "judge-ensemble",
+      "label": "baseline eval",
+      "variant": "dashed",
+      "labelDx": -30,
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "from": "aesthetic-ci",
+      "to": "api-gateway",
+      "label": "PR visual audit",
+      "variant": "dashed"
+    },
+    {
+      "from": "mcp-server",
+      "to": "api-gateway",
+      "label": "SSE mount /mcp"
+    },
+    {
+      "from": "live-coach",
+      "to": "aspect-critic",
+      "label": "real-time hints",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "from": "taste-engine",
+      "to": "judge-ensemble",
+      "label": "personal AG@k",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "from": "pipeline-queue",
+      "to": "curriculum-engine",
+      "label": "telemetry log",
+      "fromSide": "top",
+      "toSide": "bottom"
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "security-group",
+      "label": "Inference Core — Trusted Execution",
+      "wraps": ["aspect-critic", "anfis-head", "tier-a-executor", "identity-guard", "judge-ensemble"],
+      "pad": 35
+    },
+    {
+      "kind": "region",
+      "label": "SaaS Platform Boundary",
+      "wraps": ["api-gateway", "billing-engine", "pipeline-queue", "trust-layer"],
+      "pad": 30
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Aspect Critic — 5 Photographic Dimensions",
+      "items": [
+        "composition · lighting · color · subject_clarity · technical",
+        "Pydantic CriticFix: op + params + expected_aspect",
+        "HeuristicAspectCritic: offline, zero-cost ablation baseline"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Tier-A Executor — 12 Deterministic Ops",
+      "items": [
+        "exposure · contrast · WB · saturation · vibrance · clarity",
+        "unsharp mask · denoise · crop · horizon · highlights · shadows",
+        "CPU-only (<5 ms, $0.00 COGS) via Kornia + PyTorch",
+        "XMPWriter: round-trip Lightroom sidecar export and import",
+        "Region executor (Tier-A+): feathered mask compositing"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "ANFIS Head — Interpretable Fusion (C3)",
+      "items": [
+        "Takagi-Sugeno: 24 learnable rules, Gaussian membership",
+        "Product t-norm, L1 sparsity pruning to compact rulebook",
+        "Monotonic: improving any aspect cannot lower overall score",
+        "explain() → RulebookTrace with human-readable IF-THEN rules"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Identity Guard — Anti-Reward-Hacking (C1)",
+      "items": [
+        "60% semantic (SPP cosine) + 40% structural (SSIM)",
+        "Composite drift > 0.35 → edit vetoed, gain clamped to 0.0",
+        "verify_gain(): the heart of Aesthetic Gain AG@k metric"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "External Dependencies",
+      "items": [
+        "PyTorch 2.10 + Kornia ≥0.8.3 — differentiable CV",
+        "Transformers 5.2 — VLM critic backbone",
+        "Gradio 6.11 — interactive demo UI",
+        "Supabase Auth · Stripe Billing · HuggingFace weights"
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "SaaS Billing Tiers",
+      "items": [
+        "Free: 5 photos/mo, CPU Tier-A only",
+        "Pro $12/mo: 300 photos, Tier-B generative",
+        "Studio $39/mo: 2000 photos, priority queue",
+        "Stripe HMAC-SHA256 with idempotency log"
+      ]
+    },
+    {
+      "dot": "purple",
+      "title": "Phase 6 Moonshots — Agentic & Personalization Ecosystem",
+      "items": [
+        "MCP Server: FastMCP SSE transport with 5 tools & 3 resources",
+        "Aesthetic CI/CD: Automated PR image quality gate & auto-fix commits",
+        "Taste Fingerprint: Bayesian Bradley-Terry personal AG@k optimization",
+        "Skill Curriculum: Duolingo for photography longitudinal trajectory drills",
+        "Live Coach: <30ms edge viewfinder guidance (tilt, clipping, acutance)"
+      ]
+    }
+  ]
+}

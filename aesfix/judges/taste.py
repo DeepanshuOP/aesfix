@@ -22,7 +22,6 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 
-from aesfix.api.demo import get_demo_components
 from aesfix.critic.critic import CriticFix
 from aesfix.data.loaders import ASPECT_DIMENSIONS
 

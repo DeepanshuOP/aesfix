@@ -5,7 +5,7 @@
 > **Project:** AesFix: Closed-Loop Image Aesthetics via Grounded Critique and Edit Verification  
 > **Target Venues / Impact:** WACV / ACM MM / CVPR Workshop (Research Track) + Production B2B/B2C SaaS (Product Track)  
 > **Repository:** `https://github.com/DeepanshuOP/CritiQ` (`main` branch)  
-> **Current Git Head:** Commit `cbbefe0` — *All Phase 0 through Phase 5 Tasks 100% Completed and Verified*
+> **Current Git Head:** Commit `bfe3d55` — *All Phase 0 through Phase 6 Tasks 100% Completed and Verified*
 
 ---
 
@@ -109,10 +109,16 @@ PHASE 6: Moonshots & Ecosystem Extensions      [░░░░░░░░░░�
 - **AF-5.1 (Auth, Billing & Tiers)**: Supabase JWT verification, thread-safe `QuotaManager` across tiers (Free: 5/mo, Pro: 300/mo, Studio: 2000/mo), and native HMAC SHA-256 Stripe webhook service with idempotent event replay protection.
 - **AF-5.2 (Upload $\to$ Critique $\to$ Fix Queue with SSE)**: Asynchronous pipeline orchestrator running the full closed loop and emitting real-time Server-Sent Events (`text/event-stream`).
 - **AF-5.3 (Batch Processing & Goal Conditioning)**: Domain goal profiles (`listing`, `portrait`, `thumbnail`, `dating`, `general`) with calibrated aspect weight vectors, and `BatchDiagnosisAggregator` compiling shoot-level reports and identifying the "Hero Shot".
-- **AF-5.4 (Trust Layer, C2PA & Safety)**: C2PA JSON-LD provenance claims, anti-theft preview watermarks, side-by-side comparison cards, safety screening, and GDPR 30-day auto-purge / right-to-erasure.
-- **AF-5.5 (Observability & COGS Telemetry)**: Prometheus `/metrics` exposition, health/ready probes, and hardware COGS tracking proving **$>85\%$ gross margin** ($<\$0.003$ per photo on Tier-A CPU).
-- **AF-5.6 (Beta Cohort Management & Funnel Analytics)**: 20-seat pre-seeded cohort across 3 personas (Sellers, Enthusiasts, Dating), tracking the `first_verified_fix_viewed` aha moment and Net Promoter Score.
-- **AF-5.7 (Production Application Gateway & Launch Playbook)**: Unified FastAPI gateway (`aesfix/api/app.py`) and official Go-To-Market playbook (`docs/launch/GTM_LAUNCH_PLAYBOOK.md`) covering Product Hunt, Reddit `r/photocritique`, and IndieHackers.
+- - **AF-5.7 (Production Application Gateway & Launch Playbook)**: Unified FastAPI gateway (`aesfix/api/app.py`) and official Go-To-Market playbook (`docs/launch/GTM_LAUNCH_PLAYBOOK.md`) covering Product Hunt, Reddit `r/photocritique`, and IndieHackers.
+
+---
+
+### Phase 6: Moonshots & Agentic Ecosystem (Commits `f939301` to `bfe3d55`)
+- **AF-6.1 (Model Context Protocol MCP Server — Roadmap §25 F4.6)**: Native FastMCP/MCPServer implementation (`aesfix/api/mcp_server.py`) exposing 5 tools (`critique_image`, `fix_image`, `verify_gain`, `generate_xmp`, `run_closed_loop_pipeline`), 3 resources (`aesfix://aspects`, `aesfix://vocabulary`, `aesfix://goals`), and 2 prompts (`diagnose_photo`, `prepare_listing_photo`) mounted into FastAPI under `/mcp`.
+- **AF-6.2 (Aesthetic CI/CD & Visual PR Gates — Roadmap §25 F4.3)**: Visual quality linter CLI (`aesfix/eval/aesthetic_ci.py`) with threshold enforcement, Tier-A auto-fixing commit generation, and GitHub Action workflow (`.github/workflows/aesthetic_ci.yml`) posting PR diagnostic summary tables.
+- **AF-6.3 (Taste Fingerprint & Personalization Engine — Roadmap §21 & §25 F4.4)**: Bayesian/Ridge Bradley-Terry pairwise preference learner (`aesfix/judges/taste.py`) anchored to PARA priors, computing personalized gain ($\text{AG}_{\text{user}}@k$), taste divergence ($\Delta_{\text{taste}}$), and creator Taste-Packs (`cinematic_moody`, `high_key_commercial`, `minimalist_editorial`).
+- **AF-6.4 (Skill Curriculum "Duolingo for Photography" — Roadmap §25 F4.2 & §23 F2.5)**: Longitudinal 5-aspect trajectory tracker (`aesfix/eval/curriculum.py`) computing windowed growth rates ($\Delta\%$), detecting empirical bottlenecks, prescribing targeted drills, mining user own-photo counterfactual exemplars, and rendering Markdown email digests.
+- **AF-6.5 (Live Shooting Coach & Real-Time Viewfinder Guidance — Roadmap §25 F4.5)**: Edge-deployable sub-30ms capture-time viewfinder coach (`aesfix/critic/live_coach.py`) analyzing horizon tilt/roll, exposure highlight/shadow clipping, Rule-of-Thirds power point Euclidean distances, and Laplacian acutance before the shutter release.
 
 ---
 
@@ -121,7 +127,7 @@ PHASE 6: Moonshots & Ecosystem Extensions      [░░░░░░░░░░�
 ```
 AesFix/
 ├── aesfix/
-│   ├── api/                  # Production FastAPI App, Routers, Billing, Queue, Trust, Beta, Observability
+│   ├── api/                  # Production FastAPI App, Routers, Billing, Queue, Trust, Beta, MCP Server
 │   │   ├── app.py            # Central FastAPI application gateway (AF-5.7)
 │   │   ├── billing.py        # Stripe webhooks, HMAC signature, Supabase JWT, QuotaManager (AF-5.1)
 │   │   ├── pipeline_queue.py # Asynchronous closed loop, JobState, EventBroadcaster, SSE (AF-5.2)
@@ -129,15 +135,25 @@ AesFix/
 │   │   ├── trust.py          # C2PA claims, watermark engine, safety gate, GDPR purge (AF-5.4)
 │   │   ├── observability.py  # Prometheus metrics, liveness/readiness, COGS tracker (AF-5.5)
 │   │   ├── beta.py           # 20-user beta cohort, activation funnel, NPS collector (AF-5.6)
+│   │   ├── mcp_server.py     # Native Model Context Protocol (MCP) server & SSE mount (AF-6.1)
 │   │   ├── demo.py           # Gradio v2 diagnostic demo (AF-1.4)
 │   │   └── routes_*.py       # FastAPI APIRouters for all endpoints
-│   ├── critic/               # Structured VLM Aspect Critic & Pydantic fix schema
+│   ├── critic/               # Structured VLM Aspect Critic, Pydantic fix schema & Live Shooting Coach (AF-6.5)
+│   │   ├── critic.py         # 5-aspect diagnosis, CriticFix schema, heuristic & VLM policies
+│   │   └── live_coach.py     # Sub-30ms viewfinder guidance (tilt, clipping, Rule-of-Thirds, acutance)
 │   ├── data/                 # AADB, PCCD loaders, Synthetic Counterfactual Engine, Release manifest
-│   ├── eval/                 # AG@k benchmark, Leaderboard engine, Faithfulness, Paper export, Human study
+│   ├── eval/                 # AG@k benchmark, Leaderboard, Faithfulness, Paper, Human study, CI/CD, Curriculum
+│   │   ├── aesthetic_ci.py   # Aesthetic CI/CD CLI runner & PR linter (AF-6.2)
+│   │   ├── curriculum.py     # Skill Curriculum, longitudinal trajectories & counterfactual drills (AF-6.4)
+│   │   ├── leaderboard.py    # AGX living leaderboard & HF Space exporter (AF-4.4)
+│   │   └── ...
 │   ├── executor/             # Tier-A Kornia engine, Lightroom XMP exporter, IdentityGuard
 │   ├── head/                 # Differentiable PyTorch Takagi-Sugeno ANFIS neuro-fuzzy head
-│   ├── judges/               # Multi-judge frozen ensemble (imscore, SigLIP, CLIP-IQA)
-│   └── train/                # ShareGPT SFT formatting, GRPO reward modeling, rollout loop
+│   ├── judges/               # Multi-judge frozen ensemble & Taste Fingerprint engine (AF-6.3)
+│   │   ├── ensemble.py       # imscore, SigLIP, CLIP-IQA, trimmed mean aggregation
+│   │   └── taste.py          # Bradley-Terry preference optimization, personal gain, Taste-Packs
+│   ├── train/                # ShareGPT SFT formatting, GRPO reward modeling, rollout loop
+│   └── video/                # Video keyframe extraction & temporal aesthetic scoring
 ├── docs/
 │   ├── launch/               # GTM Launch Playbook (Product Hunt, Reddit, IndieHackers)
 │   ├── leaderboard/          # AGX Methodology v0.1 & Season 1 Launch Release Notes
@@ -145,11 +161,11 @@ AesFix/
 │   ├── RELEASE_MANIFEST_v1.0.md
 │   ├── aesfix-runtime.architecture.json # Interactive architectural graph definition
 │   └── aesfix-runtime.architecture.html # Rendered animated runtime architecture visualization
-└── tests/                    # 32 test files, 160 unit/integration tests (100% passing)
+└── tests/                    # 37 test files, 198 unit/integration tests (100% passing)
 ```
 
 ### Test Verification Status
-- **Test Count**: 160 automated tests across 32 test suites.
+- **Test Count**: 198 automated tests across 37 test suites.
 - **Pass Rate**: 100% green (`pytest`).
 - **Lint & Static Analysis**: `ruff check .` $\to$ **All checks passed (0 warnings, 0 errors)**.
 - **Git Branch Status**: Clean working tree on `main`, zero uncommitted code modifications.
@@ -158,83 +174,55 @@ AesFix/
 
 ## 4. What Is Left To Be Done (Roadmap Gap Analysis)
 
-While the research core (Phases 0–4) and backend SaaS API (Phase 5) are 100% built and verified, the following layers are outlined in the roadmap for future expansion:
+With the research core (Phases 0–4), SaaS API gateway (Phase 5), and Moonshots (Phase 6) 100% built and verified, the remaining operational roadmap layers are:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                        PENDING ROADMAP LAYERS                          │
+│                        FINAL OPERATIONAL LAYERS                        │
 │                                                                        │
-│   [1] Phase 6 Moonshots (Roadmap §25)                                  │
-│       • F4.6: Model Context Protocol (MCP) Server                      │
-│       • F4.3: Aesthetic CI/CD GitHub Action & Pre-Commit Hook          │
-│       • F4.4: Taste Fingerprint & Personalization Engine               │
-│       • F4.5: Mobile / Viewfinder Real-Time Coach                      │
+│   [1] Production Containerization & Cloud Deployment                   │
+│       • Multi-stage Dockerfile (PyTorch CPU / libraw / OpenCV)         │
+│       • docker-compose.yml (FastAPI + Redis + Prometheus stack)        │
+│       • Fly.io / Railway one-command deployment configuration          │
 │                                                                        │
-│   [2] Production Next.js 15 Web Frontend                               │
-│       • Full SaaS UI (React 19, Tailwind CSS, shadcn/ui)               │
-│       • react-compare-slider before/after inspection                   │
-│       • Live SSE progress meter & Radar rulebook trace viewer          │
-│                                                                        │
-│   [3] Cloud Infrastructure & Live Deployment                           │
-│       • Docker containerization (multi-stage CPU/CUDA)                 │
-│       • Fly.io / Railway API deployment                                │
-│       • Live Supabase DB migration & Stripe webhook production keys   │
+│   [2] Production Next.js 15 Web Application                            │
+│       • Next.js 15 App Router, TypeScript strict, Tailwind CSS         │
+│       • react-compare-slider before/after split viewer                 │
+│       • Recharts 5-aspect radar & ANFIS explainability trace viewer    │
+│       • Live SSE progress streaming & one-click Lightroom .XMP export  │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Detailed Breakdown of Remaining Items:
 
-#### 1. Phase 6 Moonshots (Roadmap §25)
-- **F4.6: Model Context Protocol (MCP) Server**:
-  - Expose AesFix as native agentic tools (`critique_image`, `fix_image`, `verify_gain`, `generate_xmp`).
-  - Allows Cursor, Claude Desktop, Antigravity, and autonomous creative pipelines to invoke AesFix as an aesthetic QA linter.
-- **F4.3: Aesthetic CI/CD (GitHub Action & Pre-Commit Hook)**:
-  - Automates aesthetic linting on pull requests containing image assets (marketing docs, app screenshots, game textures).
-  - Flags or blocks PRs if visual regression occurs, posting an automated comment with diagnostic scores and a one-click fix commit.
-- **F4.4: Taste Fingerprint & Personalization Engine (Roadmap §21 & C4)**:
-  - Learns user aesthetic taste from $\sim 20$ pairwise selections (grounded in PARA dataset).
-  - Computes user-conditioned aesthetic gain $\text{AG}_{\text{user}}@k$ vs. global $\text{AG}_{\text{global}}@k$.
-  - Creator Taste-Pack marketplace format.
-- **F4.5: Live Shooting Coach (Mobile / Viewfinder)**:
-  - Lightweight MobileCLIP-class student model running on mobile viewfinders for real-time framing and exposure guidance *before* the shutter click.
+#### 1. Production Containerization & Cloud Deployment
+- **Dockerfile**: Multi-stage build with minimal attack surface, pre-caching CPU inference wheels for PyTorch and torchvision, bundling OpenCV-headless and libraw.
+- **Docker Compose**: Orchestrates the FastAPI gateway (`port 8000`), local Redis queue worker, and Prometheus metrics scraper.
+- **Cloud Run / Fly.io Configuration**: `fly.toml` for turnkey global edge hosting.
 
 #### 2. Production Next.js 15 Web Application
 - Replace the Python Gradio evaluation demo (`aesfix/api/demo.py`) with a dedicated modern web client:
-  - **Framework**: Next.js 15 App Router, TypeScript, Tailwind CSS.
-  - **Components**:
+  - **Framework**: Next.js 15 App Router, TypeScript strict mode (no `any`), Tailwind CSS, Lucide React.
+  - **Key Views**:
     - Interactive before/after split slider (`react-compare-slider`).
-    - 5-aspect animated radar chart (Recharts).
-    - Fired fuzzy rules inspector with explainability toggles.
-    - Shoot blotter for batch photo uploads and Etsy/Amazon hero-shot selection.
+    - 5-aspect animated radar chart (Recharts) with fired ANFIS fuzzy rules inspector.
+    - Shoot blotter for batch photo uploads and hero-shot selection.
+    - Personal Skill Curriculum & Longitudinal Trajectory dashboard (Roadmap §25 F4.2).
     - One-click Adobe Lightroom `.xmp` download button.
     - Stripe Checkout & Customer Portal integration.
-
-#### 3. Cloud Deployment & Production Operations
-- **Containerization**: Finalize production `Dockerfile` (multi-stage build with libraw, opencv, and PyTorch CPU inference wheels).
-- **Backend Hosting**: Deploy the FastAPI Gateway (`aesfix/api/app.py`) to Fly.io or Railway.
-- **GPU Cloud Fallback**: Wire Modal / Replicate endpoints for optional Tier-B generative diffusion edits (FLUX.2 klein / Qwen-Image-Edit).
-- **Live Third-Party Credentials**:
-  - Connect live Supabase project instance (replacing local JWT mock verification).
-  - Connect live Stripe API production keys and webhook secret.
 
 ---
 
 ## 5. Execution Strategy & Next Steps
 
-When continuing in the next chat session or milestone, follow this prioritized execution sequence:
+When continuing to production delivery, follow this prioritized execution sequence:
 
-1. **Step 1: Phase 6 Moonshots — AF-6.1 (MCP Server)**
-   - Create `aesfix/mcp/` server implementing stdio/SSE MCP protocols.
-   - Expose `aesfix_critique`, `aesfix_fix_tier_a`, `aesfix_verify_gain`, and `aesfix_export_xmp`.
-   - Write integration tests in `tests/test_mcp_server.py`.
-2. **Step 2: Phase 6 Moonshots — AF-6.2 (Aesthetic CI/CD)**
-   - Create `action/action.yml` and Python CLI runner `aesfix/ci/image_linter.py`.
-   - Implement PR visual regression check and automated markdown review comment generator.
-3. **Step 3: Phase 6 Moonshots — AF-6.3 (Taste Fingerprint Engine)**
-   - Create `aesfix/head/taste_fingerprint.py` with personal preference projection.
-4. **Step 4: Next.js 15 Frontend Web Application**
-   - Scaffold Next.js 15 frontend in `web/` and wire endpoints to the FastAPI Gateway.
+1. **Step 1: Production Containerization (`Dockerfile` + `docker-compose.yml`)**
+   - Provide turnkey container deployment so any interviewer or user can run `docker compose up --build` and have the entire AesFix stack running instantly.
+2. **Step 2: Next.js 15 Web Frontend**
+   - Scaffold the portfolio-defining Next.js 15 frontend in `web/` with strict TypeScript, Tailwind CSS, and full SSE streaming.
 
 ---
 
 *This document is the authoritative handoff ledger for the AesFix repository as of September 2026.*
+
