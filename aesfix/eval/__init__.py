@@ -28,6 +28,17 @@ from .human_study import (
     HumanAgreementStudy,
     HumanPairRating,
 )
+from .curriculum import (
+    AspectTrajectory,
+    CounterfactualExemplar,
+    CurriculumDrill,
+    MasteryLevel,
+    SkillCurriculumEngine,
+    SkillGraph,
+    TrajectoryStatus,
+    UserPhotoRecord,
+    WeeklyProgressDigest,
+)
 from .leaderboard import (
     LEADERBOARD_VERSION,
     AGXLeaderboard,
@@ -54,6 +65,15 @@ __all__ = [
     "AGXLeaderboard",
     "LeaderboardEntry",
     "LEADERBOARD_VERSION",
+    "AspectTrajectory",
+    "CounterfactualExemplar",
+    "CurriculumDrill",
+    "MasteryLevel",
+    "SkillCurriculumEngine",
+    "SkillGraph",
+    "TrajectoryStatus",
+    "UserPhotoRecord",
+    "WeeklyProgressDigest",
 ]
 
 
