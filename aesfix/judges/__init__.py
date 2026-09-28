@@ -15,6 +15,14 @@ from .ensemble import (
     JudgeScore,
     create_default_ensemble,
 )
+from .taste import (
+    BUILTIN_TASTE_PACKS,
+    DEFAULT_ASPECT_PRIORS,
+    PairwiseComparison,
+    TasteFingerprint,
+    TastePack,
+    TastePersonalizer,
+)
 
 __all__ = [
     "AestheticPredictorV25Judge",
@@ -26,4 +34,10 @@ __all__ = [
     "JudgeResult",
     "JudgeScore",
     "create_default_ensemble",
+    "BUILTIN_TASTE_PACKS",
+    "DEFAULT_ASPECT_PRIORS",
+    "PairwiseComparison",
+    "TasteFingerprint",
+    "TastePack",
+    "TastePersonalizer",
 ]
