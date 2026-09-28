@@ -1,0 +1,58 @@
+# Git & IDE metadata
+.git
+.gitignore
+.github
+.agents
+.gemini
+.vscode
+.idea
+
+# Python bytecode & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Testing & Linting caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Local data, models, logs & scratch assets
+cache/
+results/
+*.log
+*.tmp
+temp.jpg
+test.jpg
+blur.jpg
+bright.jpg
+dark.jpg
+
+# Secrets & Environment variables (Strict Security Rule)
+.env
+.env.local
+.env.*
+*.pem
+*.key
