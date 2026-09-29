@@ -5,9 +5,14 @@ Enables immediate single-line access for batch scripts, the Gradio demo,
 and the AG@k evaluation harness.
 """
 from aesfix.executor.guard import (
+    DINOv2Backend,
+    DriftBackend,
     GuardVerdict,
     IdentityGuard,
+    LPIPSBackend,
+    RGBLayoutBackend,
     compute_ssim_tensor,
+    rgb_layout_stat,
 )
 from aesfix.executor.region import (
     MaskGenerator,
@@ -29,6 +34,11 @@ __all__ = [
     "IdentityGuard",
     "GuardVerdict",
     "compute_ssim_tensor",
+    "DriftBackend",
+    "RGBLayoutBackend",
+    "LPIPSBackend",
+    "DINOv2Backend",
+    "rgb_layout_stat",
     "RegionMask",
     "MaskGenerator",
     "MaskedTierAExecutor",

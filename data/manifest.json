@@ -1,0 +1,68 @@
+{
+  "manifest_version": "1.0",
+  "data_root": "data",
+  "total_files": 1,
+  "files": [
+    {
+      "path": "processed_info_test.json",
+      "sha256": "c35c9ceefed74c825741acf5a352e0bc1ddfc7cca38c342a43a8096b97e6d55e",
+      "size_bytes": 22370
+    }
+  ],
+  "canonical_audit": {
+    "FiveK": {
+      "name": "MIT-Adobe FiveK Dataset",
+      "present": false,
+      "path": null,
+      "license": "CC BY-NC-SA 3.0",
+      "license_note": "Non-commercial research only. User must accept Adobe/MIT terms before downloading.",
+      "requires_license_acceptance": true,
+      "role": "Expert photographic retouching pairs (Retouchers A-E) for Tier-A calibration."
+    },
+    "AADB": {
+      "name": "Aesthetics and Attributes Database",
+      "present": false,
+      "path": null,
+      "license": "Adobe Research Academic License",
+      "license_note": "Academic use only. Requires accepting Adobe Research license agreement.",
+      "requires_license_acceptance": true,
+      "role": "Ground-truth attribute ratings for SigLIP aspect probe training."
+    },
+    "SPAQ": {
+      "name": "Smartphone Photography Attribute and Quality Database",
+      "present": false,
+      "path": null,
+      "license": "PolyU Research License",
+      "license_note": "Non-commercial research use only. Requires agreement with authors.",
+      "requires_license_acceptance": true,
+      "role": "11k smartphone photos with brightness/contrast/colorfulness attribute labels."
+    },
+    "KonIQ-10k": {
+      "name": "KonIQ-10k Ecological Image Quality Assessment",
+      "present": false,
+      "path": null,
+      "license": "CC BY-NC-SA 4.0",
+      "license_note": "Attribution-NonCommercial-ShareAlike 4.0 International.",
+      "requires_license_acceptance": true,
+      "role": "In-the-wild aesthetic distribution for reference pool normalization."
+    },
+    "PPR10K": {
+      "name": "Portrait Photo Retouching 10K",
+      "present": false,
+      "path": null,
+      "license": "Non-commercial Research Agreement",
+      "license_note": "Portrait retouching pairs; requires non-commercial academic research agreement.",
+      "requires_license_acceptance": true,
+      "role": "Portrait-specific retouched raw/target pairs."
+    },
+    "DEAR": {
+      "name": "Diverse Aesthetic Assessment and Retouching",
+      "present": false,
+      "path": null,
+      "license": "Research-Only Data Agreement",
+      "license_note": "100-pair subset public; full pairwise dataset requires author approval.",
+      "requires_license_acceptance": true,
+      "role": "Human pairwise preference on rendering variations; calibration set D_cal."
+    }
+  }
+}

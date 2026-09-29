@@ -162,3 +162,57 @@ def test_guard_with_disk_images() -> None:
     # blur.jpg vs test.jpg represents substantial visual drift
     verdict = guard.evaluate(p_test, p_blur)
     assert isinstance(verdict, GuardVerdict)
+
+
+def test_rgb_layout_stat_renamed(sample_image: Image.Image) -> None:
+    """Verifies rgb_layout_stat computes normalized layout statistics."""
+    from aesfix.executor.guard import rgb_layout_stat, _to_rgb_tensor, RGBLayoutBackend
+
+    t = _to_rgb_tensor(sample_image)
+    stat = rgb_layout_stat(t)
+    assert stat.ndim == 2
+    # Spatial pyramid: 1x1 (3) + 2x2 (12) + 4x4 (48) = 63 dims
+    assert stat.shape[1] == 63
+    norm = torch.norm(stat, p=2, dim=1).item()
+    assert pytest.approx(norm, abs=1e-4) == 1.0
+
+    backend = RGBLayoutBackend()
+    drift = backend.compute_drift(t, t)
+    assert pytest.approx(drift, abs=1e-4) == 0.0
+
+
+def test_pluggable_backend_custom(sample_image: Image.Image) -> None:
+    """Verifies that IdentityGuard accepts custom DriftBackend implementations."""
+    from aesfix.executor.guard import DriftBackend
+
+    class MockCustomBackend(DriftBackend):
+        def compute_drift(self, t_orig: torch.Tensor, t_edit: torch.Tensor) -> float:
+            return 0.12
+
+    guard = IdentityGuard(backend=MockCustomBackend(), drift_threshold=0.35)
+    verdict = guard.evaluate(sample_image, sample_image)
+
+    assert verdict.backend_name == "MockCustomBackend"
+    assert pytest.approx(verdict.feature_drift, abs=1e-4) == 0.12
+
+
+def test_lazy_loaded_lpips_backend() -> None:
+    """Verifies LPIPSBackend lazy-loads and gives clear error if uninstalled."""
+    from aesfix.executor.guard import LPIPSBackend
+
+    backend = LPIPSBackend()
+    assert backend.net == "alex"
+    # Calling compute_drift without lpips package installed raises ImportError
+    t = torch.zeros(1, 3, 64, 64)
+    with pytest.raises(ImportError, match="lpips"):
+        backend.compute_drift(t, t)
+
+
+def test_lazy_loaded_dinov2_backend() -> None:
+    """Verifies DINOv2Backend instantiates without loading until called."""
+    from aesfix.executor.guard import DINOv2Backend
+
+    backend = DINOv2Backend(model_name="facebook/dinov2-small")
+    assert backend.model_name == "facebook/dinov2-small"
+    assert backend._model is None
+
