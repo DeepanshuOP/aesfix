@@ -35,6 +35,9 @@ jobs:
             fi
           fi
 
+      - name: Verify claims in docs and paper against ledger
+        run: python scripts/check_claims.py
+
   gitleaks:
     runs-on: ubuntu-latest
     steps:
