@@ -1,15 +1,7 @@
-"""AGX Public Leaderboard Season 1 Engine & External Submission Evaluator (AF-4.4 & Roadmap §41).
+"""AGX Public Leaderboard Engine & External Submission Evaluator (AF-4.4 & Roadmap v6).
 
-Why the AGX Season 1 Leaderboard is the project's strategic growth engine:
-1. Marketing = Benchmark: Rather than running ads or publishing ungrounded claims, AesFix
-   established AGX as the industry's first behavioral aesthetic benchmark. Providing a public
-   arena where models compete on machine-executable visual improvement positions AesFix at the
-   center of the multimodal evaluation ecosystem.
-2. Trained Critic at Rank #1: The trained SFT + GRPO Qwen2.5-VL model decisively crowns the board,
-   outperforming frontier proprietary models (GPT-4o, Claude 3.5 Sonnet) and open multimodal models.
-3. Automated External Submission Pipeline: External research teams submit JSON advice traces.
-   The engine executes them against the frozen benchmark pool through Tier-A, checks the Identity
-   Guard, and calculates verified AG@k metrics for transparent ranking.
+The AGX Leaderboard evaluates whether visual advice produces measurable aesthetic gain.
+It starts empty and loads entries exclusively from results/ledger.jsonl.
 """
 from __future__ import annotations
 
@@ -22,9 +14,9 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 logger = logging.getLogger("aesfix.eval.leaderboard")
 
-LEADERBOARD_VERSION = "1.0.0"  # Season 1 Launch Version
+LEADERBOARD_VERSION = "1.0.0"
 LEADERBOARD_METHODOLOGY_URL = (
-    "https://github.com/DeepanshuOP/CritiQ/blob/main/docs/leaderboard/METHODOLOGY_v0.1.md"
+    "https://github.com/DeepanshuOP/aesfix/blob/main/docs/AesFix_Roadmap_v6.md"
 )
 
 
@@ -32,7 +24,6 @@ LEADERBOARD_METHODOLOGY_URL = (
 class LeaderboardEntry:
     """Standardized entry in the AGX Public Leaderboard.
 
-    Why this dataclass:
     Enforces consistent reporting of both top-1 single edit performance and compound edits,
     along with guard compliance and reproducibility metadata.
     """
@@ -53,122 +44,57 @@ class LeaderboardEntry:
 
 
 class AGXLeaderboard:
-    """Manages the versioned AGX Season 1 leaderboard rankings and submission validation."""
+    """Manages the versioned AGX leaderboard rankings and submission validation.
+    
+    The leaderboard starts empty and populates exclusively from verified runs
+    recorded in results/ledger.jsonl.
+    """
 
-    def __init__(self, version: str = LEADERBOARD_VERSION) -> None:
+    def __init__(
+        self,
+        version: str = LEADERBOARD_VERSION,
+        ledger_path: Optional[Path | str] = None,
+    ) -> None:
         self.version = version
         self.methodology_url = LEADERBOARD_METHODOLOGY_URL
         self._entries: List[LeaderboardEntry] = []
-        self._load_season_1_models()
+        self.ledger_path = Path(ledger_path) if ledger_path else Path("results/ledger.jsonl")
+        self.load_from_ledger(self.ledger_path)
+
+    def load_from_ledger(self, ledger_path: Path | str = Path("results/ledger.jsonl")) -> None:
+        """Loads leaderboard entries from the results ledger JSONL file."""
+        p = Path(ledger_path)
+        if not p.exists():
+            return
+        try:
+            with open(p, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    run = json.loads(line)
+                    metrics = run.get("metrics", {})
+                    config = run.get("config", {})
+                    if "ag_at_1" in metrics:
+                        entry = LeaderboardEntry(
+                            model_name=config.get("model_name", run.get("run_id", "unknown")),
+                            organization=config.get("organization", "External"),
+                            backbone=config.get("backbone", "N/A"),
+                            ag_at_1=float(metrics["ag_at_1"]),
+                            ag_at_3=float(metrics.get("ag_at_3", 0.0)),
+                            guard_pass_rate=float(metrics.get("guard_pass_rate", 1.0)),
+                            aspect_verification_rate=float(metrics.get("aspect_verification_rate", 0.0)),
+                            verified=True,
+                            season=f"Season 1 (v{self.version})",
+                        )
+                        self._entries.append(entry)
+            self._recompute_ranks()
+        except Exception as err:
+            logger.warning("Failed to load entries from ledger %s: %s", p, err)
 
     def _load_season_1_models(self) -> None:
-        """Loads Season 1 initial standings including trained critic and external submissions."""
-        season_1_data = [
-            # Oracle ceiling
-            LeaderboardEntry(
-                model_name="Oracle Inversion (Ceiling)",
-                organization="AesFix Team",
-                backbone="Synthetic Ground-Truth Inversion",
-                ag_at_1=0.1640,
-                ag_at_3=0.1820,
-                guard_pass_rate=0.994,
-                aspect_verification_rate=0.946,
-                is_reference_ceiling=True,
-                verified=True,
-                code_or_paper_url="https://github.com/DeepanshuOP/CritiQ",
-            ),
-            # Trained critic - crowns the board
-            LeaderboardEntry(
-                model_name="AesFix-Qwen2.5-VL-7B (LoRA + GRPO)",
-                organization="AesFix Research Consortium",
-                backbone="Qwen2.5-VL-7B + LoRA + TS-ANFIS",
-                ag_at_1=0.0845,
-                ag_at_3=0.0992,
-                guard_pass_rate=0.972,
-                aspect_verification_rate=0.796,
-                verified=True,
-                code_or_paper_url="https://github.com/DeepanshuOP/CritiQ",
-            ),
-            # SFT warm-start baseline
-            LeaderboardEntry(
-                model_name="AesFix-SFT-Baseline (Pre-RL)",
-                organization="AesFix Research Consortium",
-                backbone="Qwen2.5-VL-7B + SFT Warm-Start",
-                ag_at_1=0.0385,
-                ag_at_3=0.0452,
-                guard_pass_rate=0.954,
-                aspect_verification_rate=0.524,
-                verified=True,
-                code_or_paper_url="https://github.com/DeepanshuOP/CritiQ",
-            ),
-            # External open-weight models
-            LeaderboardEntry(
-                model_name="InternVL2-8B (Zero-Shot)",
-                organization="OpenGVLab (Community Submission)",
-                backbone="InternVL2-8B Prompted",
-                ag_at_1=0.0165,
-                ag_at_3=0.0134,
-                guard_pass_rate=0.904,
-                aspect_verification_rate=0.382,
-                verified=True,
-            ),
-            LeaderboardEntry(
-                model_name="Llama-3.2-11B-Vision (Zero-Shot)",
-                organization="Meta AI (Community Submission)",
-                backbone="Llama-3.2-11B-Vision-Instruct",
-                ag_at_1=0.0151,
-                ag_at_3=0.0121,
-                guard_pass_rate=0.898,
-                aspect_verification_rate=0.374,
-                verified=True,
-            ),
-            LeaderboardEntry(
-                model_name="Qwen2-VL-7B (Prompted)",
-                organization="Alibaba (Evaluated by AesFix)",
-                backbone="Qwen2-VL-7B-Instruct Zero-Shot",
-                ag_at_1=0.0142,
-                ag_at_3=0.0112,
-                guard_pass_rate=0.896,
-                aspect_verification_rate=0.368,
-                verified=True,
-            ),
-            # Frontier commercial APIs
-            LeaderboardEntry(
-                model_name="GPT-4o (Prompted Zero-Shot)",
-                organization="OpenAI (Evaluated by AesFix)",
-                backbone="gpt-4o-2024-08-06 Zero-Shot",
-                ag_at_1=0.0118,
-                ag_at_3=0.0084,
-                guard_pass_rate=0.910,
-                aspect_verification_rate=0.346,
-                verified=True,
-            ),
-            LeaderboardEntry(
-                model_name="Claude 3.5 Sonnet (Prompted)",
-                organization="Anthropic (Evaluated by AesFix)",
-                backbone="claude-3-5-sonnet-20241022",
-                ag_at_1=0.0105,
-                ag_at_3=0.0079,
-                guard_pass_rate=0.902,
-                aspect_verification_rate=0.334,
-                verified=True,
-            ),
-            # Control baseline
-            LeaderboardEntry(
-                model_name="Random Advice Control",
-                organization="AesFix Baseline",
-                backbone="Uniform Op & Parameter Sampling",
-                ag_at_1=-0.0421,
-                ag_at_3=-0.0812,
-                guard_pass_rate=0.842,
-                aspect_verification_rate=0.224,
-                is_control_baseline=True,
-                verified=True,
-            ),
-        ]
-        for entry in season_1_data:
-            self._entries.append(entry)
-        self._recompute_ranks()
+        """Deprecated: Season 1 models must not be hardcoded."""
+        pass
 
     def _recompute_ranks(self) -> None:
         """Sorts leaderboard entries by AG@1 descending, placing the oracle reference at top."""
@@ -211,7 +137,7 @@ class AGXLeaderboard:
         submission_payload: Dict[str, Any],
         eval_fn: Optional[Callable[[List[Dict[str, Any]]], Dict[str, float]]] = None,
     ) -> LeaderboardEntry:
-        """Evaluates an external community submission payload and registers it into the leaderboard.
+        """Evaluates an external submission payload and registers it into the leaderboard.
 
         Why automated evaluation:
         Allows self-serve participant submissions on Hugging Face Spaces with automated grading.
@@ -251,7 +177,7 @@ class AGXLeaderboard:
 
         self._entries.append(entry)
         self._recompute_ranks()
-        logger.info("Successfully registered community submission: %s (Rank #%d)", entry.model_name, entry.rank)
+        logger.info("Successfully registered external submission: %s (Rank #%d)", entry.model_name, entry.rank)
         return entry
 
     def register_submission(

@@ -96,7 +96,7 @@ def test_c2pa_provenance_manifest() -> None:
         original_digest=orig_hash,
         edited_digest=orig_hash,
         applied_ops=["adjust_exposure", "adjust_contrast"],
-        verified_aesthetic_gain=0.0845,
+        verified_aesthetic_gain=0.05,
     )
 
     json_ld = manifest.to_json_ld()

@@ -151,10 +151,9 @@ AesFix is the first closed-loop vision-language critic whose photographic advice
 - **Training Recipe:** Supervised Fine-Tuning (SFT) on PCCD critiques + Synthetic Counterfactual triplets, followed by Group Relative Policy Optimization (GRPO) with multi-objective execution rewards.
 
 ## Evaluation & Benchmark Performance
-- **Verified Aesthetic Gain at rank 1 ($\\text{{AG}}@1$):** `+{ag1_score:.4f}` ($>5\\times$ frontier models).
+- **Verified Aesthetic Gain at rank 1 ($\\text{{AG}}@1$):** `+{ag1_score:.4f}`.
 - **Verified Aesthetic Gain at rank 3 ($\\text{{AG}}@3$):** `+{ag3_score:.4f}`.
-- **Human Preference Concordance:** `{concordance_rate:.1%}` across 300 image pairs (900 annotations).
-- **Identity Guard Pass Rate:** `96.8%` (structural and semantic preservation).
+- **Human Preference Concordance:** `{concordance_rate:.1%}`.
 
 ## Intended Use
 Automated photography critique, Adobe Lightroom XMP generation, and computational quality enhancement.
@@ -163,7 +162,7 @@ Automated photography critique, Adobe Lightroom XMP generation, and computationa
 ```bibtex
 @article{{aesfix2026,
   title={{AesFix: Closed-Loop Image Aesthetics via Grounded Critique and Edit Verification}},
-  author={{Deepanshu and The AesFix Research Consortium}},
+  author={{Deepanshu}},
   journal={{arXiv preprint arXiv:2609.XXXXX}},
   year={{2026}}
 }}

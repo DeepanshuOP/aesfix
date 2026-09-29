@@ -1,47 +1,40 @@
-"""Unit tests for Paper Export Engine & Camera-Ready LaTeX Generation (AF-4.2).
+"""Unit tests for Paper Export Engine & Camera-Ready LaTeX Generation (AF-4.2 & Roadmap v6).
 
-Why these tests are critical:
-1. Verifies that all 4 empirical tables, abstract, equations, and references are accurately
-   assembled into compilable LaTeX source code without formatting errors.
-2. Validates that the demographic fairness audit satisfies parity constraints across
-   skin-tone subgroups (Fitzpatrick I-VI), preventing algorithmic bias in aesthetic advice.
-3. Confirms that all LaTeX environments (tabular, table, abstract, itemize) are strictly balanced.
+Verifies that LaTeX source code compiles cleanly with balanced environments,
+bibtex entries are complete, and tables render correctly from demographic audit metrics.
 """
 from __future__ import annotations
 
 from pathlib import Path
 
 from aesfix.eval.paper_export import (
-    CANONICAL_DEMOGRAPHIC_AUDIT,
+    DemographicBiasMetric,
     PaperExportEngine,
 )
 
 
-def test_canonical_demographic_audit_fairness_bounds() -> None:
-    """Verifies demographic parity constraints across skin-tone subgroups."""
-    assert len(CANONICAL_DEMOGRAPHIC_AUDIT) == 4
-
-    ag3_scores = [d.mean_ag_at_3 for d in CANONICAL_DEMOGRAPHIC_AUDIT]
-    guard_rates = [d.guard_pass_rate for d in CANONICAL_DEMOGRAPHIC_AUDIT]
-
-    # Why max difference < 0.005 is critical:
-    # Demonstrates that Tier-A advice does not disproportionately favor any demographic group
-    max_ag3_diff = max(ag3_scores) - min(ag3_scores)
-    assert max_ag3_diff <= 0.005
-
-    # All demographic groups must have high guard pass rates (>94%)
-    assert all(r >= 0.94 for r in guard_rates)
-
-
-def test_paper_export_engine_markdown_audit_table() -> None:
-    """Tests Markdown formatting of the demographic audit table."""
+def test_demographic_audit_metric_formatting() -> None:
+    """Verifies that DemographicBiasMetric formats properly into markdown tables."""
+    records = [
+        DemographicBiasMetric("Subgroup A", 50, 0.0450, 0.0520, 0.950, 0.080, 0.700),
+        DemographicBiasMetric("Subgroup B", 50, 0.0460, 0.0530, 0.960, 0.078, 0.710),
+    ]
     engine = PaperExportEngine()
-    table_md = engine.generate_demographic_audit_table()
+    table_md = engine.generate_demographic_audit_table(records)
 
     assert "| Demographic Subgroup |" in table_md
-    assert "Fitzpatrick I-II" in table_md
-    assert "Fitzpatrick V-VI" in table_md
-    assert table_md.count("\n") >= 4
+    assert "Subgroup A" in table_md
+    assert "Subgroup B" in table_md
+    assert "+0.0450" in table_md
+
+
+def test_paper_export_engine_markdown_audit_empty_table() -> None:
+    """Tests Markdown formatting when audit data is pending validation."""
+    engine = PaperExportEngine()
+    table_md = engine.generate_demographic_audit_table([])
+
+    assert "| Demographic Subgroup |" in table_md
+    assert "Pending ledger validation runs" in table_md
 
 
 def test_paper_export_engine_bibtex_completeness() -> None:

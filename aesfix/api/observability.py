@@ -240,6 +240,6 @@ class HealthService:
             "version": "1.0.0",
             "environment": "production",
             "framework": "FastAPI + PyTorch",
-            "author": "AesFix Research Consortium",
-            "documentation": "https://github.com/DeepanshuOP/CritiQ",
+            "author": "Deepanshu",
+            "documentation": "https://github.com/DeepanshuOP/aesfix",
         }

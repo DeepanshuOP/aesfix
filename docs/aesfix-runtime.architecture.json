@@ -112,7 +112,7 @@
       "id": "identity-guard",
       "type": "security",
       "label": "Identity Guard",
-      "sublabel": "SSIM + SPP · drift gate",
+      "sublabel": "SSIM + RGB layout stat",
       "pos": [1045, 390],
       "size": [155, 55],
       "sources": [
@@ -166,8 +166,8 @@
     {
       "id": "curriculum-engine",
       "type": "backend",
-      "label": "Skill Curriculum",
-      "sublabel": "Trajectories · Drills",
+      "label": "Skill Curriculum (Planned)",
+      "sublabel": "planned · Trajectories · Drills",
       "pos": [400, 50],
       "size": [155, 50],
       "sources": [
@@ -177,8 +177,8 @@
     {
       "id": "live-coach",
       "type": "frontend",
-      "label": "Live Shooting Coach",
-      "sublabel": "<30ms Viewfinder HUD",
+      "label": "Live Shooting Coach (Planned)",
+      "sublabel": "planned · <30ms Viewfinder HUD",
       "pos": [615, 50],
       "size": [155, 50],
       "sources": [
@@ -188,8 +188,8 @@
     {
       "id": "taste-engine",
       "type": "backend",
-      "label": "Taste Fingerprint",
-      "sublabel": "Bradley-Terry · Taste-Packs",
+      "label": "Taste Fingerprint (Planned)",
+      "sublabel": "planned · Bradley-Terry · Taste-Packs",
       "pos": [830, 50],
       "size": [155, 50],
       "sources": [
