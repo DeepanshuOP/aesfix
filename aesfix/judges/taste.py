@@ -193,6 +193,9 @@ class TasteFingerprint:
         if not comparisons:
             return self.aspect_weights
 
+        # Deferred import avoids circular dependency between aesfix.judges and aesfix.api.demo
+        from aesfix.api.demo import get_demo_components
+
         critic, _, _ = get_demo_components()
         diff_vectors: List[np.ndarray] = []
         labels: List[float] = []

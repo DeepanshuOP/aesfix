@@ -146,6 +146,7 @@ bsub.txt
 *.out
 # AI / Tool folders
 .agent/
+.antigravity/
 .claude/
 .codebuddy/
 .codex/
@@ -159,6 +160,17 @@ bsub.txt
 .roo/
 .trae/
 .windsurf/
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# IDEs & Editors
+.idea/
+*.swp
+*.swo
 
 # Cache & temp
 cache/
@@ -182,3 +194,10 @@ next-env.d.ts
 # Local Environment Variables
 .env
 .env*.local
+.env.local
+
+# Tool outputs & temp artifacts
+graphify-out/
+.playwright-mcp/
+UPDATEPLS/
+hf_space/
