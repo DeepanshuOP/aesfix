@@ -9,13 +9,13 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from aesfix.ledger import DEFAULT_LEDGER_PATH, load_ledger, get_run_by_id
+from aesfix.ledger import DEFAULT_LEDGER_PATH, get_run_by_id, load_ledger  # noqa: E402
 
 
 def format_run_table(run: Dict[str, Any]) -> str:

@@ -1,11 +1,8 @@
 """Unit tests for evidence ledger and claim checking verification (AF-Roadmap v6 R0.4)."""
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from typing import Any, Dict
-
-import pytest
 
 from aesfix.ledger import (
     append_run,
@@ -81,7 +78,6 @@ def test_make_tables_formatting():
 def test_check_claims_untagged_violation(tmp_path: Path):
     doc = tmp_path / "claim.md"
     doc.write_text("The model achieved 0.85 SRCC on the benchmark.", encoding="utf-8")
-    ledger_path = tmp_path / "empty_ledger.jsonl"
 
     violations = scan_file_for_claims(doc, known_run_ids=set())
     assert len(violations) == 1
@@ -91,7 +87,6 @@ def test_check_claims_untagged_violation(tmp_path: Path):
 def test_check_claims_unknown_run_violation(tmp_path: Path):
     doc = tmp_path / "claim.md"
     doc.write_text("The model achieved 0.85 SRCC [run:missing-uuid].", encoding="utf-8")
-    ledger_path = tmp_path / "empty_ledger.jsonl"
 
     violations = scan_file_for_claims(doc, known_run_ids={"valid-uuid"})
     assert len(violations) == 1

@@ -9,7 +9,7 @@ from __future__ import annotations
 import argparse
 import importlib
 import sys
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 
 JUDGE_REGISTRY: Dict[str, Dict[str, Any]] = {

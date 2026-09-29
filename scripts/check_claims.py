@@ -18,7 +18,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from aesfix.ledger import DEFAULT_LEDGER_PATH, load_ledger
+from aesfix.ledger import DEFAULT_LEDGER_PATH, load_ledger  # noqa: E402
 
 CLAIM_PATTERN = re.compile(
     r"(?<![a-zA-Z0-9_.-])[-+]?\d+(?:\.\d+)?%?\s*(?:SRCC|PLCC|AG|HWR|FCR|accuracy|kappa|alpha)\b",

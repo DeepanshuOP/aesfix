@@ -22,9 +22,7 @@ from PIL import Image
 from aesfix.critic.critic import CriticFix
 from aesfix.eval.metrics import (
     ag_best_at_k,
-    ag_best_at_k_clipped,
     ag_comp_at_k,
-    ag_comp_at_k_clipped,
 )
 from aesfix.executor.guard import GuardVerdict, IdentityGuard
 from aesfix.executor.tier_a import TierAExecutor
