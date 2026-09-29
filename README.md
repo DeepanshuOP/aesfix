@@ -1,86 +1,69 @@
-# AesFix: Closed-Loop Image Aesthetics via Grounded Critique and Edit Verification
+# 📸 AesFix: Certified Photographic Retouching & Edit Verification
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Next.js 15](https://img.shields.io/badge/Next.js-15.0-black.svg)](https://nextjs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c.svg)](https://pytorch.org/)
 [![License: Apache-2.0 / MIT](https://img.shields.io/badge/License-Apache_2.0_|_MIT-green.svg)](LICENSE)
-[![Tests: 100% Green](https://img.shields.io/badge/tests-198%20passed-success.svg)](tests/)
+[![CI](https://github.com/DeepanshuOP/aesfix/actions/workflows/ci.yml/badge.svg)](https://github.com/DeepanshuOP/aesfix/actions)
 
-> **A portfolio-defining, closed-loop photographic intelligence system.**  
-> AesFix bridges the gap between passive aesthetic scorers and ungrounded multimodal chatbots by coupling structured critique with deterministic retouching, perceptual identity gating, and edit-verified reinforcement learning.
+## What AesFix Is
+
+AesFix is an open photographic intelligence and retouching system designed to diagnose aesthetic flaws, execute deterministic edits, and statistically verify improvements. Unlike passive vision scorers or ungrounded generative filters, AesFix subjects photographic recommendations to aspect-level falsification, execution guards, and finite-sample guarantees.
+
+> **Thesis (Roadmap v6):**  
+> Every retouching agent now claims its edits are improvements. AesFix certifies it — with a finite-sample statistical guarantee against human preference — falsifies each fix at the level of the aspect it claimed to fix, and tells you when to leave the photo alone.
 
 ---
 
-## 1. The Core Paradigm: The "Empty Quadrant"
+## System Status
 
-Modern computational photography tools fall into two failure modes:
-1. **Blind Editors** (*Luminar, Remini, Topaz*): Apply destructive global adjustments without explaining aesthetic flaws or teaching the photographer.
-2. **Passive Critics** (*photocritique.ai, GPT-4o, standard VLMs*): Emit qualitative feedback without verifying if their recommendations actually improve the photo.
+The repository adheres to the Roadmap v6 integrity protocol: no metric numbers are reported without cryptographic run provenance in `results/ledger.jsonl`.
 
-AesFix occupies the previously vacant quadrant: **it diagnoses, prescribes, executes, and mathematically verifies photographic improvements.**
+| Real & Verified | Implemented, Unvalidated | Not Built (Planned) |
+| :--- | :--- | :--- |
+| **Evidence Ledger (`aesfix/ledger.py`)**: Cryptographic run logger recording UUID, commit, hardware, config hash, and data manifest hash. | **Judge Ensemble Registry (`aesfix/judges/`)**: Interfaces for external IQA/IAA judges awaiting model weights and benchmark runs. | **Certifier Engine (`aesfix/certifier/`)**: Learn-Then-Test (LTT) / SGR risk-controlling certification gate with statistical bounds. |
+| **Integrity Checker (`scripts/check_claims.py`)**: CI gate enforcing that all metric claims in documentation link to verified ledger runs. | **Critic Interfaces (`aesfix/critic/`)**: Prompt templates and structured schema decoders awaiting deployed Qwen3-VL / vLLM serving. | **Goodhart Map**: Systematic exploitability analysis across the judge pool and candidate edit grid. |
+| **Certified Metrics (`aesfix/eval/metrics.py`)**: Signed AG_best@k, AG_comp@k, HWR (ties=0.5), harm rate, and Hypothesis property tests. | **Bayesian Taste Updater (`aesfix/judges/taste.py`)**: Online Bradley–Terry preference module awaiting active user preference streams. | **Aspect Probes**: SigLIP linear probes calibrated on AADB and SPAQ attribute datasets. |
+| **Tier-A Executor (`aesfix/executor/tier_a.py`)**: 12 deterministic parametric image adjustments in Kornia/OpenCV with Adobe Lightroom XMP export. | **Curriculum Engine (`aesfix/eval/curriculum.py`)**: Aspect-based learning progression awaiting empirical student cohort evaluations. | **C2PA Assertion Signer**: Digital provenance credentials embedding cryptographic certificates in image sidecars. |
+| **Identity Guard v1 (`aesfix/executor/guard.py`)**: Structural similarity (SSIM) and RGB layout drift bounds to abort corrupt edits. | **FastAPI Gateway (`aesfix/api/`)**: Scaffolding endpoints and streaming SSE routes awaiting live GPU model backends. | **Tier-B Generative Inpainting**: Regional generative editing guarded by multi-scale identity verification (deferred to R7). |
+| **Web Workbench Scaffolding (`web/`)**: Next.js 15 client with interactive comparison slider and inspection controls. | **Dataset Loaders (`aesfix/data/`)**: Data loading scaffolding awaiting validated local dataset mirrors. | **Human Study Verification**: Live Prolific double-blind crowd studies with attention-checked pairs. |
+
+---
+
+## Architecture v6
 
 ```
-                    │  gives advice / critique      │  no advice
-────────────────────┼───────────────────────────────┼──────────────────────
- verifies / executes│  ★ AesFix (Empty Quadrant)    │  Aftershoot, Imagen,
- the improvement    │  Grounded, Measurable, Export │  Luminar (edits, no why)
-────────────────────┼───────────────────────────────┼──────────────────────
- does not verify    │  photocritique.ai, GPT-4o,    │  bare scorers
-                    │  Photofeeler, RPCD papers     │  (NIMA, AVA, piax)
-```
-
-$$\text{Input Photo} \xrightarrow{\text{Critic}} \text{5-Aspect Scores} \xrightarrow{\text{ANFIS Head}} \text{Overall Score} \xrightarrow{\text{Tier-A Edit}} \text{Identity Guard} \xrightarrow{\text{Frozen Ensemble}} \text{Verified Gain } (\text{AG}@k)$$
-
----
-
-## 2. Key Architecture & Technical Highlights
-
-1. **5-Aspect Aesthetic Taxonomy**: Composition, Lighting, Color, Subject Clarity, and Technical quality calibrated against canonical photographic benchmarks (AADB, PCCD).
-2. **Interpretable Differentiable ANFIS Head**: Replaces black-box MLP aggregation with a Takagi–Sugeno neuro-fuzzy inference system yielding human-auditable IF–THEN rule activations with 98.4% monotonic compliance.
-3. **Tier-A Deterministic Retouching Engine**: 12 differentiable Kornia/OpenCV photographic operations running in $<25\text{ms}$ on CPU, producing standard Adobe Lightroom `.xmp` sidecars.
-4. **Perceptual Identity Guard**: Multi-scale identity gating ($\text{SSIM} + \text{DINOv2}$) that strictly drops any candidate edit causing perceptual drift $\mathcal{D} > 0.25$, mathematically preventing reward hacking.
-5. **Edit-Verified Group Relative Policy Optimization (GRPO)**: Policy gradient reinforcement learning directly rewarded by real executed pixel gains ($\text{AG}@k$), bypassing subjective LLM chat rewards.
-6. **Bayesian Taste Personalization**: Dynamic Bradley–Terry preference adaptation learning individual aesthetic taste profiles within $\le 5$ user clicks.
-7. **Production Next.js 15 Workbench & FastAPI Gateway**: Real-time interactive before/after split slider, bottleneck radar chart, Lightroom XMP exporter, and streaming SSE endpoints.
-
----
-
-## 3. Project Structure
-
-```text
-AesFix/
-├── aesfix/                     # Core Python engine
-│   ├── api/                    # FastAPI gateway, demo pipelines, MCP server
-│   ├── critic/                 # Vision-Language critique models & schemas
-│   ├── data/                   # AADB/PCCD dataset loaders & synthetic engine
-│   ├── eval/                   # AG@k benchmarks, inter-rater metrics, CI gates
-│   ├── executor/               # Tier-A retouching operators & Identity Guard
-│   ├── head/                   # Differentiable ANFIS neuro-fuzzy aggregation
-│   ├── judges/                 # Frozen judge ensemble & Bayesian taste models
-│   ├── train/                  # GRPO training loops & reward functions
-│   └── video/                  # Temporal video aesthetic assessment track
-├── baselines/                  # Legacy fuzzy ablation baseline
-├── docs/                       # Research papers, architecture specs, manifests
-│   ├── aesfix-runtime.architecture.html  # Interactive visual system diagram
-│   ├── PROJECT_STATE_AND_ROADMAP_SUMMARY.md
-│   └── RELEASE_MANIFEST_v1.0.md
-├── tests/                      # 37 automated test suites (198 tests)
-└── web/                        # Production Next.js 15 client
-    ├── src/app/                # Studio workbench, split-slider, radar visualizer
-    ├── src/components/         # Responsive Tailwind + Lucide UI components
-    └── package.json            # Strict TypeScript configuration
+┌────────────────────────────────────────────────────────────────────────────┐
+│ INPUT: photo (+ optional goal: listing / portrait / thumbnail / general)   │
+├────────────────────────────────────────────────────────────────────────────┤
+│ ① ADVICE SOURCES (pluggable — AesFix certifies anyone's advice)            │
+│    Qwen3-VL critic · frontier APIs · open agents · baseline controls       │
+│    out: [{op, params, aspect, direction, rationale}]                       │
+├────────────────────────────────────────────────────────────────────────────┤
+│ ② EXECUTOR Tier-A (deterministic Kornia/OpenCV ops; Lightroom XMP export)   │
+│    Tier-B generative: deferred to R7, behind identity guard v2             │
+├────────────────────────────────────────────────────────────────────────────┤
+│ ③ MEASUREMENT: judges (pyiqa + imscore + HPSv3 + Q-Align + APv2.5)        │
+│    aspect probes · over-processing checks → feature vector φ(x, x′)        │
+├────────────────────────────────────────────────────────────────────────────┤
+│ ④ CERTIFIER: finite-sample statistical testing (LTT / SGR)                 │
+│    verdict ∈ {CERTIFIED, NOT CERTIFIED, ABSTAIN}                           │
+├────────────────────────────────────────────────────────────────────────────┤
+│ ⑤ OUTPUT: certified edits only · "leave it alone" verdict · explanation    │
+│    provenance assertions · evidence logged to results/ledger.jsonl         │
+└────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 4. Quickstart
+## Quickstart
 
 ### Prerequisites
 - Python 3.10+
 - Node.js 18+ (for web studio)
 
-### Backend Setup & Testing
+### Backend Setup & Verification
 ```bash
 # 1. Clone repository
 git clone https://github.com/DeepanshuOP/aesfix.git
@@ -90,49 +73,29 @@ cd aesfix
 pip install -r requirements.txt
 pip install -r requirements-dev.txt
 
-# 3. Run automated test suite (198 tests, 100% green)
+# 3. Run automated verification suite
 pytest -q
 
-# 4. Run lint checks
+# 4. Verify metric claims against evidence ledger
+python scripts/check_claims.py
+
+# 5. Lint checks
 ruff check .
 ```
 
-### Next.js Interactive Studio
+### Web Studio
 ```bash
-# 1. Navigate to web directory
 cd web
-
-# 2. Install dependencies and verify types
 npm install
-npm run type-check
-
-# 3. Start local development server
 npm run dev
-# Open http://localhost:3000 in your browser
 ```
-
-### End-to-End Pipeline Evaluation
-```bash
-# Run standalone critique and deterministic retouching demo
-python -m aesfix.api.demo
-
-# Score video aesthetics frame-by-frame
-python -m aesfix.video.score_video --video path/to/clip.mp4 --fps 1.0
-```
+Open [http://localhost:3000](http://localhost:3000) to view the workbench.
 
 ---
 
-## 5. Engineering Standards & Quality Gates
+## Research Protocol & Integrity
 
-- **Type Safety**: Python strict typing across all modules; Next.js frontend with strict TypeScript (`no any`, clean `tsc --noEmit`).
-- **Test Coverage**: 198 automated unit and integration tests across 37 test suites.
-- **Auditable AI**: ANFIS fuzzy inference exposes printable decision traces for every evaluated image.
-- **Reproducibility**: Parameterized synthetic counterfactual generation allowing exact defect-reversal validation.
-
----
-
-## 6. Author & License
-
-- **Author**: Deepanshu (B.Tech IT, VIT Vellore)
-- **Email**: Deepanshuop@gmail.com
-- **License**: Core software licensed under [Apache-2.0](LICENSE) / [MIT](LICENSE).
+Per Roadmap v6 Part XI, AesFix follows strict verification protocol:
+1. **Zero fabricated metrics**: No performance numbers appear in documentation without a corresponding cryptographic entry in `results/ledger.jsonl`.
+2. **No simulated stand-ins**: Synthetic data is confined to unit testing statistical routines and stamped `SIMULATED`.
+3. **Evidence-based claims**: All claims are tagged `[run:<uuid>]` and checked automatically in CI.
