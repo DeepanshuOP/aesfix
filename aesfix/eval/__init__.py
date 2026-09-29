@@ -9,6 +9,14 @@ from .ag_benchmark import (
     AGEvaluationHarness,
     AGSampleResult,
 )
+from .metrics import (
+    ag_best_at_k,
+    ag_best_at_k_clipped,
+    ag_comp_at_k,
+    ag_comp_at_k_clipped,
+    harm_rate,
+    human_win_rate,
+)
 from .faithfulness import (
     FaithfulnessMetrics,
     benchmark_table1_interpretability,
@@ -76,6 +84,12 @@ __all__ = [
     "TrajectoryStatus",
     "UserPhotoRecord",
     "WeeklyProgressDigest",
+    "ag_best_at_k",
+    "ag_best_at_k_clipped",
+    "ag_comp_at_k",
+    "ag_comp_at_k_clipped",
+    "human_win_rate",
+    "harm_rate",
 ]
 
 

@@ -20,6 +20,12 @@ import numpy as np
 from PIL import Image
 
 from aesfix.critic.critic import CriticFix
+from aesfix.eval.metrics import (
+    ag_best_at_k,
+    ag_best_at_k_clipped,
+    ag_comp_at_k,
+    ag_comp_at_k_clipped,
+)
 from aesfix.executor.guard import GuardVerdict, IdentityGuard
 from aesfix.executor.tier_a import TierAExecutor
 
@@ -57,6 +63,8 @@ class AGBenchmarkReport:
     mean_ag_at_k: float
     guard_pass_rate: float
     aspect_verification_rate: float
+    ag_best_at_k: float = 0.0
+    ag_comp_at_k: float = 0.0
     sample_results: List[AGSampleResult] = field(default_factory=list)
     metadata: Dict[str, Any] = field(default_factory=dict)
 
@@ -75,6 +83,8 @@ class AGBenchmarkReport:
             "num_samples": self.num_samples,
             "mean_ag_at_1": self.mean_ag_at_1,
             "mean_ag_at_k": self.mean_ag_at_k,
+            "ag_best_at_k": self.ag_best_at_k,
+            "ag_comp_at_k": self.ag_comp_at_k,
             "guard_pass_rate": self.guard_pass_rate,
             "aspect_verification_rate": self.aspect_verification_rate,
             "metadata": self.metadata,
@@ -153,13 +163,13 @@ class AGEvaluationHarness:
         exec_res = self.executor.execute_fixes(pil_orig, top_k_fixes)
         pil_edited = exec_res.image
 
-        # 3. Post-execution scoring
+        # 3. Post-execution scoring (signed delta per Roadmap Part IV.2)
         after_score, after_aspects = self._scorer_fn(pil_edited)
-        raw_gain = max(0.0, after_score - before_score)
+        raw_gain = round(after_score - before_score, 4)
 
         # 4. Identity Guard verification
         guard_verdict = self.guard.evaluate(pil_orig, pil_edited)
-        verified_gain = round(raw_gain, 4) if guard_verdict.is_valid else 0.0
+        verified_gain = raw_gain if guard_verdict.is_valid else 0.0
 
         # 5. Compute per-aspect deltas
         aspect_deltas: Dict[str, float] = {}
@@ -176,8 +186,8 @@ class AGEvaluationHarness:
             image_id=image_id,
             before_score=before_score,
             after_score=after_score,
-            raw_gain=round(raw_gain, 4),
-            verified_gain=verified_gain,
+            raw_gain=raw_gain,
+            verified_gain=round(verified_gain, 4),
             is_guard_approved=guard_verdict.is_valid,
             applied_fixes=serialized_fixes,
             aspect_deltas=aspect_deltas,
@@ -194,11 +204,12 @@ class AGEvaluationHarness:
         """Executes full AG@k evaluation protocol across a dataset of images.
 
         Why this method:
-        Standardizes automated benchmarking across models, random baselines, and oracle ceilings.
+        Standardizes automated benchmarking across models, random baselines, and oracle ceilings
+        using certified signed metrics (Roadmap v6 Part IV.2).
         """
         sample_results: List[AGSampleResult] = []
-        ag_at_1_list: List[float] = []
-        ag_at_k_list: List[float] = []
+        all_candidate_deltas: List[List[float]] = []
+        all_comp_deltas: List[float] = []
         guard_passes: int = 0
         aspect_verified_count: int = 0
         aspect_target_count: int = 0
@@ -208,14 +219,19 @@ class AGEvaluationHarness:
             # Critic emits ranked fixes
             fixes = critic_policy(pil_img)
 
-            # Evaluate AG@1 (single top fix)
-            res_k1 = self.evaluate_sample(pil_img, fixes[:1], image_id=f"img_{idx:04d}_k1", k=1)
-            ag_at_1_list.append(res_k1.verified_gain)
+            # Evaluate each individual candidate fix up to k for AG_best@k
+            cand_deltas: List[float] = []
+            for f in fixes[:k]:
+                res_f = self.evaluate_sample(pil_img, [f], image_id=f"img_{idx:04d}_cand", k=1)
+                cand_deltas.append(res_f.verified_gain)
+            if not cand_deltas:
+                cand_deltas = [0.0]
+            all_candidate_deltas.append(cand_deltas)
 
             # Evaluate AG@k (compound top-k fixes)
             res_k = self.evaluate_sample(pil_img, fixes, image_id=f"img_{idx:04d}_k{k}", k=k)
             sample_results.append(res_k)
-            ag_at_k_list.append(res_k.verified_gain)
+            all_comp_deltas.append(res_k.verified_gain)
 
             if res_k.is_guard_approved:
                 guard_passes += 1
@@ -233,8 +249,9 @@ class AGEvaluationHarness:
                         aspect_verified_count += 1
 
         n = len(images)
-        mean_ag_1 = float(np.mean(ag_at_1_list)) if ag_at_1_list else 0.0
-        mean_ag_k = float(np.mean(ag_at_k_list)) if ag_at_k_list else 0.0
+        mean_ag_1 = ag_best_at_k(all_candidate_deltas, k=1)
+        best_k = ag_best_at_k(all_candidate_deltas, k=k)
+        comp_k = ag_comp_at_k(all_comp_deltas)
         pass_rate = (guard_passes / n) if n > 0 else 0.0
         avr = (aspect_verified_count / aspect_target_count) if aspect_target_count > 0 else 0.0
 
@@ -243,7 +260,9 @@ class AGEvaluationHarness:
             k=k,
             num_samples=n,
             mean_ag_at_1=round(mean_ag_1, 4),
-            mean_ag_at_k=round(mean_ag_k, 4),
+            mean_ag_at_k=round(comp_k, 4),
+            ag_best_at_k=round(best_k, 4),
+            ag_comp_at_k=round(comp_k, 4),
             guard_pass_rate=round(pass_rate, 4),
             aspect_verification_rate=round(avr, 4),
             sample_results=sample_results,
