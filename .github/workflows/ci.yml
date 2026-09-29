@@ -26,6 +26,15 @@ jobs:
       - name: Test (pytest)
         run: pytest -q
 
+      - name: Check results integrity (no SIMULATED in results/)
+        run: |
+          if [ -d "results" ]; then
+            if grep -rn "SIMULATED" results/; then
+              echo "Integrity Violation: Found SIMULATED files or outputs under results/"
+              exit 1
+            fi
+          fi
+
   gitleaks:
     runs-on: ubuntu-latest
     steps:

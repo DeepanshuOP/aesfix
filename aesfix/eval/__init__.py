@@ -18,9 +18,11 @@ from .faithfulness import (
 from .frontier_benchmark import (
     FrontierBenchmarkSuite,
     FrontierComparisonTable,
+    make_advice_json_policy,
     make_aesfix_grounded_critic_policy,
     make_frontier_vlm_generic_policy,
     make_random_advice_policy,
+    simulate_frontier_vlm_generic_policy,
 )
 from .human_study import (
     EvaluatedPairResult,

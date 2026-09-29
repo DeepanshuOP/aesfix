@@ -292,17 +292,15 @@ class HumanAgreementStudy:
         return matching_comparisons / max(1, total_comparisons)
 
     @classmethod
-    def generate_synthetic_benchmark_pairs(
+    def simulate_synthetic_benchmark_pairs(
         cls,
         num_pairs: int = 100,
         num_raters: int = 3,
         seed: int = 42,
     ) -> List[Dict[str, Any]]:
-        """Generates a statistically calibrated 100-pair x 3-rater dataset (AF-2.7 DoD).
+        """[SIMULATED] Generates a synthetic dataset for testing study statistical code.
 
-        Why this generator exists:
-        Allows complete, deterministic reproducibility of the human study protocol
-        and validation of statistical harnesses prior to running costly crowd annotations.
+        Outputs are stamped SIMULATED and must never be represented as real human study results.
         """
         rng = np.random.default_rng(seed)
         pairs: List[Dict[str, Any]] = []
@@ -368,6 +366,10 @@ class HumanAgreementStudy:
                 "edited_image": edit_img,
                 "ratings": ratings,
                 "dominant_aspect": aspect,
+                "status": "SIMULATED",
             })
 
         return pairs
+
+    # Backward compatibility alias
+    generate_synthetic_benchmark_pairs = simulate_synthetic_benchmark_pairs

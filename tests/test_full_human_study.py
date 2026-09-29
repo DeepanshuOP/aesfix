@@ -65,10 +65,10 @@ def test_compute_bootstrap_ci() -> None:
     assert ci_high <= 1.0
 
 
-def test_generate_simulated_study_cohort() -> None:
-    """Verifies synthesis of realistic 300-pair cohort across 5 genres."""
+def test_simulate_study_cohort() -> None:
+    """Verifies synthesis of simulated cohort across 5 genres for testing."""
     harness = FullHumanStudyHarness(seed=123)
-    gains, annotations = harness.generate_simulated_study_cohort(num_pairs=300, raters_per_pair=3)
+    gains, annotations = harness.simulate_study_cohort(num_pairs=300, raters_per_pair=3)
 
     assert len(gains) == 300
     assert len(annotations) == 900
@@ -82,9 +82,9 @@ def test_generate_simulated_study_cohort() -> None:
 
 
 def test_full_human_study_analysis() -> None:
-    """Tests end-to-end analysis of the 300-pair cohort against paper claims."""
+    """Tests end-to-end analysis of the simulated cohort against statistical invariants."""
     harness = FullHumanStudyHarness(seed=42)
-    gains, annotations = harness.generate_simulated_study_cohort(num_pairs=300, raters_per_pair=3)
+    gains, annotations = harness.simulate_study_cohort(num_pairs=300, raters_per_pair=3)
 
     report = harness.analyze_study(pair_judge_gains=gains, annotations=annotations)
 
@@ -92,26 +92,25 @@ def test_full_human_study_analysis() -> None:
     assert report.total_annotations == 900
     assert report.raters_per_pair == 3
 
-    # Paper Table 3 empirical claims verification
-    assert report.overall_concordance_rate >= 0.70
-    assert report.spearman_rho >= 0.50
-    assert report.spearman_ci_low > 0.40
+    # Statistical invariants verification (no fabricated claims)
+    assert 0.0 <= report.overall_concordance_rate <= 1.0
+    assert -1.0 <= report.spearman_rho <= 1.0
     assert report.spearman_ci_low <= report.spearman_rho <= report.spearman_ci_high
-    assert report.krippendorff_alpha >= 0.35
-    assert report.mean_usefulness_likert >= 3.5
+    assert -1.0 <= report.krippendorff_alpha <= 1.0
+    assert 1.0 <= report.mean_usefulness_likert <= 5.0
 
     # Cross-genre breakdown verification
     assert len(report.genre_breakdown) == 5
     for genre in PHOTOGRAPHIC_GENRES:
         stats_g = report.genre_breakdown[genre]
         assert stats_g.num_pairs == 60
-        assert stats_g.concordance_rate >= 0.68
-        assert stats_g.spearman_rho >= 0.45
+        assert 0.0 <= stats_g.concordance_rate <= 1.0
+        assert -1.0 <= stats_g.spearman_rho <= 1.0
 
     # Aspect concordance verification
     assert len(report.aspect_concordance) == 5
     for dim in ASPECT_DIMENSIONS:
-        assert report.aspect_concordance[dim] >= 0.65
+        assert 0.0 <= report.aspect_concordance[dim] <= 1.0
 
     # JSON export integrity
     report_dict = report.to_dict()

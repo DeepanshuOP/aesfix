@@ -94,11 +94,11 @@ class AGEvaluationHarness:
         """Initializes the AG@k harness with custom or default scoring and execution backends."""
         self.executor = executor or TierAExecutor()
         self.guard = guard or IdentityGuard(drift_threshold=0.35)
-        self._scorer_fn = scorer_fn or self._default_mock_scorer
+        self._scorer_fn = scorer_fn or self.simulate_default_mock_scorer
 
     @staticmethod
-    def _default_mock_scorer(img: Image.Image) -> Tuple[float, Dict[str, float]]:
-        """Fast fallback scorer for unit testing and CI pipelines without GPU dependencies."""
+    def simulate_default_mock_scorer(img: Image.Image) -> Tuple[float, Dict[str, float]]:
+        """[SIMULATED] Fast fallback scorer for unit testing and CI pipelines without GPU dependencies."""
         arr = np.array(img, dtype=np.float32) / 255.0
         # Estimate basic photographic attributes
         mean_lum = float(np.mean(arr))
@@ -109,6 +109,8 @@ class AGEvaluationHarness:
         overall = 0.5 * lighting + 0.5 * technical
         aspects = {"lighting": lighting, "technical": technical, "composition": 0.6, "color": 0.6}
         return round(overall, 4), aspects
+
+    _default_mock_scorer = simulate_default_mock_scorer
 
     def evaluate_sample(
         self,

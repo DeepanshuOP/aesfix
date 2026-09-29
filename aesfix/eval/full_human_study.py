@@ -321,16 +321,14 @@ class FullHumanStudyHarness:
             aspect_concordance=aspect_concordance,
         )
 
-    def generate_simulated_study_cohort(
+    def simulate_study_cohort(
         self,
         num_pairs: int = 300,
         raters_per_pair: int = 3,
     ) -> Tuple[Dict[str, float], List[FullHumanAnnotation]]:
-        """Synthesizes a realistic 300-pair study cohort mirroring ground-truth crowd distributions.
+        """[SIMULATED] Synthesizes a simulated study cohort for statistical harness verification.
 
-        Why this simulation generator exists:
-        Provides an end-to-end verified test harness producing the exact distribution
-        characteristics reported in Paper Table 3 (76% concordance, rho=+0.584).
+        Outputs are stamped SIMULATED and must never be used as real empirical results.
         """
         pair_gains: Dict[str, float] = {}
         annotations: List[FullHumanAnnotation] = []
@@ -380,3 +378,6 @@ class FullHumanStudyHarness:
                 )
 
         return pair_gains, annotations
+
+    # Backward compatibility alias
+    generate_simulated_study_cohort = simulate_study_cohort

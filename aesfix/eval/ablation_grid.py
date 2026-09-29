@@ -179,7 +179,7 @@ class AblationHarness:
         if policy_rollout_fn is not None:
             rollout_fn = policy_rollout_fn
         else:
-            rollout_fn = self._default_mock_policy_rollout
+            rollout_fn = self.simulate_default_mock_policy_rollout
 
         gains_k1: List[float] = []
         gains_kk: List[float] = []
@@ -318,12 +318,12 @@ class AblationHarness:
         return ""
 
     @staticmethod
-    def _default_mock_policy_rollout(
+    def simulate_default_mock_policy_rollout(
         config: AblationConfig,
         img: Image.Image,
         k: int,
     ) -> List[str]:
-        """Simulates model behavior under varying ablation configurations."""
+        """[SIMULATED] Simulates model behavior under varying ablation configurations."""
         completions: List[str] = []
 
         # If without SFT, 15% of outputs produce malformed JSON
@@ -370,6 +370,8 @@ class AblationHarness:
             )
 
         return completions[:k]
+
+    _default_mock_policy_rollout = simulate_default_mock_policy_rollout
 
 
 def format_ablation_markdown_table(results: Sequence[AblationRowResult]) -> str:
