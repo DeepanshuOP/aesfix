@@ -1,8 +1,13 @@
 {
   "manifest_version": "1.0",
   "data_root": "data",
-  "total_files": 1,
+  "total_files": 2,
   "files": [
+    {
+      "path": "manifest.json",
+      "sha256": "6eae9311751dc06e8ba6f1a435359d6618934be117bd018d592bb85572e25e66",
+      "size_bytes": 2697
+    },
     {
       "path": "processed_info_test.json",
       "sha256": "c35c9ceefed74c825741acf5a352e0bc1ddfc7cca38c342a43a8096b97e6d55e",

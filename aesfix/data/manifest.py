@@ -66,7 +66,7 @@ CANONICAL_DATASETS: Dict[str, Dict[str, Any]] = {
     "DEAR": {
         "full_name": "Diverse Aesthetic Assessment and Retouching",
         "expected_subdirs": ["dear", "DEAR"],
-        "source": "CVPR 2025 / DEAR Consortium",
+        "source": "CVPR 2025 / DEAR Authors",
         "license_name": "Research-Only Data Agreement",
         "license_note": "100-pair subset public; full pairwise dataset requires author approval.",
         "requires_license_acceptance": True,
