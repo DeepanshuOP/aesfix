@@ -189,7 +189,9 @@ class PipelineQueueManager:
         """Validates quota, persists image, and enqueues job for asynchronous processing."""
         # 1. Pre-flight quota check
         user = self.quota_mgr.get_or_create_user(user_id)
-        if user_id.startswith("mock-user-") or user_id in ("demo-user", "guest"):
+        # In demo mode, users are granted PRO tier quota for unlimited trial evaluations.
+        # Gated explicitly by the AESFIX_DEMO_MODE=1 environment variable (default off).
+        if os.environ.get("AESFIX_DEMO_MODE", "0") == "1":
             user.tier = TierLevel.PRO
         can_run, reason = self.quota_mgr.can_critique(user_id)
         if not can_run:

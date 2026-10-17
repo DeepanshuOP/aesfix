@@ -55,6 +55,16 @@ Response:
 - `GET /api/v1/pipeline/jobs/{job_id}/preview/{fix_index}` — Serves rendered candidate preview images (`original` or fix index `0..n`).
 - `GET /api/v1/pipeline/jobs/{job_id}/xmp/{fix_index}` — Generates downloadable Adobe Lightroom `.xmp` preset deltas.
 
+### Demo Mode Quota Flag (`AESFIX_DEMO_MODE`)
+By default, critique requests consume user quotas according to tier limits. To run local demonstrations, evaluations, or visual automation suites without quota constraints:
+
+```powershell
+$env:AESFIX_DEMO_MODE="1"
+python -m uvicorn aesfix.api.app:app --host 127.0.0.1 --port 8000
+```
+
+When `AESFIX_DEMO_MODE=1` is enabled, all trial users are assigned `TierLevel.PRO` quotas. The default is off (`0`).
+
 ---
 
 ## 3. Starting the Frontend Studio
