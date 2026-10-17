@@ -2,6 +2,10 @@
 # Pinned model identifiers for multimodal vision inference
 
 default_provider: "gemini"
+provider_chain:
+  - gemini
+  - openrouter
+  - heuristic
 
 gemini:
   model_id: "gemini-3.8-flash"
