@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import math
 import time
+import warnings
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -130,6 +131,12 @@ class TierAExecutor:
 
         elif op == "adjust_contrast":
             # Contrast: pivot around midtone 0.5
+            if "contrast_factor" in params:
+                warnings.warn(
+                    "contrast_factor is deprecated; use canonical 'factor' instead",
+                    DeprecationWarning,
+                    stacklevel=2,
+                )
             factor = params.get("factor", params.get("contrast_factor"))
             if factor is None:
                 contrast_val = float(params.get("contrast", params.get("value", 0.0)))
@@ -160,6 +167,18 @@ class TierAExecutor:
 
         elif op == "adjust_white_balance":
             # Color temperature (amber/blue) and tint (magenta/green)
+            if "temperature_shift" in params:
+                warnings.warn(
+                    "temperature_shift is deprecated; use canonical 'temperature' instead",
+                    DeprecationWarning,
+                    stacklevel=2,
+                )
+            if "temp" in params and "temperature" not in params:
+                warnings.warn(
+                    "temp is deprecated; use canonical 'temperature' instead",
+                    DeprecationWarning,
+                    stacklevel=2,
+                )
             temp = float(params.get("temperature", params.get("temp", params.get("temperature_shift", 0.0)))) / 100.0
             tint = float(params.get("tint", 0.0)) / 100.0
             # Red boosted / Blue lowered for warmth
@@ -227,18 +246,31 @@ class TierAExecutor:
             tensor = torch.clamp(tensor + amount * high_pass, 0.0, 1.0)
 
         elif op == "denoise":
-            # Edge-preserving luminance smoothing (accepts either [0, 1] or [0, 100] scale)
-            raw_strength = float(params.get("strength", params.get("luminance_smoothing", 20.0)))
-            strength = raw_strength if raw_strength <= 1.0 else raw_strength / 100.0
-            if strength > 1e-4:
+            # Denoise strength has exactly one unit: 0..100 (Lightroom-style)
+            if "luminance_smoothing" in params and "strength" not in params:
+                warnings.warn(
+                    "luminance_smoothing is deprecated; use canonical 'strength' in [0, 100] instead",
+                    DeprecationWarning,
+                    stacklevel=2,
+                )
+                raw_strength = params["luminance_smoothing"]
+            else:
+                raw_strength = params.get("strength", 20.0)
+
+            strength = float(raw_strength)
+            if strength < 0.0 or strength > 100.0:
+                raise ValueError(f"Denoise strength must be in [0, 100], got {strength}")
+
+            norm_strength = strength / 100.0
+            if norm_strength > 1e-4:
                 if _HAS_KORNIA and kf is not None:
-                    blurred = kf.gaussian_blur2d(tensor, (5, 5), (1.0 + strength * 1.5, 1.0 + strength * 1.5))
+                    blurred = kf.gaussian_blur2d(tensor, (5, 5), (1.0 + norm_strength * 1.5, 1.0 + norm_strength * 1.5))
                 else:
                     blurred = torch.nn.functional.avg_pool2d(
                         torch.nn.functional.pad(tensor, (1, 1, 1, 1), mode="reflect"),
                         kernel_size=3, stride=1,
                     )
-                tensor = torch.clamp((1.0 - strength * 0.6) * tensor + (strength * 0.6) * blurred, 0.0, 1.0)
+                tensor = torch.clamp((1.0 - norm_strength * 0.6) * tensor + (norm_strength * 0.6) * blurred, 0.0, 1.0)
 
         elif op == "smart_crop":
             # Normalized box [top, left, bottom, right] or params dictionary
@@ -250,7 +282,12 @@ class TierAExecutor:
 
             if "crop_box" in params and isinstance(params["crop_box"], (list, tuple)) and len(params["crop_box"]) == 4:
                 top, left, bottom, right = [float(v) for v in params["crop_box"]]
-            elif "rule" in params and "top" not in params:
+            elif ("rule" in params or "tightness" in params) and "top" not in params:
+                warnings.warn(
+                    "rule/tightness is deprecated for smart_crop; use canonical 'top', 'left', 'bottom', 'right' instead",
+                    DeprecationWarning,
+                    stacklevel=2,
+                )
                 tightness = float(params.get("tightness", 0.85))
                 pad = max(0.0, (1.0 - tightness) / 2.0)
                 top, left, bottom, right = pad, pad, 1.0 - pad, 1.0 - pad
@@ -383,6 +420,12 @@ class XMPWriter:
                 crs_attrs["Exposure2012"] = f"{ev:+.2f}"
 
             elif op == "adjust_contrast":
+                if "contrast_factor" in p:
+                    warnings.warn(
+                        "contrast_factor is deprecated; use canonical 'factor' instead",
+                        DeprecationWarning,
+                        stacklevel=2,
+                    )
                 contrast = float(p.get("contrast", p.get("value", 0.0)))
                 factor_val = p.get("factor", p.get("contrast_factor"))
                 if factor_val is not None:
@@ -398,6 +441,18 @@ class XMPWriter:
                 crs_attrs["Shadows2012"] = f"{int(round(sh)):+d}"
 
             elif op == "adjust_white_balance":
+                if "temperature_shift" in p:
+                    warnings.warn(
+                        "temperature_shift is deprecated; use canonical 'temperature' instead",
+                        DeprecationWarning,
+                        stacklevel=2,
+                    )
+                if "temp" in p and "temperature" not in p:
+                    warnings.warn(
+                        "temp is deprecated; use canonical 'temperature' instead",
+                        DeprecationWarning,
+                        stacklevel=2,
+                    )
                 temp = float(p.get("temperature", p.get("temp", p.get("temperature_shift", 0.0))))
                 tint = float(p.get("tint", 0.0))
                 crs_attrs["Temperature"] = f"{int(round(temp)):+d}"
@@ -424,9 +479,18 @@ class XMPWriter:
                 crs_attrs["SharpenRadius"] = f"{radius:+.1f}"
 
             elif op == "denoise":
-                noise = float(p.get("strength", p.get("luminance_smoothing", 25.0)))
-                if noise <= 1.0:
-                    noise = noise * 100.0
+                if "luminance_smoothing" in p and "strength" not in p:
+                    warnings.warn(
+                        "luminance_smoothing is deprecated; use canonical 'strength' in [0, 100] instead",
+                        DeprecationWarning,
+                        stacklevel=2,
+                    )
+                    raw_noise = p["luminance_smoothing"]
+                else:
+                    raw_noise = p.get("strength", 25.0)
+                noise = float(raw_noise)
+                if noise < 0.0 or noise > 100.0:
+                    raise ValueError(f"Denoise strength must be in [0, 100], got {noise}")
                 crs_attrs["LuminanceSmoothing"] = f"{int(round(noise))}"
 
             elif op == "smart_crop":
@@ -436,7 +500,12 @@ class XMPWriter:
                 right = float(p.get("right", 1.0))
                 if "crop_box" in p and isinstance(p["crop_box"], (list, tuple)) and len(p["crop_box"]) == 4:
                     top, left, bottom, right = [float(v) for v in p["crop_box"]]
-                elif "rule" in p and "top" not in p:
+                elif ("rule" in p or "tightness" in p) and "top" not in p:
+                    warnings.warn(
+                        "rule/tightness is deprecated for smart_crop; use canonical 'top', 'left', 'bottom', 'right' instead",
+                        DeprecationWarning,
+                        stacklevel=2,
+                    )
                     tightness = float(p.get("tightness", 0.85))
                     pad = max(0.0, (1.0 - tightness) / 2.0)
                     top, left, bottom, right = pad, pad, 1.0 - pad, 1.0 - pad

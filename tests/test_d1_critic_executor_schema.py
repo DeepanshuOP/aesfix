@@ -12,7 +12,7 @@ import torch.nn.functional as F
 from PIL import Image
 
 from aesfix.critic.critic import CriticFix, HeuristicAspectCritic
-from aesfix.executor.tier_a import TierAExecutor, _pil_to_tensor
+from aesfix.executor.tier_a import TierAExecutor, XMPWriter, _pil_to_tensor
 
 
 def test_critic_fix_direction_validation() -> None:
@@ -110,3 +110,81 @@ def test_critic_fixes_change_pixels_on_legacy_images() -> None:
 
     # Verify that fixes were indeed emitted and tested
     assert total_fixes_tested >= 10, f"Expected >= 10 fixes tested across legacy images, got {total_fixes_tested}"
+
+
+def test_critic_never_emits_alias_parameter_names() -> None:
+    """HeuristicAspectCritic must emit ONLY canonical parameter names, never executor aliases."""
+    critic = HeuristicAspectCritic()
+    legacy_images = ["blur.jpg", "bright.jpg", "dark.jpg", "temp.jpg", "test.jpg"]
+    repo_root = Path(__file__).resolve().parent.parent
+
+    banned_aliases = {
+        "contrast_factor",
+        "temperature_shift",
+        "temp",
+        "rule",
+        "tightness",
+        "luminance_smoothing",
+    }
+
+    for img_name in legacy_images:
+        img_path = repo_root / img_name
+        critique = critic.critique(str(img_path))
+        for fix in critique.fixes:
+            emitted_keys = set(fix.params.keys())
+            collision = emitted_keys.intersection(banned_aliases)
+            assert not collision, f"Critic fix {fix.op} on {img_name} emitted non-canonical alias keys: {collision}"
+
+
+def test_executor_aliases_emit_deprecation_warnings() -> None:
+    """Executor aliases (contrast_factor, temperature_shift, rule/tightness, luminance_smoothing) must emit DeprecationWarning."""
+    executor = TierAExecutor(device=torch.device("cpu"))
+    dummy_tensor = torch.zeros((1, 3, 64, 64), dtype=torch.float32)
+
+    with pytest.deprecated_call(match="contrast_factor is deprecated"):
+        executor.execute_op(dummy_tensor, "adjust_contrast", {"contrast_factor": 1.2})
+
+    with pytest.deprecated_call(match="temperature_shift is deprecated"):
+        executor.execute_op(dummy_tensor, "adjust_white_balance", {"temperature_shift": 15.0})
+
+    with pytest.deprecated_call(match="rule/tightness is deprecated"):
+        executor.execute_op(dummy_tensor, "smart_crop", {"rule": "rule_of_thirds", "tightness": 0.85})
+
+    with pytest.deprecated_call(match="luminance_smoothing is deprecated"):
+        executor.execute_op(dummy_tensor, "denoise", {"luminance_smoothing": 25.0})
+
+    # Also test warnings in generate_xmp
+    with pytest.deprecated_call(match="contrast_factor is deprecated"):
+        XMPWriter.generate_xmp([CriticFix(op="adjust_contrast", params={"contrast_factor": 1.2}, expected_aspect="lighting", nl_instruction="Boost contrast")])
+
+    with pytest.deprecated_call(match="temperature_shift is deprecated"):
+        XMPWriter.generate_xmp([CriticFix(op="adjust_white_balance", params={"temperature_shift": 15.0}, expected_aspect="color", nl_instruction="Warm temp")])
+
+    with pytest.deprecated_call(match="rule/tightness is deprecated"):
+        XMPWriter.generate_xmp([CriticFix(op="smart_crop", params={"rule": "rule_of_thirds", "tightness": 0.85}, expected_aspect="composition", nl_instruction="Crop")])
+
+    with pytest.deprecated_call(match="luminance_smoothing is deprecated"):
+        XMPWriter.generate_xmp([CriticFix(op="denoise", params={"luminance_smoothing": 25.0}, expected_aspect="technical", nl_instruction="Denoise")])
+
+
+def test_denoise_strength_range_validation() -> None:
+    """Denoise strength has exactly one unit: 0..100; values outside raise ValueError."""
+    executor = TierAExecutor(device=torch.device("cpu"))
+    dummy_tensor = torch.zeros((1, 3, 64, 64), dtype=torch.float32)
+
+    # Valid values in [0, 100] must pass
+    for valid_strength in [0.0, 0.5, 25.0, 100.0]:
+        res = executor.execute_op(dummy_tensor, "denoise", {"strength": valid_strength})
+        assert res.shape == dummy_tensor.shape
+
+        xmp = XMPWriter.generate_xmp([CriticFix(op="denoise", params={"strength": valid_strength}, expected_aspect="technical", nl_instruction="Denoise")])
+        assert "LuminanceSmoothing" in xmp
+
+    # Invalid values outside [0, 100] must raise ValueError
+    for invalid_strength in [-0.01, -10.0, 100.1, 150.0]:
+        with pytest.raises(ValueError, match="Denoise strength must be in \\[0, 100\\]"):
+            executor.execute_op(dummy_tensor, "denoise", {"strength": invalid_strength})
+
+        with pytest.raises(ValueError, match="Denoise strength must be in \\[0, 100\\]"):
+            XMPWriter.generate_xmp([CriticFix(op="denoise", params={"strength": invalid_strength}, expected_aspect="technical", nl_instruction="Denoise")])
+
