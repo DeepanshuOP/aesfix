@@ -130,7 +130,7 @@ class TierAExecutor:
 
         elif op == "adjust_contrast":
             # Contrast: pivot around midtone 0.5
-            factor = params.get("factor")
+            factor = params.get("factor", params.get("contrast_factor"))
             if factor is None:
                 contrast_val = float(params.get("contrast", params.get("value", 0.0)))
                 factor = 1.0 + (contrast_val / 100.0)
@@ -160,7 +160,7 @@ class TierAExecutor:
 
         elif op == "adjust_white_balance":
             # Color temperature (amber/blue) and tint (magenta/green)
-            temp = float(params.get("temperature", params.get("temp", 0.0))) / 100.0
+            temp = float(params.get("temperature", params.get("temp", params.get("temperature_shift", 0.0)))) / 100.0
             tint = float(params.get("tint", 0.0)) / 100.0
             # Red boosted / Blue lowered for warmth
             r = tensor[:, 0:1] * (1.0 + 0.25 * temp + 0.15 * tint)
@@ -227,8 +227,9 @@ class TierAExecutor:
             tensor = torch.clamp(tensor + amount * high_pass, 0.0, 1.0)
 
         elif op == "denoise":
-            # Edge-preserving luminance smoothing
-            strength = float(params.get("strength", params.get("luminance_smoothing", 20.0))) / 100.0
+            # Edge-preserving luminance smoothing (accepts either [0, 1] or [0, 100] scale)
+            raw_strength = float(params.get("strength", params.get("luminance_smoothing", 20.0)))
+            strength = raw_strength if raw_strength <= 1.0 else raw_strength / 100.0
             if strength > 1e-4:
                 if _HAS_KORNIA and kf is not None:
                     blurred = kf.gaussian_blur2d(tensor, (5, 5), (1.0 + strength * 1.5, 1.0 + strength * 1.5))
@@ -249,6 +250,10 @@ class TierAExecutor:
 
             if "crop_box" in params and isinstance(params["crop_box"], (list, tuple)) and len(params["crop_box"]) == 4:
                 top, left, bottom, right = [float(v) for v in params["crop_box"]]
+            elif "rule" in params and "top" not in params:
+                tightness = float(params.get("tightness", 0.85))
+                pad = max(0.0, (1.0 - tightness) / 2.0)
+                top, left, bottom, right = pad, pad, 1.0 - pad, 1.0 - pad
 
             # Bound inside [0, 1]
             y1 = max(0, min(int(top * h), h - 10))
@@ -379,8 +384,9 @@ class XMPWriter:
 
             elif op == "adjust_contrast":
                 contrast = float(p.get("contrast", p.get("value", 0.0)))
-                if "factor" in p:
-                    contrast = (float(p["factor"]) - 1.0) * 100.0
+                factor_val = p.get("factor", p.get("contrast_factor"))
+                if factor_val is not None:
+                    contrast = (float(factor_val) - 1.0) * 100.0
                 crs_attrs["Contrast2012"] = f"{int(round(contrast)):+d}"
 
             elif op == "adjust_highlights":
@@ -392,7 +398,7 @@ class XMPWriter:
                 crs_attrs["Shadows2012"] = f"{int(round(sh)):+d}"
 
             elif op == "adjust_white_balance":
-                temp = float(p.get("temperature", p.get("temp", 0.0)))
+                temp = float(p.get("temperature", p.get("temp", p.get("temperature_shift", 0.0))))
                 tint = float(p.get("tint", 0.0))
                 crs_attrs["Temperature"] = f"{int(round(temp)):+d}"
                 crs_attrs["Tint"] = f"{int(round(tint)):+d}"
@@ -419,6 +425,8 @@ class XMPWriter:
 
             elif op == "denoise":
                 noise = float(p.get("strength", p.get("luminance_smoothing", 25.0)))
+                if noise <= 1.0:
+                    noise = noise * 100.0
                 crs_attrs["LuminanceSmoothing"] = f"{int(round(noise))}"
 
             elif op == "smart_crop":
@@ -428,6 +436,10 @@ class XMPWriter:
                 right = float(p.get("right", 1.0))
                 if "crop_box" in p and isinstance(p["crop_box"], (list, tuple)) and len(p["crop_box"]) == 4:
                     top, left, bottom, right = [float(v) for v in p["crop_box"]]
+                elif "rule" in p and "top" not in p:
+                    tightness = float(p.get("tightness", 0.85))
+                    pad = max(0.0, (1.0 - tightness) / 2.0)
+                    top, left, bottom, right = pad, pad, 1.0 - pad, 1.0 - pad
                 crs_attrs["HasCrop"] = "True"
                 crs_attrs["CropTop"] = f"{top:.4f}"
                 crs_attrs["CropLeft"] = f"{left:.4f}"

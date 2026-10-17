@@ -49,6 +49,7 @@ class CriticFix(BaseModel):
     op: str = Field(description="Actionable operation identifier from the executor vocabulary.")
     params: Dict[str, Any] = Field(default_factory=dict, description="Numerical/categorical parameters for the op.")
     expected_aspect: str = Field(description="The primary aesthetic dimension this fix aims to improve.")
+    direction: int = Field(default=1, description="Direction of expected aspect change (+1 or -1).")
     nl_instruction: str = Field(description="Human-readable coaching explanation.")
     region_hint: Optional[str] = Field(default=None, description="Optional bounding box or subject hint for masked ops.")
 
@@ -60,6 +61,14 @@ class CriticFix(BaseModel):
         if v_clean not in ASPECT_DIMENSIONS:
             raise ValueError(f"expected_aspect must be one of {ASPECT_DIMENSIONS}, got {v!r}")
         return v_clean
+
+    @field_validator("direction")
+    @classmethod
+    def validate_direction(cls, v: int) -> int:
+        # Direction must be +1 (boost/improve aspect) or -1 (attenuate)
+        if v not in (1, -1):
+            raise ValueError(f"direction must be +1 or -1, got {v!r}")
+        return v
 
 
 class CriticOutput(BaseModel):
@@ -131,6 +140,7 @@ JSON SCHEMA:
       "op": "string",
       "params": {"param_key": value},
       "expected_aspect": "lighting|composition|color|subject_clarity|technical",
+      "direction": 1,
       "nl_instruction": "string",
       "region_hint": null or "subject|background|sky"
     }
@@ -233,8 +243,9 @@ class HeuristicAspectCritic(BaseCritic):
             fixes.append(
                 CriticFix(
                     op="smart_crop",
-                    params={"rule": "rule_of_thirds", "tightness": 0.85},
+                    params={"top": 0.05, "left": 0.05, "bottom": 0.95, "right": 0.95},
                     expected_aspect="composition",
+                    direction=1,
                     nl_instruction="Re-crop along the rule-of-thirds grid to anchor the primary subject.",
                 )
             )
@@ -252,6 +263,7 @@ class HeuristicAspectCritic(BaseCritic):
                     op="adjust_exposure",
                     params={"ev_delta": 0.40, "highlight_recovery": True},
                     expected_aspect="lighting",
+                    direction=1,
                     nl_instruction="Lift exposure by +0.4 EV and preserve highlight roll-off.",
                 )
             )
@@ -261,8 +273,9 @@ class HeuristicAspectCritic(BaseCritic):
                 fixes.append(
                     CriticFix(
                         op="adjust_contrast",
-                        params={"contrast_factor": 1.15},
+                        params={"factor": 1.15},
                         expected_aspect="lighting",
+                        direction=1,
                         nl_instruction="Apply a gentle contrast curve to add depth between midtones and shadows.",
                     )
                 )
@@ -276,8 +289,9 @@ class HeuristicAspectCritic(BaseCritic):
             fixes.append(
                 CriticFix(
                     op="adjust_white_balance",
-                    params={"temperature_shift": 150, "vibrance": 1.10},
+                    params={"temperature": 15.0, "tint": 0.0},
                     expected_aspect="color",
+                    direction=1,
                     nl_instruction="Correct white balance and subtly lift color vibrance.",
                 )
             )
@@ -295,6 +309,7 @@ class HeuristicAspectCritic(BaseCritic):
                     op="unsharp_mask",
                     params={"radius": 1.5, "amount": 1.25},
                     expected_aspect="subject_clarity",
+                    direction=1,
                     nl_instruction="Enhance micro-contrast on the focal subject using unsharp masking.",
                     region_hint="subject",
                 )
@@ -311,8 +326,9 @@ class HeuristicAspectCritic(BaseCritic):
             fixes.append(
                 CriticFix(
                     op="denoise",
-                    params={"strength": 0.35},
+                    params={"strength": 25.0},
                     expected_aspect="technical",
+                    direction=1,
                     nl_instruction="Apply mild luminance denoising to clean sensor grain.",
                 )
             )
