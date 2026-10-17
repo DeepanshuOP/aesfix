@@ -1,0 +1,25 @@
+# AesFix Agent Model Configuration (AG0)
+# Pinned model identifiers for multimodal vision inference
+
+default_provider: "gemini"
+
+gemini:
+  model_id: "gemini-2.5-flash"
+  description: "Primary fast vision-language model for photographic diagnosis and parametric fix planning."
+  max_tokens: 1024
+  temperature: 0.2
+
+openrouter:
+  # Pinned explicit model id; never use generic openrouter/free
+  model_id: "nvidia/nemotron-3.5-super-vl:free"
+  description: "Pinned free vision model on OpenRouter for open-weights multimodal fallback."
+  max_tokens: 1024
+  temperature: 0.2
+
+cache:
+  disk_cache_dir: "D:\\aesfix-cache\\llm"
+
+loop:
+  max_steps: 6
+  consecutive_rejections_stop: 2
+  deterministic_seed: 42
