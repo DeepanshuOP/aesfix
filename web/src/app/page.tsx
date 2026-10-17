@@ -30,7 +30,7 @@ const GOAL_OPTIONS: GoalOption[] = [
   { id: "thumbnail", label: "Thumbnail", description: "Vibrant contrast & punchy saturation" },
 ];
 
-interface VerifiedFixPreview {
+interface MeasuredFixPreview {
   fix_id: string;
   op: string;
   params: Record<string, unknown>;
@@ -57,8 +57,9 @@ interface JobResult {
   job_id: string;
   aspect_scores: Record<string, number>;
   critique_rationale: Record<string, string>;
-  verified_fixes: VerifiedFixPreview[];
-  best_fix: VerifiedFixPreview | null;
+  measured_fixes: MeasuredFixPreview[];
+  verified_fixes?: MeasuredFixPreview[];
+  best_fix: MeasuredFixPreview | null;
   uncertainty_badge: string;
   total_latency_seconds: number;
   overall_score?: number | null;
@@ -245,7 +246,8 @@ export default function StudioPage(): React.JSX.Element {
     }
   };
 
-  const activeFix = jobResult?.verified_fixes?.[selectedFixIndex] ?? null;
+  const currentFixes = jobResult?.measured_fixes ?? jobResult?.verified_fixes ?? [];
+  const activeFix = currentFixes[selectedFixIndex] ?? null;
   const originalPreviewUrl = jobId
     ? `${API_URL}/api/v1/pipeline/jobs/${jobId}/preview/original`
     : localPreviewUrl || "";
@@ -257,9 +259,8 @@ export default function StudioPage(): React.JSX.Element {
     jobResult &&
     (jobResult.image_verdict.startsWith("Leave it") ||
       !jobResult.best_fix ||
-      !jobResult.verified_fixes ||
-      jobResult.verified_fixes.length === 0 ||
-      jobResult.verified_fixes.every((f) => f.verdict !== "measurable improvement" && f.verdict !== "measured improvement above noise floor"));
+      currentFixes.length === 0 ||
+      currentFixes.every((f) => f.verdict !== "measurable improvement" && f.verdict !== "measured improvement above noise floor"));
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -567,11 +568,11 @@ export default function StudioPage(): React.JSX.Element {
           )}
 
           {/* Per-Fix Cards */}
-          {jobResult && jobResult.verified_fixes && jobResult.verified_fixes.length > 0 && (
+          {currentFixes.length > 0 && (
             <div className="glass-card rounded-2xl p-5">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-400">
-                  4. Candidate Edits ({jobResult.verified_fixes.length})
+                  4. Candidate Edits ({currentFixes.length})
                 </span>
                 <span className="text-[11px] font-mono text-zinc-500">
                   Click card to inspect preview
@@ -579,7 +580,7 @@ export default function StudioPage(): React.JSX.Element {
               </div>
 
               <div className="flex flex-col gap-3">
-                {jobResult.verified_fixes.map((fix, idx) => {
+                {currentFixes.map((fix, idx) => {
                   const isSelected = selectedFixIndex === idx;
                   const isImprovement = fix.verdict === "measurable improvement" || fix.verdict === "measured improvement above noise floor";
                   const isGuardRejected = fix.verdict === "rejected by guard";

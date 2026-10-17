@@ -63,8 +63,8 @@ class JobEvent:
 
 
 @dataclass
-class VerifiedFixPreview:
-    """An executed photographic fix with verified gain badge and Lightroom XMP."""
+class MeasuredFixPreview:
+    """An executed photographic fix with measured gain badge and Lightroom XMP."""
     fix_id: str
     op: str
     params: Dict[str, Any]
@@ -87,16 +87,20 @@ class VerifiedFixPreview:
     guard_backend: str = "SSIM + rgb_layout_stat"
 
 
+# Deprecated alias kept for one release for backward compatibility
+VerifiedFixPreview = MeasuredFixPreview
+
+
 @dataclass
 class JobResult:
     """Comprehensive diagnosis payload conforming to Core Features F1.1–F1.3."""
     job_id: str
     aspect_scores: Dict[str, float]
     critique_rationale: Dict[str, str]
-    verified_fixes: List[VerifiedFixPreview]
-    best_fix: Optional[VerifiedFixPreview]
-    uncertainty_badge: str
-    total_latency_seconds: float
+    measured_fixes: List[MeasuredFixPreview] = field(default_factory=list)
+    best_fix: Optional[MeasuredFixPreview] = None
+    uncertainty_badge: str = ""
+    total_latency_seconds: float = 0.0
     overall_score: Optional[float] = None
     grade_label: Optional[str] = None
     anfis_rulebook_summary: Optional[str] = None
@@ -104,6 +108,15 @@ class JobResult:
     image_verdict: str = ""
     noise_floor: float = 0.0
     judge_id: str = ""
+    # Deprecated alias kept for one release for backward compatibility
+    verified_fixes: List[MeasuredFixPreview] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        # Synchronize measured_fixes and verified_fixes alias
+        if not self.verified_fixes and self.measured_fixes:
+            self.verified_fixes = self.measured_fixes
+        elif not self.measured_fixes and self.verified_fixes:
+            self.measured_fixes = self.verified_fixes
 
 
 class PipelineJob:
@@ -432,6 +445,7 @@ class PipelineQueueManager:
                 anfis_rulebook_summary=None,
                 top_fired_rules=[],
                 critique_rationale=critic_out.rationales,
+                measured_fixes=verified_previews,
                 verified_fixes=verified_previews,
                 best_fix=best_fix,
                 uncertainty_badge=uncertainty_badge,

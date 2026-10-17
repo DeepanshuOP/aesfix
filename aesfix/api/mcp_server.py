@@ -309,6 +309,25 @@ def create_mcp_server() -> MCPServer:
             "critique_rationale": result.critique_rationale,
             "uncertainty_badge": result.uncertainty_badge,
             "total_latency_seconds": result.total_latency_seconds,
+            "measured_fixes": [
+                {
+                    "fix_id": fix.fix_id,
+                    "op": fix.op,
+                    "params": fix.params,
+                    "expected_aspect": fix.expected_aspect,
+                    "reasoning": fix.reasoning,
+                    "baseline_score": fix.baseline_score,
+                    "post_edit_score": fix.post_edit_score,
+                    "aesthetic_gain": fix.aesthetic_gain,
+                    "guard_passed": fix.guard_passed,
+                    "gain_badge": fix.gain_badge,
+                    "execution_time_ms": fix.execution_time_ms,
+                    "verdict": fix.verdict,
+                    "guard_backend": fix.guard_backend,
+                }
+                for fix in result.measured_fixes
+            ],
+            # Deprecated: alias for measured_fixes (kept for one release)
             "verified_fixes": [
                 {
                     "fix_id": fix.fix_id,
@@ -322,8 +341,10 @@ def create_mcp_server() -> MCPServer:
                     "guard_passed": fix.guard_passed,
                     "gain_badge": fix.gain_badge,
                     "execution_time_ms": fix.execution_time_ms,
+                    "verdict": fix.verdict,
+                    "guard_backend": fix.guard_backend,
                 }
-                for fix in result.verified_fixes
+                for fix in result.measured_fixes
             ],
             "best_fix": (
                 {
