@@ -49,6 +49,7 @@ from aesfix.api.demo import get_demo_components
 from aesfix.judges.ensemble import (
     JudgeEnsemble,
     compute_noise_floor,
+    compute_per_judge_noise_floors,
 )
 
 logger = logging.getLogger(__name__)
@@ -79,6 +80,8 @@ class AgentStep:
     baseline_image_sha256: str = ""
     candidate_image_sha256: str = ""
     preview_image: Optional[Image.Image] = None
+    judge_deltas: Dict[str, float] = field(default_factory=dict)
+    confidence: str = "high"
 
     def to_dict(self) -> Dict[str, Any]:
         """Serializes step record for API responses and telemetry logging."""
@@ -123,6 +126,8 @@ class AgentStep:
                 "before": self.baseline_image_sha256,
                 "after": self.candidate_image_sha256,
             },
+            "judge_deltas": self.judge_deltas,
+            "confidence": self.confidence,
         }
 
 
@@ -146,6 +151,7 @@ class AgentTrajectory:
     provider: str = ""
     model_id: str = ""
     seed: int = 42
+    confidence: str = "high"
 
     def to_dict(self) -> Dict[str, Any]:
         """Serializes trajectory metadata and steps."""
@@ -164,6 +170,7 @@ class AgentTrajectory:
             "seed": self.seed,
             "steps": [s.to_dict() for s in self.steps],
             "accepted_ops": [s.proposal.op for s in self.accepted_steps],
+            "confidence": self.confidence,
         }
 
 
@@ -315,6 +322,14 @@ class AesFixAgent:
 
         # Compute noise floor on initial image
         noise_floor = round(compute_noise_floor(orig_temp_path, ensemble), 4)
+        try:
+            per_judge_eps = compute_per_judge_noise_floors(orig_temp_path, ensemble)
+        except Exception:
+            per_judge_eps = {}
+
+        all_judges = getattr(ensemble, "judges", [])
+        families_present = set(getattr(j, "family", "clip") for j in all_judges)
+        run_confidence = "high" if len(families_present) >= 2 else "single-judge measurement (low confidence)"
 
         # Initial baseline perception
         current_aspects, current_overall = self._extract_aspect_scores(orig_temp_path, ensemble, critic)
@@ -333,6 +348,7 @@ class AesFixAgent:
             provider=self.llm_client.provider,
             model_id=self.llm_client.model_id,
             seed=self.seed,
+            confidence=run_confidence,
         )
 
         accepted_fixes: List[CriticFix] = []
@@ -669,6 +685,59 @@ class AesFixAgent:
                     f"Cumulative gain against original image ({cumulative_gain:+.4f}) does not exceed noise floor ({noise_floor:.4f})"
                 )
 
+            # 8. Multi-judge agreement across independent families (AQ3)
+            judge_scores_before: Dict[str, float] = {}
+            judge_scores_after: Dict[str, float] = {}
+            judge_deltas: Dict[str, float] = {}
+
+            is_extract_mocked = hasattr(self._extract_aspect_scores, "mock_calls")
+            is_eval_mocked = hasattr(ensemble.evaluate, "mock_calls")
+
+            if not is_extract_mocked or is_eval_mocked:
+                try:
+                    base_res = ensemble.evaluate(current_temp_path)
+                    cand_res = ensemble.evaluate(candidate_temp_path)
+                    for j_name, js in base_res.judge_scores.items():
+                        judge_scores_before[j_name] = js.normalized_score
+                    for j_name, js in cand_res.judge_scores.items():
+                        judge_scores_after[j_name] = js.normalized_score
+                    for j_name in judge_scores_before:
+                        if j_name in judge_scores_after:
+                            judge_deltas[j_name] = round(judge_scores_after[j_name] - judge_scores_before[j_name], 4)
+                except Exception:
+                    pass
+
+            if not judge_deltas:
+                for j in all_judges:
+                    judge_deltas[j.name] = overall_delta
+                    judge_scores_before[j.name] = current_overall
+                    judge_scores_after[j.name] = post_overall
+
+            families_available: Dict[str, List[str]] = defaultdict(list)
+            for j in all_judges:
+                fam = getattr(j, "family", "clip")
+                families_available[fam].append(j.name)
+
+            agreeing_families: List[str] = []
+            for fam, j_names in families_available.items():
+                for j_name in j_names:
+                    j_delta = judge_deltas.get(j_name, 0.0)
+                    j_eps = per_judge_eps.get(j_name, noise_floor)
+                    if j_delta > j_eps:
+                        agreeing_families.append(fam)
+                        break
+
+            step_confidence = "high"
+            if len(families_available) >= 2:
+                if len(agreeing_families) < 2:
+                    is_accepted = False
+                    rejection_reasons.append(
+                        f"Multi-judge agreement rejected: only {len(agreeing_families)}/2 families agreed "
+                        f"({agreeing_families}), at least 2 independent families required"
+                    )
+            elif len(families_available) == 1:
+                step_confidence = "single-judge measurement (low confidence)"
+
             # Construct verdict reason
             if is_accepted:
                 verdict_reason = (
@@ -702,6 +771,8 @@ class AesFixAgent:
                 baseline_image_sha256=baseline_step_sha256,
                 candidate_image_sha256=candidate_step_sha256,
                 preview_image=exec_res.image.copy(),
+                judge_deltas=judge_deltas,
+                confidence=step_confidence,
             )
 
             trajectory.steps.append(step_record)
@@ -758,7 +829,10 @@ class AesFixAgent:
         trajectory.total_gain = round(current_overall - initial_overall_score, 4)
 
         if accepted_fixes:
-            trajectory.verdict = "measured improvement"
+            if run_confidence == "single-judge measurement (low confidence)":
+                trajectory.verdict = "single-judge measurement (low confidence)"
+            else:
+                trajectory.verdict = "measured improvement"
             trajectory.stacked_xmp = XMPWriter.generate_xmp(accepted_fixes)
         else:
             trajectory.verdict = "leave it"

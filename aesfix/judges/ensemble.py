@@ -65,6 +65,7 @@ class BaseJudge(ABC):
     """Abstract interface defining the contract for all aesthetic judges."""
 
     name: str
+    family: str = "clip"
 
     @abstractmethod
     def evaluate(self, image_path: str) -> JudgeScore:
@@ -88,6 +89,7 @@ class ClipAspectJudge(BaseJudge):
     """
 
     name = "clip_aspect"
+    family = "clip"
 
     def __init__(self) -> None:
         # Import dynamically so module import doesn't stall if CLIP isn't needed immediately
@@ -126,6 +128,7 @@ class AestheticPredictorV25Judge(BaseJudge):
     """
 
     name = "aesthetic_predictor_v2_5"
+    family = "clip"
 
     def __init__(self, model_id: str = "discus0434/aesthetic-predictor-v2-5") -> None:
         self.model_id = model_id
@@ -187,6 +190,7 @@ class ImscoreLaionJudge(BaseJudge):
     """
 
     name = "imscore_laion"
+    family = "clip"
 
     def __init__(self, model_id: str = "RE-N-Y/laion-aesthetic") -> None:
         self.model_id = model_id
@@ -286,6 +290,7 @@ class RsinemaAestheticJudge(BaseJudge):
     """
 
     name = "fine-tuned CLIP ViT-B/32 aesthetic judge (same backbone family as the critic — partially independent)"
+    family = "clip"
 
     def __init__(self, model_id: str = "rsinema/aesthetic-scorer") -> None:
         self.model_id = model_id
@@ -390,6 +395,59 @@ class RsinemaAestheticJudge(BaseJudge):
             raise JudgeEvaluationError(f"Rsinema inference failed on {image_path}: {exc}") from exc
 
 
+class MusiqAestheticJudge(BaseJudge):
+    """MUSIQ (Multi-scale Image Quality Transformer) blind IQA judge via pyiqa (CPU only).
+
+    Why this judge provides independent aesthetic verification (AQ3):
+    - Non-CLIP patch-based Vision Transformer backbone trained on KonIQ-10k.
+    - Zero architectural or training overlap with CLIP-based models (rsinema, laion).
+    - Runs entirely on CPU with weights cached to D:\\aesfix-cache\\torch.
+    - Exact Model ID: pyiqa 'musiq' (checkpoint: musiq_koniq_ckpt-e95806b9.pth).
+    """
+
+    name = "musiq (pyiqa, non-CLIP patch-transformer on CPU)"
+    family = "non-clip"
+    exact_id = "musiq-koniq"
+
+    def __init__(self, device: str = "cpu") -> None:
+        self.device = device
+        self._metric: Optional[Any] = None
+
+    def _ensure_loaded(self) -> None:
+        if self._metric is not None:
+            return
+        if "TORCH_HOME" not in os.environ:
+            os.environ["TORCH_HOME"] = r"D:\aesfix-cache\torch"
+
+        try:
+            import pyiqa  # type: ignore[import-untyped]
+
+            self._metric = pyiqa.create_metric("musiq", device=self.device)
+            logger.info("Loaded %s on %s (%s)", self.name, self.device, self.exact_id)
+        except Exception as exc:
+            raise JudgeEvaluationError(f"Failed to load pyiqa MUSIQ judge: {exc}") from exc
+
+    def evaluate(self, image_path: str) -> JudgeScore:
+        self._validate_image_path(image_path)
+        self._ensure_loaded()
+        if self._metric is None:
+            raise JudgeEvaluationError("MUSIQ metric not initialized.")
+
+        try:
+            val_tensor = self._metric(image_path)
+            raw_score = float(val_tensor.squeeze().item())
+            # MUSIQ-KonIQ outputs quality on a 0-100 scale.
+            # Normalization projects [0, 100] to [0.0, 1.0].
+            normalized = max(0.0, min(1.0, raw_score / 100.0))
+            return JudgeScore(
+                name=self.name,
+                raw_score=round(raw_score, 4),
+                normalized_score=round(normalized, 4),
+            )
+        except Exception as exc:
+            raise JudgeEvaluationError(f"MUSIQ inference failed on {image_path}: {exc}") from exc
+
+
 
 def compute_noise_floor(
     image_input: Union[str, Path, Image.Image],
@@ -461,6 +519,80 @@ def compute_noise_floor(
     epsilon = round(float(max(deltas)), 4)
     # Guarantee at least 0.001 noise floor to prevent false claims on degenerate uniform inputs
     return max(0.0010, epsilon)
+
+
+def compute_per_judge_noise_floors(
+    image_input: Union[str, Path, Image.Image],
+    judge_or_ensemble: Any,
+) -> Dict[str, float]:
+    """Computes empirical noise floors ε_j per judge across 4 perturbations (AQ3)."""
+    if isinstance(image_input, (str, Path)):
+        orig = Image.open(str(image_input)).convert("RGB")
+    else:
+        orig = image_input.convert("RGB")
+
+    judges = getattr(judge_or_ensemble, "judges", None)
+    if not judges:
+        if hasattr(judge_or_ensemble, "name"):
+            judges = [judge_or_ensemble]
+        else:
+            return {"overall": compute_noise_floor(image_input, judge_or_ensemble)}
+
+    def _eval_all(img: Image.Image) -> Dict[str, float]:
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tf:
+            img.save(tf.name, format="PNG")
+            temp_path = tf.name
+        try:
+            scores: Dict[str, float] = {}
+            for j in judges:
+                try:
+                    js = j.evaluate(temp_path)
+                    scores[j.name] = float(js.normalized_score)
+                except Exception:
+                    pass
+            return scores
+        finally:
+            try:
+                os.remove(temp_path)
+            except OSError:
+                pass
+
+    base_scores = _eval_all(orig)
+
+    # 1. JPEG q90
+    buf90 = io.BytesIO()
+    orig.save(buf90, format="JPEG", quality=90)
+    buf90.seek(0)
+    s_q90 = _eval_all(Image.open(buf90))
+
+    # 2. JPEG q95
+    buf95 = io.BytesIO()
+    orig.save(buf95, format="JPEG", quality=95)
+    buf95.seek(0)
+    s_q95 = _eval_all(Image.open(buf95))
+
+    # 3. +2% resize
+    w, h = orig.size
+    w_up, h_up = max(1, int(round(w * 1.02))), max(1, int(round(h * 1.02)))
+    img_up = orig.resize((w_up, h_up), Image.Resampling.BILINEAR)
+    s_up = _eval_all(img_up)
+
+    # 4. -2% resize
+    w_down, h_down = max(1, int(round(w * 0.98))), max(1, int(round(h * 0.98)))
+    img_down = orig.resize((w_down, h_down), Image.Resampling.BILINEAR)
+    s_down = _eval_all(img_down)
+
+    per_judge_eps: Dict[str, float] = {}
+    for j_name, base_s in base_scores.items():
+        deltas = [
+            abs(s_q90.get(j_name, base_s) - base_s),
+            abs(s_q95.get(j_name, base_s) - base_s),
+            abs(s_up.get(j_name, base_s) - base_s),
+            abs(s_down.get(j_name, base_s) - base_s),
+        ]
+        per_judge_eps[j_name] = max(0.0010, round(float(max(deltas)), 4))
+
+    return per_judge_eps
 
 
 class JudgeEnsemble:
@@ -581,7 +713,17 @@ def create_default_ensemble(
         logger.warning("Could not load fine-tuned CLIP ViT-B/32 aesthetic judge (same backbone family as the critic — partially independent): %s", exc)
         clip_fallback = ClipAspectJudge()
         clip_fallback.name = "clip_aspect (same-family judge, not independent)"
+        clip_fallback.family = "clip"
         judges.append(clip_fallback)
+
+    # Attach independent non-CLIP family judge (MUSIQ via pyiqa on CPU) (AQ3)
+    try:
+        musiq = MusiqAestheticJudge()
+        musiq._ensure_loaded()
+        judges.append(musiq)
+        logger.info("Ensemble initialized with non-CLIP judge: %s", musiq.name)
+    except Exception as exc:
+        logger.warning("Could not load MusiqAestheticJudge (non-CLIP family): %s", exc)
 
     if include_heavy_models:
         try:
