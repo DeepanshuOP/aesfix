@@ -8,24 +8,27 @@ import { Sparkles, SlidersHorizontal } from "lucide-react";
 export interface CompareSliderProps {
   originalImage: string;
   editedImage: string;
-  verifiedGain?: number | null;
+  gain?: number | null;
+  noiseFloor?: number | null;
   aspectFixed?: string;
   fixName?: string;
+  verdict?: string;
 }
 
 export function CompareSlider({
   originalImage,
   editedImage,
-  verifiedGain = 0.16,
-  aspectFixed = "Lighting & Dynamic Range",
-  fixName = "Exposure & Tone Curve Lift",
+  gain = null,
+  noiseFloor = null,
+  aspectFixed = "General",
+  fixName = "Adjusted",
+  verdict = "measured",
 }: CompareSliderProps): React.JSX.Element {
   const [sliderPosition, setSliderPosition] = useState<number>(50);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // Why pointer coordinates are normalized relative to container bounds:
-  // Ensures touch and mouse interactions track accurately on both mobile viewports and desktop monitors.
+  // Normalize pointer coordinates relative to container bounds
   const handleMove = useCallback((clientX: number) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
@@ -54,6 +57,22 @@ export function CompareSlider({
     setIsDragging(false);
   }, []);
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>): void => {
+    if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
+      e.preventDefault();
+      setSliderPosition((prev) => Math.max(0, prev - 5));
+    } else if (e.key === "ArrowRight" || e.key === "ArrowUp") {
+      e.preventDefault();
+      setSliderPosition((prev) => Math.min(100, prev + 5));
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      setSliderPosition(0);
+    } else if (e.key === "End") {
+      e.preventDefault();
+      setSliderPosition(100);
+    }
+  };
+
   useEffect(() => {
     if (isDragging) {
       window.addEventListener("mousemove", handleMouseMove);
@@ -71,18 +90,25 @@ export function CompareSlider({
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Interactive Canvas Container */}
+      {/* Interactive Canvas Container with ARIA slider role */}
       <div
         ref={containerRef}
-        className="relative aspect-[4/3] w-full select-none overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 shadow-2xl"
+        role="slider"
+        aria-label="Before and after photographic comparison slider"
+        aria-valuenow={Math.round(sliderPosition)}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+        className="relative aspect-[4/3] w-full select-none overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 shadow-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
         onMouseDown={() => setIsDragging(true)}
         onTouchStart={() => setIsDragging(true)}
       >
         {/* Edited (After) Image Layer - Full Canvas */}
         <img
           src={editedImage}
-          alt="AesFix Tier-A Retouched"
-          className="absolute inset-0 h-full w-full object-cover"
+          alt="AesFix Retouched Preview"
+          className="absolute inset-0 h-full w-full object-contain bg-zinc-950"
           draggable={false}
         />
 
@@ -93,8 +119,8 @@ export function CompareSlider({
         >
           <img
             src={originalImage}
-            alt="Original Input"
-            className="absolute inset-0 h-full w-full object-cover"
+            alt="Original Input Preview"
+            className="absolute inset-0 h-full w-full object-contain bg-zinc-950"
             style={{
               width: containerRef.current
                 ? `${containerRef.current.clientWidth}px`
@@ -116,18 +142,23 @@ export function CompareSlider({
         </div>
 
         {/* Before / After Badges */}
-        <div className="pointer-events-none absolute left-3 top-3 rounded-md bg-black/60 px-2 py-1 text-[11px] font-mono font-medium text-zinc-300 backdrop-blur-sm border border-white/10">
+        <div className="pointer-events-none absolute left-3 top-3 rounded-md bg-black/70 px-2 py-1 text-[11px] font-mono font-medium text-zinc-300 backdrop-blur-sm border border-white/10">
           BEFORE (Input)
         </div>
         <div className="pointer-events-none absolute right-3 top-3 rounded-md bg-cyan-950/80 px-2 py-1 text-[11px] font-mono font-medium text-cyan-300 backdrop-blur-sm border border-cyan-500/30">
-          AFTER (Verified Fix)
+          AFTER (Retouched)
         </div>
 
-        {/* Verified Gain Badge Overlay */}
-        {verifiedGain !== null && verifiedGain !== undefined && (
-          <div className="pointer-events-none absolute bottom-3 left-3 flex items-center gap-1.5 rounded-lg bg-emerald-950/90 px-3 py-1.5 text-xs font-mono font-bold text-emerald-300 border border-emerald-500/40 backdrop-blur-md shadow-lg">
+        {/* Measurement Badge Overlay */}
+        {gain !== null && gain !== undefined && (
+          <div className="pointer-events-none absolute bottom-3 left-3 flex items-center gap-1.5 rounded-lg bg-zinc-950/90 px-3 py-1.5 text-xs font-mono font-bold text-emerald-300 border border-emerald-500/40 backdrop-blur-md shadow-lg">
             <Sparkles className="h-3.5 w-3.5 text-emerald-400" />
-            <span>AG@1: +{verifiedGain.toFixed(2)} Gain Verified</span>
+            <span>
+              Δ: {gain > 0 ? `+${gain.toFixed(4)}` : gain.toFixed(4)}
+              {noiseFloor !== null && noiseFloor !== undefined ? ` (ε: ${noiseFloor.toFixed(4)})` : ""}
+              {" • "}
+              {verdict}
+            </span>
           </div>
         )}
       </div>
