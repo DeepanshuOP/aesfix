@@ -583,7 +583,7 @@ export default function StudioPage(): React.JSX.Element {
               <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider block mb-1.5">
                 Or Load A Benchmark Pilot Sample:
               </span>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => handleLoadSample("test.jpg")}
@@ -596,7 +596,14 @@ export default function StudioPage(): React.JSX.Element {
                   onClick={() => handleLoadSample("dark.jpg")}
                   className="rounded-lg bg-zinc-900 px-2 py-1.5 text-[11px] font-mono text-zinc-300 border border-zinc-800 hover:border-amber-500 hover:text-white transition-all text-center"
                 >
-                  Underexposed
+                  Low-key night (hard case)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleLoadSample("underexposed_synthetic.jpg")}
+                  className="rounded-lg bg-zinc-900 px-2 py-1.5 text-[11px] font-mono text-zinc-300 border border-zinc-800 hover:border-blue-500 hover:text-white transition-all text-center"
+                >
+                  Underexposed (synthetic)
                 </button>
                 <button
                   type="button"
