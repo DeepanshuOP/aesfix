@@ -125,7 +125,7 @@ class WatermarkService:
     def apply_watermark(
         cls,
         image: Image.Image,
-        watermark_text: str = "AesFix AI-Verified Preview",
+        watermark_text: str = "AesFix Measured Preview",
         gain_badge: Optional[str] = None,
         opacity: float = 0.65,
     ) -> Image.Image:
@@ -200,7 +200,7 @@ class WatermarkService:
 
         # Headers
         draw.text((20, 14), "BEFORE (Original)", fill=(180, 185, 195))
-        draw.text((orig_resized.width + 24, 14), f"AFTER (AesFix Verified · {gain_badge})", fill=(52, 211, 153))
+        draw.text((orig_resized.width + 24, 14), f"AFTER (AesFix Measured · {gain_badge})", fill=(52, 211, 153))
 
         return canvas
 
@@ -244,14 +244,14 @@ class C2PAProvenanceEngine:
             {
                 "action": "c2pa.evaluated",
                 "softwareAgent": "AesFix Multi-Judge Ensemble v1.0",
-                "parameters": {"verified_aesthetic_gain": verified_aesthetic_gain},
+                "parameters": {"measured_aesthetic_gain": verified_aesthetic_gain},
                 "description": "Aesthetic gain computed by frozen multi-judge ensemble with Identity Guard verification.",
             },
         ]
 
         assertions = {
             "c2pa.training_opt_in": False,
-            "c2pa.generator": "AesFix Photographic Verification Engine",
+            "c2pa.generator": "AesFix Photographic Measurement Engine",
             "c2pa.model_provenance": model_name,
             "c2pa.gain_metric": "AG@1",
             "c2pa.gain_value": verified_aesthetic_gain,
@@ -259,7 +259,7 @@ class C2PAProvenanceEngine:
 
         return C2PAManifest(
             claim_generator="AesFix/1.0.0 (C2PA-Profile-v1.3)",
-            title="AesFix Verified Photo Enhancement",
+            title="AesFix Measured Photo Enhancement",
             digital_source_type="http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia",
             actions=actions,
             assertions=assertions,

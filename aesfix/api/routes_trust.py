@@ -107,7 +107,7 @@ def get_c2pa_manifest(
 
     best_fix = job.result.best_fix
     gain = best_fix.aesthetic_gain if best_fix else 0.0
-    applied_ops = [f.op for f in job.result.verified_fixes]
+    applied_ops = [f.op for f in job.result.measured_fixes]
 
     orig_hash = C2PAProvenanceEngine.compute_sha256(job.image_path)
     edited_hash = orig_hash  # In production, compute from serialized edited image
@@ -126,7 +126,7 @@ async def generate_watermarked_preview(
     file: UploadFile = File(...),
     gain_badge: Optional[str] = Form(None),
 ) -> Response:
-    """Applies anti-theft translucent pill watermark with verified gain badge to an image."""
+    """Applies anti-theft translucent pill watermark with measured gain badge to an image."""
     content = await file.read()
     try:
         pil_img = Image.open(io.BytesIO(content)).convert("RGB")
@@ -138,7 +138,7 @@ async def generate_watermarked_preview(
 
     watermarked = WatermarkService.apply_watermark(
         pil_img,
-        watermark_text="AesFix AI-Verified Preview",
+        watermark_text="AesFix Measured Preview",
         gain_badge=gain_badge,
     )
 

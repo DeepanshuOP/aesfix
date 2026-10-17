@@ -13,7 +13,7 @@ export default function ResearchPage(): React.JSX.Element {
           <span>Research Methodology &amp; Closed-Loop Thesis</span>
         </div>
         <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-          Aesthetic Diagnostics via Measured Edit Verification
+          Aesthetic Diagnostics via Measured Edit Validation
         </h1>
         <p className="mt-3 text-sm text-zinc-400 leading-relaxed">
           Why contemporary retouching assistants fail without falsifiable edit validation, and how closed-loop measurement establishes whether photographic adjustments genuinely improve visual quality.
@@ -27,7 +27,7 @@ export default function ResearchPage(): React.JSX.Element {
           <div className="flex items-center gap-2.5 mb-3">
             <Scale className="h-5 w-5 text-cyan-400" />
             <h2 className="text-lg font-bold text-white tracking-tight">
-              The Critique Without Verification Problem
+              The Critique Without Measurement Problem
             </h2>
           </div>
           <p className="text-zinc-300">
