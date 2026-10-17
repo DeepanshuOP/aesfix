@@ -2,9 +2,7 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
-import pytest
 
 from scripts.check_ledger_append_only import (
     validate_ledger_entries,

@@ -4,9 +4,7 @@ Ensures that deprecated aliases (rule, tightness, contrast_factor, temperature_s
 and unknown parameters are strictly rejected with actionable feedback naming canonical parameters,
 and validates that the system prompt specifies unit, range, and example magnitude for each parameter.
 """
-import pytest
 from aesfix.agent.schema import (
-    AgentProposal,
     generate_tool_schema_prompt,
     validate_proposal,
 )

@@ -17,7 +17,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_LEDGER_PATH = REPO_ROOT / "results" / "ledger.jsonl"
