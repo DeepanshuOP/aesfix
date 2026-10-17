@@ -255,10 +255,11 @@ export default function StudioPage(): React.JSX.Element {
 
   const isLeaveIt =
     jobResult &&
-    (jobResult.image_verdict === "Leave it" ||
+    (jobResult.image_verdict.startsWith("Leave it") ||
+      !jobResult.best_fix ||
       !jobResult.verified_fixes ||
       jobResult.verified_fixes.length === 0 ||
-      jobResult.verified_fixes.every((f) => f.verdict === "no measurable improvement"));
+      jobResult.verified_fixes.every((f) => f.verdict !== "measurable improvement" && f.verdict !== "measured improvement above noise floor"));
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -580,7 +581,8 @@ export default function StudioPage(): React.JSX.Element {
               <div className="flex flex-col gap-3">
                 {jobResult.verified_fixes.map((fix, idx) => {
                   const isSelected = selectedFixIndex === idx;
-                  const isPositive = fix.verdict === "measured improvement above noise floor";
+                  const isImprovement = fix.verdict === "measurable improvement" || fix.verdict === "measured improvement above noise floor";
+                  const isGuardRejected = fix.verdict === "rejected by guard";
 
                   return (
                     <div
@@ -608,13 +610,17 @@ export default function StudioPage(): React.JSX.Element {
                         <div className="text-right shrink-0">
                           <span
                             className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[10px] font-bold border ${
-                              isPositive
+                              isImprovement
                                 ? "bg-emerald-950/80 text-emerald-300 border-emerald-800/40"
+                                : isGuardRejected
+                                ? "bg-red-950/80 text-red-300 border-red-800/40"
                                 : "bg-zinc-900 text-zinc-400 border-zinc-800"
                             }`}
                           >
-                            {isPositive ? (
+                            {isImprovement ? (
                               <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+                            ) : isGuardRejected ? (
+                              <ShieldAlert className="h-3 w-3 text-red-400" />
                             ) : (
                               <XCircle className="h-3 w-3 text-zinc-500" />
                             )}

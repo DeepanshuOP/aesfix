@@ -91,7 +91,7 @@ def test_execute_job_sync_closed_loop_f1_outputs() -> None:
     for fix in result.verified_fixes:
         assert fix.fix_id.startswith(job.job_id)
         assert fix.op != ""
-        assert fix.verdict in ("measurable improvement", "no measurable improvement")
+        assert fix.verdict in ("measurable improvement", "no measurable improvement", "rejected by guard")
         assert fix.judge_id == result.judge_id
         assert fix.epsilon == result.noise_floor
         assert fix.delta == round(fix.post_edit_score - fix.baseline_score, 4)
@@ -186,3 +186,42 @@ def test_fastapi_unauthorized_rejection() -> None:
 
     resp = client.post("/api/v1/pipeline/submit-path", json={"image_path": _TEST_JPG})
     assert resp.status_code == 401
+
+
+def test_guard_failed_edit_with_gain_above_epsilon_shows_rejected_by_guard() -> None:
+    """Verifies that an edit failing Identity Guard drift with raw Δ > ε emits 'rejected by guard'."""
+    from unittest.mock import MagicMock
+    from aesfix.executor.guard import GuardVerdict
+
+    qm = QuotaManager()
+    pq = PipelineQueueManager(quota_mgr=qm)
+
+    # Mock IdentityGuard to reject with drift > threshold
+    mock_guard = MagicMock()
+    mock_guard.backend_name = "rgb_layout_stat"
+    mock_guard.evaluate.return_value = GuardVerdict(
+        is_valid=False,
+        composite_drift=0.55,
+        feature_drift=0.60,
+        structural_drift=0.50,
+        threshold=0.35,
+        backend_name="rgb_layout_stat",
+        rejection_reason="Perceptual drift exceeds threshold",
+        guard_backend="SSIM + rgb_layout_stat",
+    )
+    pq.identity_guard = mock_guard
+
+    job = pq.submit_job(user_id="test_user_guard_fail", image_input=_TEST_JPG)
+    result = pq.execute_job_sync(job.job_id)
+
+    assert len(result.verified_fixes) >= 1
+    for fix in result.verified_fixes:
+        assert fix.guard_passed is False
+        # When guard fails, backend must explicitly return "rejected by guard" as source of truth
+        assert fix.verdict == "rejected by guard"
+        assert fix.aesthetic_gain == 0.0
+        assert "Vetoed by Identity Guard" in fix.gain_badge
+
+    # Best fix should be None since all fixes were vetoed by guard
+    assert result.best_fix is None
+    assert result.image_verdict == "Leave it — no measurable improvement found"

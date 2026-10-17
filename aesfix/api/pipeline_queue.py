@@ -360,20 +360,20 @@ class PipelineQueueManager:
                 post_judge_res = ensemble.evaluate(edit_path)
                 post_score = round(post_judge_res.overall_score, 4)
 
-                # Compute delta and honest verdict against empirical noise floor
+                # Compute delta and honest verdict against empirical noise floor and identity guard
                 raw_delta = round(post_score - baseline_score, 4)
-                is_improvement = guard_verdict.is_valid and (raw_delta > noise_floor)
-
-                if is_improvement:
+                if not guard_verdict.is_valid:
+                    verdict = "rejected by guard"
+                    gain = 0.0
+                    badge = "Vetoed by Identity Guard (Structural Drift)"
+                elif raw_delta > noise_floor:
                     verdict = "measurable improvement"
                     gain = raw_delta
                     badge = f"+{gain:.3f} Measurable Gain"
                 else:
                     verdict = "no measurable improvement"
                     gain = 0.0
-                    if not guard_verdict.is_valid:
-                        badge = "Vetoed by Identity Guard (Structural Drift)"
-                    elif raw_delta <= 0:
+                    if raw_delta <= 0:
                         badge = f"No aesthetic improvement (Δ={raw_delta:+.4f})"
                     else:
                         badge = f"Below noise floor (Δ={raw_delta:+.4f} ≤ ε={noise_floor:.4f})"
