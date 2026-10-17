@@ -139,17 +139,14 @@ class AestheticPredictorV25Judge(BaseJudge):
         if self._model is not None and self._processor is not None:
             return
         try:
-            from aesthetic_predictor_v2_5 import (  # type: ignore[import-untyped,import-not-found]
-                AestheticPredictorV2_5Model,
-                AestheticPredictorV2_5Processor,
-            )
+            from aesthetic_predictor_v2_5 import convert_v2_5_from_siglip  # type: ignore[import-untyped,import-not-found]
 
-            # Load in eval mode to prevent gradient tracking during reward/verification passes
-            model = AestheticPredictorV2_5Model.from_pretrained(self.model_id)
+            # Load model and processor using official package loader
+            model, processor = convert_v2_5_from_siglip()
             model.eval()
             self._model = model
-            self._processor = AestheticPredictorV2_5Processor.from_pretrained(self.model_id)
-            logger.info("Loaded AestheticPredictorV2_5Model from %s", self.model_id)
+            self._processor = processor
+            logger.info("Loaded AestheticPredictorV2_5Model via convert_v2_5_from_siglip")
         except Exception as exc:
             raise JudgeEvaluationError(
                 f"Failed to load aesthetic-predictor-v2-5 ({self.model_id}): {exc}"

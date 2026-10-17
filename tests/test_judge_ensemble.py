@@ -261,7 +261,7 @@ def test_multi_judge_family_agreement_rules():
     agent = AesFixAgent(llm_client=fake_llm, max_steps=1)
     agent.ensemble = ensemble
 
-    # Case 1: Disagreement between families (CLIP improves by 0.05 > 0.01, but non-CLIP improves by 0.00 <= 0.01)
+    # Case 1: Degradation in secondary family (non-CLIP degrades by -0.05 < -0.01)
     def mock_extract(path, ens, crt):
         if "in.jpg" in path or "initial" in path:
             return ({"lighting": 0.50}, 0.50)
@@ -275,7 +275,7 @@ def test_multi_judge_family_agreement_rules():
              is_valid=True, composite_drift=0.02, feature_drift=0.01, structural_drift=0.01,
              threshold=0.35, backend_name="rgb_layout_stat", guard_backend="SSIM + rgb_layout_stat",
          )):
-        # Candidate eval returns improvement for clip_judge only
+        # Candidate eval returns degradation for nonclip_judge (-0.05 < -0.01)
         from aesfix.judges.ensemble import JudgeResult, JudgeScore
         mock_base = JudgeResult(
             image_path="base", overall_score=0.50,
@@ -283,7 +283,7 @@ def test_multi_judge_family_agreement_rules():
         )
         mock_cand_disagree = JudgeResult(
             image_path="cand", overall_score=0.53,
-            judge_scores={"clip_judge": JudgeScore("clip_judge", 0.55, 0.55), "nonclip_judge": JudgeScore("nonclip_judge", 0.50, 0.50)}
+            judge_scores={"clip_judge": JudgeScore("clip_judge", 0.55, 0.55), "nonclip_judge": JudgeScore("nonclip_judge", 0.45, 0.45)}
         )
         mock_eval.side_effect = [mock_base, mock_cand_disagree]
 
@@ -291,9 +291,9 @@ def test_multi_judge_family_agreement_rules():
 
     assert len(traj_disagree.steps) == 1
     assert traj_disagree.steps[0].status == "rejected"
-    assert "Multi-judge agreement rejected" in traj_disagree.steps[0].verdict_reason
+    assert "Multi-judge non-inferiority rejected" in traj_disagree.steps[0].verdict_reason
     assert traj_disagree.steps[0].judge_deltas["clip_judge"] == 0.05
-    assert traj_disagree.steps[0].judge_deltas["nonclip_judge"] == 0.0
+    assert traj_disagree.steps[0].judge_deltas["nonclip_judge"] == -0.05
 
     # Case 2: Agreement between families (both CLIP and non-CLIP improve by > 0.01)
     fake_llm_agree = _LocalFakeLLM([prop])
