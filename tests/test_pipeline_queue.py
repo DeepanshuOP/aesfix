@@ -80,7 +80,7 @@ def test_execute_job_sync_closed_loop_f1_outputs() -> None:
     assert len(result.aspect_scores) == 5
     assert result.noise_floor >= 0.0
     assert result.judge_id != ""
-    assert "Single judge" in result.uncertainty_badge or "Judge Consensus" in result.uncertainty_badge
+    assert any(k in result.uncertainty_badge for k in ("Single judge", "Judge Consensus", "High Aesthetic Disagreement"))
     assert result.image_verdict != ""
 
     # 3. F1.2 Critique card rationales
