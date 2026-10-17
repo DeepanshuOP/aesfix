@@ -122,11 +122,11 @@ def test_fake_llm_accept(dummy_image: str) -> None:
 def test_fake_llm_reject_with_feedback(dummy_image: str) -> None:
     """Verifies that a regressing proposal is rejected and feedback is provided to the next step."""
     step1_proposal = json.dumps({
-        "op": "adjust_contrast",
-        "params": {"factor": 1.5},
+        "op": "adjust_exposure",
+        "params": {"ev_delta": -0.5},
         "aspect": "lighting",
         "direction": 1,
-        "rationale": "High contrast push.",
+        "rationale": "Severe underexposure drop causing quality regression.",
     })
     step2_proposal = json.dumps({
         "op": "adjust_exposure",
@@ -165,7 +165,7 @@ def test_fake_llm_reject_with_feedback(dummy_image: str) -> None:
 
     # Verify that the model received rejection feedback in its dialogue prompt
     second_prompt = fake_llm.prompts_received[1]
-    assert "REJECTED adjust_contrast" in second_prompt
+    assert "REJECTED adjust_exposure" in second_prompt
 
 
 def test_fake_llm_invalid_schema(dummy_image: str) -> None:
