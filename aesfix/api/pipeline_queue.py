@@ -84,6 +84,7 @@ class VerifiedFixPreview:
     verdict: str = "no measurable improvement"
     direction: int = 1
     claimed_aspect: str = ""
+    guard_backend: str = "SSIM + rgb_layout_stat"
 
 
 @dataclass
@@ -401,6 +402,7 @@ class PipelineQueueManager:
                         verdict=verdict,
                         direction=1,
                         claimed_aspect=claimed_aspect,
+                        guard_backend=getattr(guard_verdict, "guard_backend", f"SSIM + {guard_verdict.backend_name}"),
                     )
                 )
 

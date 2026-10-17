@@ -50,6 +50,7 @@ interface VerifiedFixPreview {
   verdict: string;
   direction: number;
   claimed_aspect: string;
+  guard_backend?: string;
 }
 
 interface JobResult {
@@ -498,7 +499,7 @@ export default function StudioPage(): React.JSX.Element {
                   ) : (
                     <ShieldAlert className="h-3 w-3" />
                   )}
-                  Drift: {activeFix.guard_drift.toFixed(4)} ({activeFix.guard_passed ? "PASS" : "VETOED"})
+                  Drift: {activeFix.guard_drift.toFixed(4)} ({activeFix.guard_passed ? "PASS" : "VETOED"}) • Guard: {activeFix.guard_backend || "SSIM + rgb_layout_stat"}
                 </span>
               )}
             </div>
@@ -635,7 +636,7 @@ export default function StudioPage(): React.JSX.Element {
                           <span className="text-zinc-300">{fix.epsilon.toFixed(4)}</span>
                         </div>
                         <div>
-                          <span className="text-zinc-500 block text-[9px] uppercase">Guard Drift</span>
+                          <span className="text-zinc-500 block text-[9px] uppercase">Guard ({fix.guard_backend || "SSIM + rgb_layout_stat"})</span>
                           <span className={fix.guard_passed ? "text-zinc-300" : "text-red-400"}>
                             {fix.guard_drift.toFixed(4)}
                           </span>

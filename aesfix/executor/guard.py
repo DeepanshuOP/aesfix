@@ -31,6 +31,7 @@ class GuardVerdict:
     threshold: float
     backend_name: str = "rgb_layout_stat"
     rejection_reason: Optional[str] = None
+    guard_backend: str = "SSIM + rgb_layout_stat"
 
 
 def _to_rgb_tensor(image_input: Union[Image.Image, torch.Tensor, np.ndarray, str, Path]) -> torch.Tensor:
@@ -260,6 +261,9 @@ class IdentityGuard:
                 "Edit rejected: subject identity altered."
             )
 
+        # Explicitly report the composite guard backends (SSIM structural + active feature backend)
+        # to ensure honesty about what models actually run in the pipeline.
+        full_guard_backend = f"SSIM + {self.backend_name}"
         return GuardVerdict(
             is_valid=is_valid,
             composite_drift=round(composite_drift, 4),
@@ -268,6 +272,7 @@ class IdentityGuard:
             threshold=self.drift_threshold,
             backend_name=self.backend_name,
             rejection_reason=rejection_reason,
+            guard_backend=full_guard_backend,
         )
 
     def verify_gain(
