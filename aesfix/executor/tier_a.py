@@ -3,8 +3,8 @@
 Why Tier-A exists alongside generative models:
 1. Determinism and zero hallucination: Adjusting exposure, contrast, white balance,
    or horizon tilt mathematically alters existing pixels without generating synthetic artifacts.
-2. Latency and COGS: Pure PyTorch/Kornia tensor transformations run in single-digit
-   milliseconds on CPU, costing $0.00 in cloud inference fees.
+2. Local execution: Pure PyTorch/Kornia tensor transformations run deterministically on CPU
+   without external API dependencies.
 3. Industry integration (The XMP principle): Professional photographers and agencies
    rely on Adobe Lightroom and Camera Raw. By exporting every verified fix into a
    standards-compliant .xmp sidecar, AesFix fits directly into existing editing pipelines
@@ -41,6 +41,39 @@ except (ImportError, ModuleNotFoundError):
     _HAS_KORNIA = False
 
 from aesfix.critic.critic import CriticFix
+
+
+def _srgb_to_linear(tensor: torch.Tensor) -> torch.Tensor:
+    """Decodes standard sRGB [0, 1] tensor to linear photometric light space.
+
+    Why: Optical exposure adjustments scale physical light intensities (I * 2^EV),
+    which must be calculated in linear radiometric space rather than non-linear gamma curves.
+    """
+    return torch.where(
+        tensor <= 0.04045,
+        tensor / 12.92,
+        torch.pow(torch.clamp((tensor + 0.055) / 1.055, min=0.0), 2.4),
+    )
+
+
+def _linear_to_srgb(tensor: torch.Tensor) -> torch.Tensor:
+    """Re-encodes linear light tensor into standard sRGB [0, 1] perceptual space."""
+    return torch.where(
+        tensor <= 0.0031308,
+        tensor * 12.92,
+        1.055 * torch.pow(torch.clamp(tensor, min=0.0), 1.0 / 2.4) - 0.055,
+    )
+
+
+def _apply_highlight_shoulder(linear: torch.Tensor, threshold: float = 0.75) -> torch.Tensor:
+    """Applies a smooth C^1 photographic highlight roll-off (shoulder) above threshold towards 1.0.
+
+    Why: Hard digital clipping at 1.0 causes harsh chromatic edge artifacts.
+    A tanh shoulder smoothly compresses extreme highlights while maintaining contrast below the threshold.
+    """
+    diff = 1.0 - threshold
+    shoulder = threshold + diff * torch.tanh((linear - threshold) / diff)
+    return torch.where(linear <= threshold, linear, shoulder)
 
 # The 12 Canonical Tier-A operations supported for round-trip execution and XMP export
 TIER_A_OPERATIONS: Tuple[str, ...] = (
@@ -122,15 +155,21 @@ class TierAExecutor:
         tensor = tensor.to(self.device)
 
         if op == "adjust_exposure":
-            # EV delta: scale intensity in linear domain then re-encode
+            # EV delta: scale intensity in linear domain then re-encode with soft highlight shoulder
             ev = float(params.get("ev_delta", params.get("ev", params.get("value", 0.0))))
             if abs(ev) > 1e-4:
-                # Perceptually calibrated linear multiplier: I_out = I * 2^EV
-                gain = math.pow(2.0, ev)
-                tensor = torch.clamp(tensor * gain, 0.0, 1.0)
+                # 1. Decode sRGB to linear light
+                linear = _srgb_to_linear(tensor)
+                # 2. Scale photon intensity linearly: I_out = I * 2^EV
+                scaled_linear = linear * math.pow(2.0, ev)
+                # 3. Soft highlight shoulder above 0.75 threshold to prevent hard digital clipping on positive EV
+                if ev > 0.0:
+                    scaled_linear = _apply_highlight_shoulder(scaled_linear, threshold=0.75)
+                # 4. Re-encode to sRGB and clamp to valid range
+                tensor = torch.clamp(_linear_to_srgb(scaled_linear), 0.0, 1.0)
 
         elif op == "adjust_contrast":
-            # Contrast: pivot around midtone 0.5
+            # Contrast: pivot around midtone 0.5 regardless of Kornia
             if "contrast_factor" in params:
                 warnings.warn(
                     "contrast_factor is deprecated; use canonical 'factor' instead",
@@ -142,10 +181,8 @@ class TierAExecutor:
                 contrast_val = float(params.get("contrast", params.get("value", 0.0)))
                 factor = 1.0 + (contrast_val / 100.0)
             factor = max(0.1, min(float(factor), 3.0))
-            if _HAS_KORNIA and ke is not None:
-                tensor = ke.adjust_contrast(tensor, factor)
-            else:
-                tensor = torch.clamp(0.5 + factor * (tensor - 0.5), 0.0, 1.0)
+            # Midtone pivot: 0.5 + factor * (I - 0.5) ensures 0.5 is unchanged while contrast expands/contracts
+            tensor = torch.clamp(0.5 + factor * (tensor - 0.5), 0.0, 1.0)
 
         elif op == "adjust_highlights":
             # Smoothstep mask isolating luminance > 0.5 to lift/recover blown bright areas
@@ -229,9 +266,12 @@ class TierAExecutor:
                 tensor = torch.clamp(tensor + clarity * 0.5 * midtone_mask * (tensor - blurred), 0.0, 1.0)
 
         elif op == "unsharp_mask":
-            amount = float(params.get("amount", 1.0))
-            if amount > 10.0:  # Scaled as Lightroom 0..150
-                amount = amount / 50.0
+            # Continuous Lightroom-style amount scale (0..150, default 40.0)
+            raw_amount = float(params.get("amount", 40.0))
+            if raw_amount < 0.0:
+                raise ValueError(f"Unsharp amount must be non-negative, got {raw_amount}")
+            # Continuous linear factor: default 40.0 maps to 1.0x high-pass blend
+            amount = raw_amount / 40.0
             radius = float(params.get("radius", 1.0))
             kernel_size = max(3, int(radius * 3) * 2 + 1)
             sigma = max(0.5, radius)

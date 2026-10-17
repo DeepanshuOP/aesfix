@@ -307,7 +307,7 @@ class HeuristicAspectCritic(BaseCritic):
             fixes.append(
                 CriticFix(
                     op="unsharp_mask",
-                    params={"radius": 1.5, "amount": 1.25},
+                    params={"radius": 1.5, "amount": 50.0},
                     expected_aspect="subject_clarity",
                     direction=1,
                     nl_instruction="Enhance micro-contrast on the focal subject using unsharp masking.",
