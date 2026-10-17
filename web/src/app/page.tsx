@@ -109,6 +109,9 @@ export interface AgentStepData {
   aspect_scores_after: Record<string, number>;
   aspect_deltas: Record<string, number>;
   execution_duration_ms: number;
+  judge_delta_over_eps?: Record<string, number>;
+  judge_deltas?: Record<string, number>;
+  judge_epsilons?: Record<string, number>;
   preview_data_url?: string;
   preview_url?: string;
 }
@@ -1119,6 +1122,41 @@ export default function StudioPage(): React.JSX.Element {
                           </span>
                         </div>
                       </div>
+
+                      {/* Per-Judge Δ/ε strip (F3c) */}
+                      {step.judge_delta_over_eps && Object.keys(step.judge_delta_over_eps).length > 0 && (
+                        <div className="mt-2.5 flex flex-wrap items-center gap-1.5 pt-2 border-t border-zinc-800/40 text-[10px] font-mono">
+                          <span className="text-zinc-500 uppercase text-[9px] font-semibold mr-1">Judges (Δ/ε):</span>
+                          {Object.entries(step.judge_delta_over_eps).map(([jName, ratio]) => {
+                            const isPositive = ratio > 0;
+                            const isSuperior = ratio > 1.0;
+                            const isDegraded = ratio < -1.0;
+                            const shortName = jName.includes("rsinema") || jName.includes("CLIP")
+                              ? "rsinema"
+                              : jName.includes("musiq")
+                              ? "musiq"
+                              : jName.includes("pref") || jName.includes("Pref")
+                              ? "AesFix-Pref"
+                              : jName.split(" ")[0];
+                            return (
+                              <span
+                                key={jName}
+                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border ${
+                                  isSuperior
+                                    ? "bg-emerald-950/60 text-emerald-300 border-emerald-800/40 font-bold"
+                                    : !isDegraded
+                                    ? "bg-zinc-900 text-zinc-300 border-zinc-800"
+                                    : "bg-red-950/60 text-red-300 border-red-800/40 font-bold"
+                                }`}
+                                title={`${jName}: Δ=${step.judge_deltas?.[jName]?.toFixed(4) ?? "?"}, ε=${step.judge_epsilons?.[jName]?.toFixed(4) ?? "?"}`}
+                              >
+                                <span>{shortName}:</span>
+                                <span>{isPositive ? `+${ratio.toFixed(2)}` : ratio.toFixed(2)}×ε</span>
+                              </span>
+                            );
+                          })}
+                        </div>
+                      )}
 
                       {/* Verdict Reason Box */}
                       <div className="mt-2.5 rounded-lg bg-zinc-950/80 p-2.5 border border-zinc-800/80 text-[11px] font-mono text-zinc-400">
