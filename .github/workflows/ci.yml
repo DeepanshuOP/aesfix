@@ -38,6 +38,9 @@ jobs:
       - name: Verify claims in docs and paper against ledger
         run: python scripts/check_claims.py
 
+      - name: Verify ledger append-only integrity
+        run: python scripts/check_ledger_append_only.py
+
   gitleaks:
     runs-on: ubuntu-latest
     steps:
