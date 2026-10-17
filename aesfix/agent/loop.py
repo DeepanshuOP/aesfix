@@ -196,6 +196,7 @@ class AesFixAgent:
         seed: int = 42,
         max_accepted_per_op: Optional[int] = None,
         op_magnitude_caps: Optional[Dict[str, float]] = None,
+        runs_path: Optional[Union[str, Path]] = None,
     ) -> None:
         self.llm_client = llm_client or LLMClient(provider="heuristic")
         self.critic = critic
@@ -207,6 +208,7 @@ class AesFixAgent:
         self.seed = seed
         self.max_accepted_per_op = max_accepted_per_op
         self.op_magnitude_caps = dict(op_magnitude_caps or {})
+        self.runs_path = Path(runs_path) if runs_path is not None else Path(os.environ.get("AESFIX_RUNS_PATH", "results/agent_runs/runs.jsonl"))
         self._load_agent_config()
 
     def _load_agent_config(self) -> None:
@@ -999,35 +1001,33 @@ class AesFixAgent:
             trajectory.verdict = "leave it"
             trajectory.stacked_xmp = ""
 
-        # Append telemetry (hashes + metrics only, no images) to results/agent_runs/ (AG6)
-        if not os.environ.get("PYTEST_CURRENT_TEST"):
-            try:
-                runs_dir = Path("results/agent_runs")
-                runs_dir.mkdir(parents=True, exist_ok=True)
-                log_file = runs_dir / "runs.jsonl"
-                rec = {
-                    "timestamp": time.time(),
-                    "initial_image_sha256": trajectory.initial_image_sha256,
-                    "provider": trajectory.provider,
-                    "model_id": trajectory.model_id,
-                    "seed": trajectory.seed,
-                    "verdict": trajectory.verdict,
-                    "initial_overall_score": trajectory.initial_overall_score,
-                    "final_overall_score": trajectory.final_overall_score,
-                    "total_gain": trajectory.total_gain,
-                    "noise_floor": trajectory.noise_floor,
-                    "total_steps": trajectory.total_steps,
-                    "accepted_count": len(trajectory.accepted_steps),
-                    "rejected_count": len(trajectory.rejected_steps),
-                    "accepted_ops": [s.proposal.op for s in trajectory.accepted_steps],
-                    "steps": [s.to_dict() for s in trajectory.steps],
-                    "llm_calls_count": trajectory.llm_calls_count,
-                    "fallback_provider": trajectory.fallback_provider,
-                }
-                with open(log_file, "a", encoding="utf-8") as f:
-                    f.write(json.dumps(rec) + "\n")
-            except Exception as exc:
-                logger.debug("Failed logging agent run telemetry: %s", exc)
+        # Append telemetry (hashes + metrics only, no images) to configured runs_path (AG6)
+        try:
+            log_file = self.runs_path
+            log_file.parent.mkdir(parents=True, exist_ok=True)
+            rec = {
+                "timestamp": time.time(),
+                "initial_image_sha256": trajectory.initial_image_sha256,
+                "provider": trajectory.provider,
+                "model_id": trajectory.model_id,
+                "seed": trajectory.seed,
+                "verdict": trajectory.verdict,
+                "initial_overall_score": trajectory.initial_overall_score,
+                "final_overall_score": trajectory.final_overall_score,
+                "total_gain": trajectory.total_gain,
+                "noise_floor": trajectory.noise_floor,
+                "total_steps": trajectory.total_steps,
+                "accepted_count": len(trajectory.accepted_steps),
+                "rejected_count": len(trajectory.rejected_steps),
+                "accepted_ops": [s.proposal.op for s in trajectory.accepted_steps],
+                "steps": [s.to_dict() for s in trajectory.steps],
+                "llm_calls_count": trajectory.llm_calls_count,
+                "fallback_provider": trajectory.fallback_provider,
+            }
+            with open(log_file, "a", encoding="utf-8") as f:
+                f.write(json.dumps(rec) + "\n")
+        except Exception as exc:
+            logger.debug("Failed logging agent run telemetry: %s", exc)
 
         # Clean up temp files
         try:

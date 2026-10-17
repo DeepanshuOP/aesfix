@@ -61,9 +61,8 @@ def _image_to_jpeg_bytes(pil_img: Image.Image, quality: int = 90, max_size: int 
 def _log_agent_run_telemetry(trajectory: AgentTrajectory, job_id: str, input_hash: str) -> None:
     """Appends run telemetry (hashes + metrics only) to results/agent_runs/ (AG6)."""
     try:
-        runs_dir = Path("results/agent_runs")
-        runs_dir.mkdir(parents=True, exist_ok=True)
-        log_file = runs_dir / "runs.jsonl"
+        log_file = Path(os.environ.get("AESFIX_RUNS_PATH", "results/agent_runs/runs.jsonl"))
+        log_file.parent.mkdir(parents=True, exist_ok=True)
 
         record = {
             "timestamp": time.time(),

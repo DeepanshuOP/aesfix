@@ -9,6 +9,7 @@ import datetime
 import hashlib
 import json
 import logging
+import os
 import platform
 import subprocess
 import uuid
@@ -18,6 +19,16 @@ from typing import Any, Dict, List, Optional, Union
 logger = logging.getLogger("aesfix.ledger")
 
 DEFAULT_LEDGER_PATH = Path("results/ledger.jsonl")
+
+
+def get_ledger_path(path: Optional[Union[str, Path]] = None) -> Path:
+    """Returns effective ledger path respecting explicit arg, AESFIX_LEDGER_PATH env var, or DEFAULT_LEDGER_PATH."""
+    if path is not None:
+        return Path(path)
+    env_path = os.environ.get("AESFIX_LEDGER_PATH")
+    if env_path:
+        return Path(env_path)
+    return DEFAULT_LEDGER_PATH
 
 
 def compute_dict_hash(d: Dict[str, Any]) -> str:
@@ -62,7 +73,7 @@ def append_run(
     config: Dict[str, Any],
     data_manifest: Dict[str, Any],
     cost_usd: Optional[float] = None,
-    ledger_path: Union[str, Path] = DEFAULT_LEDGER_PATH,
+    ledger_path: Optional[Union[str, Path]] = None,
     run_id: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Appends an immutable record of an executed benchmark/experiment run to the ledger.
@@ -72,13 +83,13 @@ def append_run(
         config: Experiment configuration parameters.
         data_manifest: Dataset splits, identifiers, and checksums.
         cost_usd: Monetary cost incurred during inference/API execution.
-        ledger_path: Target path for the JSONL ledger.
+        ledger_path: Target path for the JSONL ledger (falls back to AESFIX_LEDGER_PATH or DEFAULT_LEDGER_PATH).
         run_id: Optional UUID4 string; auto-generated if omitted.
 
     Returns:
         The complete run entry dictionary written to disk.
     """
-    path = Path(ledger_path)
+    path = get_ledger_path(ledger_path)
     path.parent.mkdir(parents=True, exist_ok=True)
 
     rid = run_id or str(uuid.uuid4())
@@ -109,9 +120,9 @@ def append_run(
     return record
 
 
-def load_ledger(ledger_path: Union[str, Path] = DEFAULT_LEDGER_PATH) -> List[Dict[str, Any]]:
+def load_ledger(ledger_path: Optional[Union[str, Path]] = None) -> List[Dict[str, Any]]:
     """Loads all run records from the ledger JSONL file."""
-    path = Path(ledger_path)
+    path = get_ledger_path(ledger_path)
     if not path.exists():
         return []
 
@@ -128,7 +139,7 @@ def load_ledger(ledger_path: Union[str, Path] = DEFAULT_LEDGER_PATH) -> List[Dic
     return runs
 
 
-def get_run_by_id(run_id: str, ledger_path: Union[str, Path] = DEFAULT_LEDGER_PATH) -> Optional[Dict[str, Any]]:
+def get_run_by_id(run_id: str, ledger_path: Optional[Union[str, Path]] = None) -> Optional[Dict[str, Any]]:
     """Fetches a specific run record by UUID from the ledger."""
     for run in load_ledger(ledger_path):
         if run.get("run_id") == run_id:
