@@ -6,3 +6,6 @@ exclude = ["baselines", "venv", "cache"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = [
+    "live: live tests calling external provider APIs",
+]

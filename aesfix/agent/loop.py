@@ -364,10 +364,20 @@ class AesFixAgent:
 
             # Act: Execute tool call via TierAExecutor
             t_exec_start = time.perf_counter()
+            # Normalize aspect to match CriticFix canonical dimensions
+            norm_aspect = proposal.aspect.lower()
+            if norm_aspect in ("sharpness", "quality"):
+                norm_aspect = "technical"
+            elif norm_aspect in ("light",):
+                norm_aspect = "lighting"
+            elif norm_aspect in ("clarity",):
+                norm_aspect = "subject_clarity"
+
             critic_fix = CriticFix(
                 op=proposal.op,
                 params=proposal.params,
-                expected_aspect=proposal.aspect,
+                expected_aspect=norm_aspect,
+                direction=proposal.direction if proposal.direction in (1, -1) else 1,
                 nl_instruction=proposal.rationale,
             )
 
@@ -400,9 +410,11 @@ class AesFixAgent:
             for k in current_aspects:
                 aspect_deltas[k] = round(post_aspects.get(k, 0.0) - current_aspects[k], 4)
 
-            # Map claimed aspect to score keys
+            # Map claimed aspect to score keys (search both validated and unvalidated keys)
             claimed_norm = proposal.aspect.lower()
-            claimed_key = f"{claimed_norm} (unvalidated)"
+            claimed_key = claimed_norm
+            if claimed_key not in aspect_deltas and f"{claimed_norm} (unvalidated)" in aspect_deltas:
+                claimed_key = f"{claimed_norm} (unvalidated)"
             claimed_delta = aspect_deltas.get(claimed_key, 0.0)
 
             # --- Evaluation of Acceptance Criteria ---
