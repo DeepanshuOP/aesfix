@@ -29,7 +29,8 @@ loop:
   deterministic_seed: 42
   max_accepted_per_op: 2
   op_magnitude_caps:
-    adjust_exposure: 0.6
+    adjust_exposure: 2.0
+    adjust_exposure_intentional: 0.6
 
 overprocessing:
   max_highlight_clipping_growth: 0.02

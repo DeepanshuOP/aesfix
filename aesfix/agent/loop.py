@@ -80,6 +80,8 @@ class AgentStep:
     candidate_image_sha256: str = ""
     preview_image: Optional[Image.Image] = None
     judge_deltas: Dict[str, float] = field(default_factory=dict)
+    judge_epsilons: Dict[str, float] = field(default_factory=dict)
+    judge_delta_over_eps: Dict[str, float] = field(default_factory=dict)
     confidence: str = "high"
     overprocessing_metrics: Dict[str, float] = field(default_factory=dict)
     provider: str = ""
@@ -129,6 +131,8 @@ class AgentStep:
                 "after": self.candidate_image_sha256,
             },
             "judge_deltas": self.judge_deltas,
+            "judge_epsilons": self.judge_epsilons,
+            "judge_delta_over_eps": self.judge_delta_over_eps,
             "confidence": self.confidence,
             "overprocessing_metrics": self.overprocessing_metrics,
             "provider": self.provider,
@@ -248,7 +252,13 @@ class AesFixAgent:
         if self.max_accepted_per_op is None:
             self.max_accepted_per_op = 2
         if not self.op_magnitude_caps:
-            self.op_magnitude_caps = {"adjust_exposure": 0.6}
+            self.op_magnitude_caps = {
+                "adjust_exposure": 2.0,
+                "adjust_exposure_intentional": 0.6,
+            }
+        else:
+            self.op_magnitude_caps.setdefault("adjust_exposure", 2.0)
+            self.op_magnitude_caps.setdefault("adjust_exposure_intentional", 0.6)
 
     def _set_deterministic_seed(self) -> None:
         """Sets random seeds for deterministic inference across all frameworks."""
@@ -283,7 +293,11 @@ class AesFixAgent:
         Otherwise falls back to critic aspect scores and labels as unvalidated.
         """
         judge_res = ensemble.evaluate(image_path)
-        overall_score = round(float(judge_res.overall_score), 4)
+        primary_judge = getattr(ensemble, "primary_judge", ensemble.judges[0] if getattr(ensemble, "judges", None) else None)
+        if primary_judge and primary_judge.name in judge_res.judge_scores:
+            overall_score = round(float(judge_res.judge_scores[primary_judge.name].raw_score), 4)
+        else:
+            overall_score = round(float(judge_res.overall_score), 4)
 
         aspect_scores: Dict[str, float] = {}
 
@@ -301,9 +315,8 @@ class AesFixAgent:
                         aspect_scores["lighting (unvalidated)"] = raw_aspects.get("light (unvalidated)", 0.5)
                         aspect_scores["color (unvalidated)"] = raw_aspects.get("color (unvalidated)", 0.5)
                         aspect_scores["technical (unvalidated)"] = raw_aspects.get("quality (unvalidated)", 0.5)
-                        dof_val = raw_aspects.get("dof (unvalidated)", 0.5)
-                        aspect_scores["sharpness (unvalidated)"] = dof_val
-                        aspect_scores["subject_clarity (unvalidated)"] = dof_val
+                        aspect_scores["sharpness (unvalidated)"] = raw_aspects.get("dof (unvalidated)", 0.5)
+                        aspect_scores["subject_clarity (unvalidated)"] = raw_aspects.get("content (unvalidated)", 0.5)
                         break
                 except Exception as exc:
                     logger.debug("Failed extracting rsinema heads: %s", exc)
@@ -313,8 +326,18 @@ class AesFixAgent:
             critique = critic.critique(image_path)
             for k, v in critique.aspect_scores.items():
                 aspect_scores[f"{k} (unvalidated)"] = round(float(v), 4)
-            if "subject_clarity" in critique.aspect_scores and "sharpness (unvalidated)" not in aspect_scores:
-                aspect_scores["sharpness (unvalidated)"] = round(float(critique.aspect_scores["subject_clarity"]), 4)
+            if "subject_clarity" in critique.aspect_scores and "subject_clarity (unvalidated)" not in aspect_scores:
+                aspect_scores["subject_clarity (unvalidated)"] = round(float(critique.aspect_scores["subject_clarity"]), 4)
+            if "sharpness (unvalidated)" not in aspect_scores:
+                try:
+                    with Image.open(image_path) as pimg:
+                        gray = np.asarray(pimg.convert("L"), dtype=np.float32)
+                        gy, gx = np.gradient(gray)
+                        grad_var = float(np.var(gx**2 + gy**2))
+                        sharp_norm = float(1.0 / (1.0 + np.exp(-grad_var / 500.0 + 2.0)))
+                        aspect_scores["sharpness (unvalidated)"] = round(max(0.0, min(1.0, sharp_norm)), 4)
+                except Exception:
+                    aspect_scores["sharpness (unvalidated)"] = 0.5
 
         return aspect_scores, overall_score
 
@@ -416,6 +439,10 @@ class AesFixAgent:
             per_judge_eps = {}
 
         all_judges = getattr(ensemble, "judges", [])
+        primary_judge = getattr(ensemble, "primary_judge", all_judges[0] if all_judges else None)
+        if primary_judge:
+            per_judge_eps[primary_judge.name] = noise_floor
+
         families_present = set(getattr(j, "family", "clip") for j in all_judges)
         run_confidence = "high" if len(families_present) >= 2 else "single-judge measurement (low confidence)"
 
@@ -792,9 +819,10 @@ class AesFixAgent:
                     f"Operation '{proposal.op}' reached maximum accepted quota ({self.max_accepted_per_op} per run)"
                 )
 
-            # 6. Anti-greedy (AQ2): Cumulative magnitude cap
+            # 6. Anti-greedy (AQ2 / F3b): Cumulative magnitude cap
             if proposal.op == "adjust_exposure":
-                cap = self.op_magnitude_caps.get("adjust_exposure", 0.6)
+                is_intentional = bool(style_intent.get("is_intentional", False))
+                cap = self.op_magnitude_caps.get("adjust_exposure_intentional", 0.6) if is_intentional else self.op_magnitude_caps.get("adjust_exposure", 2.0)
                 delta_ev = float(proposal.params.get("ev_delta", 0.0))
                 if abs(cumulative_op_magnitudes["adjust_exposure"] + delta_ev) > (cap + 1e-4):
                     is_accepted = False
@@ -811,7 +839,7 @@ class AesFixAgent:
                     f"Cumulative gain against original image ({cumulative_gain:+.4f}) does not exceed noise floor ({noise_floor:.4f})"
                 )
 
-            # 8. Multi-judge agreement across independent families (AQ3)
+            # 8. Multi-judge non-inferiority across independent families (AQ3 / F3c / F3d)
             judge_scores_before: Dict[str, float] = {}
             judge_scores_after: Dict[str, float] = {}
             judge_deltas: Dict[str, float] = {}
@@ -839,30 +867,36 @@ class AesFixAgent:
                     judge_scores_before[j.name] = current_overall
                     judge_scores_after[j.name] = post_overall
 
+            primary_judge = getattr(ensemble, "primary_judge", all_judges[0] if all_judges else None)
+            if primary_judge and primary_judge.name in judge_deltas:
+                judge_deltas[primary_judge.name] = overall_delta
+
+            judge_epsilons: Dict[str, float] = {}
+            judge_delta_over_eps: Dict[str, float] = {}
+            primary_family = getattr(primary_judge, "family", "clip") if primary_judge else "clip"
+
+            for j in all_judges:
+                j_delta = judge_deltas.get(j.name, 0.0)
+                j_eps = per_judge_eps.get(j.name, noise_floor)
+                ratio = round(j_delta / max(1e-6, j_eps), 2)
+                judge_epsilons[j.name] = j_eps
+                judge_delta_over_eps[j.name] = ratio
+
+                # Non-inferiority rule (F3c): Secondary independent families must not degrade beyond their noise floor
+                if getattr(j, "family", "") != primary_family:
+                    if j_delta < -j_eps:
+                        is_accepted = False
+                        rejection_reasons.append(
+                            f"Multi-judge non-inferiority rejected: independent family '{j.family}' ({j.name}) "
+                            f"degraded beyond noise floor: Δ={j_delta:+.4f} < -ε=-{j_eps:.4f} (Δ/ε = {ratio:+.2f})"
+                        )
+
             families_available: Dict[str, List[str]] = defaultdict(list)
             for j in all_judges:
                 fam = getattr(j, "family", "clip")
                 families_available[fam].append(j.name)
 
-            agreeing_families: List[str] = []
-            for fam, j_names in families_available.items():
-                for j_name in j_names:
-                    j_delta = judge_deltas.get(j_name, 0.0)
-                    j_eps = per_judge_eps.get(j_name, noise_floor)
-                    if j_delta > j_eps:
-                        agreeing_families.append(fam)
-                        break
-
-            step_confidence = "high"
-            if len(families_available) >= 2:
-                if len(agreeing_families) < 2:
-                    is_accepted = False
-                    rejection_reasons.append(
-                        f"Multi-judge agreement rejected: only {len(agreeing_families)}/2 families agreed "
-                        f"({agreeing_families}), at least 2 independent families required"
-                    )
-            elif len(families_available) == 1:
-                step_confidence = "single-judge measurement (low confidence)"
+            step_confidence = "high" if len(families_available) >= 2 else "single-judge measurement (low confidence)"
 
             # 9. Intent check: Opt-in required for exposure/shadow lifts on intentional style (AQ4)
             is_exposure_lift = (
@@ -884,12 +918,12 @@ class AesFixAgent:
                         f"exposure/shadow lifts require explicit user opt-in via Goal Directives"
                     )
 
-            # 10. Over-processing checks against ORIGINAL image (AQ4)
+            # 10. Over-processing checks against ORIGINAL image (AQ4 / F5)
             try:
                 arr_cand = np.asarray(exec_res.image.convert("RGB"), dtype=np.float32) / 255.0
                 luma_cand = 0.299 * arr_cand[:, :, 0] + 0.587 * arr_cand[:, :, 1] + 0.114 * arr_cand[:, :, 2]
                 hl_cand = float(np.mean(np.max(arr_cand, axis=-1) >= 0.99))
-                sh_cand = float(np.mean(np.min(arr_cand, axis=-1) <= 0.01))
+                sh_cand = float(np.mean(luma_cand <= 0.01))
                 p5_cand = float(np.percentile(luma_cand, 5))
                 max_c = np.max(arr_cand, axis=-1)
                 min_c = np.min(arr_cand, axis=-1)
@@ -958,6 +992,8 @@ class AesFixAgent:
                 candidate_image_sha256=candidate_step_sha256,
                 preview_image=exec_res.image.copy(),
                 judge_deltas=judge_deltas,
+                judge_epsilons=judge_epsilons,
+                judge_delta_over_eps=judge_delta_over_eps,
                 confidence=step_confidence,
                 overprocessing_metrics=overprocessing_metrics,
                 provider=step_provider,

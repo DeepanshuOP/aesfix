@@ -142,12 +142,14 @@ class LLMClient:
         max_retries: int = 3,
         enable_cache: bool = True,
         provider_chain: Optional[List[str]] = None,
+        target_luma: float = 0.45,
     ) -> None:
         self.max_retries = max_retries
         self.enable_cache = enable_cache
         self.cache = DiskCache(cache_dir=cache_dir)
         self.total_calls: int = 0
         self.cache_hits: int = 0
+        self.target_luma = float(target_luma)
 
         # Load provider chain (AQ5)
         if provider_chain is not None:
@@ -440,6 +442,7 @@ class LLMClient:
         arr = np.array(img.convert("RGB"), dtype=np.float32) / 255.0
         luma_map = 0.299 * arr[:, :, 0] + 0.587 * arr[:, :, 1] + 0.114 * arr[:, :, 2]
         mean_luma = float(luma_map.mean())
+        median_luma = float(np.median(luma_map))
         std_luma = float(luma_map.std())
 
         # HSV saturation analysis
@@ -447,22 +450,32 @@ class LLMClient:
         hsv_arr = np.array(hsv, dtype=np.float32) / 255.0
         mean_sat = float(hsv_arr[:, :, 1].mean())
 
+        # Image-aware exposure calculation (F3a)
+        # ev_delta = clip(log2(target / median_luma), -2, 2), target default 0.45
+        target = getattr(self, "target_luma", 0.45)
+        raw_ev = np.log2(target / max(1e-4, median_luma))
+        ev_delta = round(float(np.clip(raw_ev, -2.0, 2.0)), 2)
+
         # Select primary parametric operator based on empirical measurements
         # Avoid repeating an already rejected op if mentioned in prompt
-        rejected_ops = [op for op in ["adjust_exposure", "adjust_contrast", "adjust_saturation", "adjust_highlights", "adjust_shadows"] if f"rejected: {op}" in prompt.lower()]
+        prompt_lower = prompt.lower()
+        rejected_ops = [
+            op for op in [
+                "adjust_exposure", "adjust_contrast", "adjust_saturation",
+                "adjust_highlights", "adjust_shadows", "smart_crop"
+            ]
+            if f"rejected {op}" in prompt_lower or f"rejected: {op}" in prompt_lower
+        ]
 
-        if mean_luma < 0.38 and "adjust_exposure" not in rejected_ops:
+        if abs(ev_delta) >= 0.15 and "adjust_exposure" not in rejected_ops:
             op = "adjust_exposure"
-            params = {"ev_delta": 0.30}
+            params = {"ev_delta": ev_delta}
             aspect = "lighting"
             direction = 1
-            rationale = "Image exhibits underexposure across midtones; lifting exposure by +0.30 EV to improve illumination."
-        elif mean_luma > 0.65 and "adjust_exposure" not in rejected_ops:
-            op = "adjust_exposure"
-            params = {"ev_delta": -0.25}
-            aspect = "lighting"
-            direction = 1
-            rationale = "Image is moderately overexposed with highlight blowout risk; reducing exposure by -0.25 EV."
+            if ev_delta > 0:
+                rationale = f"Image exhibits underexposure across midtones (median luma {median_luma:.3f}); lifting exposure by {ev_delta:+.2f} EV toward target {target:.2f}."
+            else:
+                rationale = f"Image exhibits overexposure across midtones (median luma {median_luma:.3f}); reducing exposure by {ev_delta:+.2f} EV toward target {target:.2f}."
         elif std_luma < 0.16 and "adjust_contrast" not in rejected_ops:
             op = "adjust_contrast"
             params = {"factor": 1.18}
@@ -475,12 +488,25 @@ class LLMClient:
             aspect = "color"
             direction = 1
             rationale = "Color chroma is subdued and washed out; enhancing HSV saturation by 1.15x."
-        else:
+        elif "adjust_highlights" not in rejected_ops and mean_luma > 0.50:
             op = "adjust_highlights"
-            params = {"factor": -15.0}
+            params = {"highlights": -15.0}
             aspect = "lighting"
             direction = 1
             rationale = "Recovering upper-range luminance details by compressing highlight peaks."
+        elif "adjust_shadows" not in rejected_ops and median_luma < 0.35:
+            op = "adjust_shadows"
+            params = {"shadows": 15.0}
+            aspect = "lighting"
+            direction = 1
+            rationale = "Lifting deep shadow tones to recover subtle dark textures."
+        else:
+            # Terminate cleanly if all candidate operations have been evaluated
+            op = "adjust_exposure"
+            params = {"ev_delta": 0.0}
+            aspect = "lighting"
+            direction = 1
+            rationale = "All candidate operations have been rejected or balanced; terminating heuristic exploration."
 
         payload = {
             "op": op,
