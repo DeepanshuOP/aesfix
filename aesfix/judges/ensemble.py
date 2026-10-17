@@ -474,6 +474,10 @@ def compute_noise_floor(
             temp_path = tf.name
         try:
             res = judge_or_ensemble.evaluate(temp_path)
+            if hasattr(judge_or_ensemble, "primary_judge") and hasattr(res, "judge_scores"):
+                pj = judge_or_ensemble.primary_judge
+                if pj.name in res.judge_scores:
+                    return float(res.judge_scores[pj.name].raw_score)
             if hasattr(res, "overall_score"):
                 return float(res.overall_score)
             elif hasattr(res, "normalized_score"):
@@ -613,8 +617,12 @@ class JudgeEnsemble:
             raise ValueError("JudgeEnsemble requires at least one judge.")
         self.judges = list(judges)
         self.disagreement_threshold = disagreement_threshold
-        # Keyed strictly by sha256(image_bytes) to prevent path-dependent cache collisions
         self._content_hash_cache: Dict[str, JudgeResult] = {}
+
+    @property
+    def primary_judge(self) -> BaseJudge:
+        """Returns the primary judge responsible for absolute score deltas."""
+        return self.judges[0]
 
     def evaluate(self, image_path: str) -> JudgeResult:
         """Evaluate an image across all judges in the ensemble."""
