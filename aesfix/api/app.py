@@ -39,9 +39,9 @@ def create_app() -> FastAPI:
         title="AesFix API — Closed-Loop Image Aesthetics & Edit Verification",
         description=(
             "The photo critic that proves its advice works. "
-            "Evaluates photos across 5 aesthetic dimensions, computes interpretable neuro-fuzzy "
-            "rulebook traces, executes deterministic photographic adjustments, tests against "
-            "Identity Guard drift, and reports verified Aesthetic Gain (AG@k) with Lightroom XMP sidecars."
+            "Evaluates photos across 5 aesthetic dimensions, computes interpretable photographic "
+            "recommendations, executes deterministic photographic adjustments, tests against "
+            "Identity Guard drift, and reports measurable improvement against empirical noise floors with Lightroom XMP sidecars."
         ),
         version="1.0.0",
         docs_url="/docs",
@@ -91,14 +91,12 @@ def create_app() -> FastAPI:
     # 5. Root Welcome Endpoint
     @app.get("/", tags=["root"])
     def root_welcome() -> Dict[str, Any]:
-        """Root API metadata, research preprint link, and documentation gateway."""
+        """Root API metadata and documentation gateway."""
         return {
             "name": "AesFix API",
             "tagline": "The photo critic that proves its advice works.",
             "version": "1.0.0",
             "status": "operational",
-            "paper_preprint": "docs/paper/arxiv_preprint_draft.md",
-            "agx_leaderboard": "https://huggingface.co/spaces/aesfix/agx-leaderboard",
             "mcp_endpoint": "/mcp/sse",
             "docs": "/docs",
         }

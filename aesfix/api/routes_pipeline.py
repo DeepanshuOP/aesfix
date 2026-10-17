@@ -217,3 +217,70 @@ def download_xmp_sidecar(job_id: str, fix_index: int = 0) -> Response:
             "Content-Disposition": f'attachment; filename="{filename}"',
         },
     )
+
+
+@router.get("/jobs/{job_id}/preview/original")
+def get_original_preview(job_id: str) -> Response:
+    """Returns the original uploaded photo as a PNG preview image."""
+    job = queue_manager.get_job(job_id)
+    if not job or job.original_image is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Original preview for job '{job_id}' not found.",
+        )
+    buf = io.BytesIO()
+    job.original_image.save(buf, format="PNG")
+    return Response(
+        content=buf.getvalue(),
+        media_type="image/png",
+        headers={"Content-Disposition": f'inline; filename="original_{job_id}.png"'},
+    )
+
+
+@router.get("/jobs/{job_id}/preview/{fix_index}")
+def get_fix_preview(job_id: str, fix_index: str) -> Response:
+    """Returns the rendered photographic fix preview image as PNG."""
+    job = queue_manager.get_job(job_id)
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Job '{job_id}' not found.",
+        )
+
+    if fix_index.lower() in ("original", "-1"):
+        if job.original_image is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Original image for job '{job_id}' not available.",
+            )
+        buf = io.BytesIO()
+        job.original_image.save(buf, format="PNG")
+        return Response(
+            content=buf.getvalue(),
+            media_type="image/png",
+            headers={"Content-Disposition": f'inline; filename="original_{job_id}.png"'},
+        )
+
+    try:
+        idx = int(fix_index)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid fix index: '{fix_index}'. Must be an integer or 'original'.",
+        ) from exc
+
+    img = job.preview_images.get(idx)
+    if img is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Preview image for fix {idx} not available.",
+        )
+
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    return Response(
+        content=buf.getvalue(),
+        media_type="image/png",
+        headers={"Content-Disposition": f'inline; filename="fix_{idx}_{job_id}.png"'},
+    )
+
