@@ -26,3 +26,8 @@ loop:
   max_accepted_per_op: 2
   op_magnitude_caps:
     adjust_exposure: 0.6
+
+overprocessing:
+  max_highlight_clipping_growth: 0.02
+  max_black_level_lift_low_key: 0.03
+  max_saturation_clipping_growth: 0.05

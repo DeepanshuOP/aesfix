@@ -596,3 +596,90 @@ def test_anti_greedy_diminishing_returns_stop(dummy_image: str) -> None:
     assert len(trajectory.steps) == 3
     assert len(trajectory.accepted_steps) == 3
 
+
+def test_intent_detection_and_opt_in_requirement() -> None:
+    """Verifies that intentional low-key photo rejects exposure lift unless opted in (AQ4)."""
+    dark_jpg = str(_PROJECT_ROOT / "dark.jpg")
+    prop = json.dumps({
+        "op": "adjust_exposure",
+        "params": {"ev_delta": 0.3},
+        "aspect": "lighting",
+        "direction": 1,
+        "rationale": "Greedy lift without opt in.",
+    })
+    fake_llm = FakeLLM([prop])
+    agent = AesFixAgent(llm_client=fake_llm, max_steps=1)
+
+    mock_scores = [
+        ({"lighting": 0.20}, 0.20),  # baseline
+        ({"lighting": 0.30}, 0.30),  # post
+    ]
+
+    with patch.object(agent, "_extract_aspect_scores", side_effect=mock_scores), \
+         patch("aesfix.agent.loop.compute_noise_floor", return_value=0.01), \
+         patch.object(agent.guard, "evaluate", return_value=GuardVerdict(
+             is_valid=True, composite_drift=0.02, feature_drift=0.01, structural_drift=0.01,
+             threshold=0.35, backend_name="rgb_layout_stat", guard_backend="SSIM + rgb_layout_stat",
+         )):
+        # Run without opt-in in user_goal
+        traj_no_opt_in = agent.run(dark_jpg, user_goal=None)
+
+    assert len(traj_no_opt_in.steps) == 1
+    assert traj_no_opt_in.steps[0].status == "rejected"
+    assert "Intent check" in traj_no_opt_in.steps[0].verdict_reason
+    assert "opt-in" in traj_no_opt_in.steps[0].verdict_reason
+    assert traj_no_opt_in.style_intent["is_intentional"] is True
+    assert traj_no_opt_in.style_intent["style_type"] == "low-key"
+
+    # Now run WITH opt-in in user_goal
+    fake_llm_opt_in = FakeLLM([prop])
+    agent_opt_in = AesFixAgent(llm_client=fake_llm_opt_in, max_steps=1)
+
+    with patch.object(agent_opt_in, "_extract_aspect_scores", side_effect=mock_scores), \
+         patch("aesfix.agent.loop.compute_noise_floor", return_value=0.01), \
+         patch.object(agent_opt_in.guard, "evaluate", return_value=GuardVerdict(
+             is_valid=True, composite_drift=0.02, feature_drift=0.01, structural_drift=0.01,
+             threshold=0.35, backend_name="rgb_layout_stat", guard_backend="SSIM + rgb_layout_stat",
+         )):
+        traj_opt_in = agent_opt_in.run(dark_jpg, user_goal="I explicitly opt-in to lift exposure on this night photo.")
+
+    assert len(traj_opt_in.steps) == 1
+    assert traj_opt_in.steps[0].status == "accepted"
+
+
+def test_overprocessing_metrics_reported_on_step_cards(dummy_image: str) -> None:
+    """Verifies that overprocessing clipping and black level metrics are computed and serialized (AQ4)."""
+    prop = json.dumps({
+        "op": "adjust_exposure",
+        "params": {"ev_delta": 0.25},
+        "aspect": "lighting",
+        "direction": 1,
+        "rationale": "Moderate exposure balance.",
+    })
+    fake_llm = FakeLLM([prop])
+    agent = AesFixAgent(llm_client=fake_llm, max_steps=1)
+
+    mock_scores = [
+        ({"lighting": 0.50}, 0.50),
+        ({"lighting": 0.55}, 0.55),
+    ]
+
+    with patch.object(agent, "_extract_aspect_scores", side_effect=mock_scores), \
+         patch("aesfix.agent.loop.compute_noise_floor", return_value=0.01), \
+         patch.object(agent.guard, "evaluate", return_value=GuardVerdict(
+             is_valid=True, composite_drift=0.02, feature_drift=0.01, structural_drift=0.01,
+             threshold=0.35, backend_name="rgb_layout_stat", guard_backend="SSIM + rgb_layout_stat",
+         )):
+        traj = agent.run(dummy_image)
+
+    assert len(traj.steps) == 1
+    step_dict = traj.steps[0].to_dict()
+    assert "overprocessing_metrics" in step_dict
+    metrics = step_dict["overprocessing_metrics"]
+    assert "highlight_clipping" in metrics
+    assert "shadow_clipping" in metrics
+    assert "black_level_lift" in metrics
+    assert "saturation_clipping" in metrics
+    assert "highlight_clipping_growth" in metrics
+
+

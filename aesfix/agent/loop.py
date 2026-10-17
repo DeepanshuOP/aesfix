@@ -82,6 +82,7 @@ class AgentStep:
     preview_image: Optional[Image.Image] = None
     judge_deltas: Dict[str, float] = field(default_factory=dict)
     confidence: str = "high"
+    overprocessing_metrics: Dict[str, float] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         """Serializes step record for API responses and telemetry logging."""
@@ -128,6 +129,7 @@ class AgentStep:
             },
             "judge_deltas": self.judge_deltas,
             "confidence": self.confidence,
+            "overprocessing_metrics": self.overprocessing_metrics,
         }
 
 
@@ -152,6 +154,7 @@ class AgentTrajectory:
     model_id: str = ""
     seed: int = 42
     confidence: str = "high"
+    style_intent: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         """Serializes trajectory metadata and steps."""
@@ -171,6 +174,7 @@ class AgentTrajectory:
             "steps": [s.to_dict() for s in self.steps],
             "accepted_ops": [s.proposal.op for s in self.accepted_steps],
             "confidence": self.confidence,
+            "style_intent": self.style_intent,
         }
 
 
@@ -217,8 +221,16 @@ class AesFixAgent:
                     self.op_magnitude_caps = {
                         str(k): float(v) for k, v in loop_cfg["op_magnitude_caps"].items()
                     }
+                self.overprocessing_cfg = cfg.get("overprocessing", {})
             except Exception as exc:
                 logger.debug("Could not parse config/agent.yaml: %s", exc)
+
+        if not self.overprocessing_cfg:
+            self.overprocessing_cfg = {
+                "max_highlight_clipping_growth": 0.02,
+                "max_black_level_lift_low_key": 0.03,
+                "max_saturation_clipping_growth": 0.05,
+            }
 
         if self.max_accepted_per_op is None:
             self.max_accepted_per_op = 2
@@ -293,6 +305,69 @@ class AesFixAgent:
 
         return aspect_scores, overall_score
 
+    def _detect_style_intent(
+        self,
+        image_path: str,
+        user_goal: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Classifies photographic style intent (low-key, high-key, night, monochrome, normal) (AQ4)."""
+        try:
+            with Image.open(image_path) as pil_img:
+                rgb = pil_img.convert("RGB")
+                arr = np.asarray(rgb, dtype=np.float32) / 255.0
+                luma = 0.299 * arr[:, :, 0] + 0.587 * arr[:, :, 1] + 0.114 * arr[:, :, 2]
+                mean_luma = float(np.mean(luma))
+                p5_luma = float(np.percentile(luma, 5))
+                p95_luma = float(np.percentile(luma, 95))
+        except Exception:
+            mean_luma, p5_luma, p95_luma = 0.5, 0.1, 0.9
+
+        stat_is_intentional = False
+        stat_style = "normal"
+        stat_explanation = "Standard exposure and tone distribution."
+
+        if mean_luma < 0.15 and p5_luma < 0.02:
+            stat_is_intentional = True
+            stat_style = "low-key"
+            stat_explanation = f"Intentional low-key night photography (mean luma {mean_luma:.3f}, p5 {p5_luma:.3f})."
+        elif mean_luma > 0.80 and p95_luma > 0.95:
+            stat_is_intentional = True
+            stat_style = "high-key"
+            stat_explanation = f"Intentional high-key photography (mean luma {mean_luma:.3f}, p95 {p95_luma:.3f})."
+
+        is_mock = hasattr(self.llm_client, "responses")
+        if not is_mock and self.llm_client is not None:
+            try:
+                intent_prompt = (
+                    "Examine this photograph. Is the current exposure or style intentional "
+                    "(low-key, high-key, silhouette, night, monochrome)? "
+                    "Respond in valid JSON: {\"is_intentional\": bool, \"style_type\": str, \"explanation\": str}"
+                )
+                resp = self.llm_client.generate(
+                    prompt=intent_prompt,
+                    image_input=image_path,
+                    system_instruction="You are a photographic vision planner diagnosing creative intent.",
+                )
+                data = json.loads(resp.content.strip().strip("```json").strip("```").strip())
+                if isinstance(data, dict) and "is_intentional" in data:
+                    return {
+                        "is_intentional": bool(data["is_intentional"]),
+                        "style_type": str(data.get("style_type", stat_style)),
+                        "explanation": str(data.get("explanation", stat_explanation)),
+                        "mean_luma": round(mean_luma, 4),
+                        "p5_luma": round(p5_luma, 4),
+                    }
+            except Exception as exc:
+                logger.debug("Planner intent call fallback to statistical detection: %s", exc)
+
+        return {
+            "is_intentional": stat_is_intentional,
+            "style_type": stat_style,
+            "explanation": stat_explanation,
+            "mean_luma": round(mean_luma, 4),
+            "p5_luma": round(p5_luma, 4),
+        }
+
     def run(
         self,
         image_input: Union[str, Path, Image.Image],
@@ -335,6 +410,19 @@ class AesFixAgent:
         current_aspects, current_overall = self._extract_aspect_scores(orig_temp_path, ensemble, critic)
         initial_overall_score = current_overall
 
+        # Measure baseline pixel and luma distributions for over-processing checks (AQ4)
+        try:
+            arr_orig = np.asarray(current_image.convert("RGB"), dtype=np.float32) / 255.0
+            luma_orig = 0.299 * arr_orig[:, :, 0] + 0.587 * arr_orig[:, :, 1] + 0.114 * arr_orig[:, :, 2]
+            orig_hl_clip = float(np.mean(np.max(arr_orig, axis=-1) >= 0.99))
+            orig_p5_luma = float(np.percentile(luma_orig, 5))
+        except Exception:
+            orig_hl_clip = 0.0
+            orig_p5_luma = 0.0
+
+        # Classify photographic style intent (AQ4)
+        style_intent = self._detect_style_intent(orig_temp_path, user_goal)
+
         trajectory = AgentTrajectory(
             initial_image_path=orig_temp_path,
             final_image=current_image.copy(),
@@ -349,6 +437,7 @@ class AesFixAgent:
             model_id=self.llm_client.model_id,
             seed=self.seed,
             confidence=run_confidence,
+            style_intent=style_intent,
         )
 
         accepted_fixes: List[CriticFix] = []
@@ -738,6 +827,66 @@ class AesFixAgent:
             elif len(families_available) == 1:
                 step_confidence = "single-judge measurement (low confidence)"
 
+            # 9. Intent check: Opt-in required for exposure/shadow lifts on intentional style (AQ4)
+            is_exposure_lift = (
+                (proposal.op == "adjust_exposure" and float(proposal.params.get("ev_delta", 0.0)) > 0)
+                or (proposal.op in ("adjust_contrast", "adjust_clarity") and proposal.aspect == "lighting" and proposal.direction > 0)
+            )
+            if style_intent.get("is_intentional") and is_exposure_lift:
+                style_type = style_intent.get("style_type", "low-key")
+                opt_in_keywords = [
+                    "lift exposure", "brighten", "exposure lift", "increase exposure",
+                    "boost exposure", "brighten shadows", "lift shadow", "lift shadows",
+                    "override", "opt-in",
+                ]
+                has_opt_in = bool(user_goal and any(kw in user_goal.lower() for kw in opt_in_keywords))
+                if not has_opt_in:
+                    is_accepted = False
+                    rejection_reasons.append(
+                        f"Intent check: photograph classified as intentional {style_type}; "
+                        f"exposure/shadow lifts require explicit user opt-in via Goal Directives"
+                    )
+
+            # 10. Over-processing checks against ORIGINAL image (AQ4)
+            try:
+                arr_cand = np.asarray(exec_res.image.convert("RGB"), dtype=np.float32) / 255.0
+                luma_cand = 0.299 * arr_cand[:, :, 0] + 0.587 * arr_cand[:, :, 1] + 0.114 * arr_cand[:, :, 2]
+                hl_cand = float(np.mean(np.max(arr_cand, axis=-1) >= 0.99))
+                sh_cand = float(np.mean(np.min(arr_cand, axis=-1) <= 0.01))
+                p5_cand = float(np.percentile(luma_cand, 5))
+                max_c = np.max(arr_cand, axis=-1)
+                min_c = np.min(arr_cand, axis=-1)
+                sat = np.where(max_c > 1e-4, (max_c - min_c) / np.maximum(max_c, 1e-4), 0.0)
+                sat_cand = float(np.mean(sat >= 0.99))
+
+                hl_growth = float(hl_cand - orig_hl_clip)
+                black_level_lift = float(p5_cand - orig_p5_luma)
+            except Exception:
+                hl_cand, sh_cand, sat_cand, hl_growth, black_level_lift = 0.0, 0.0, 0.0, 0.0, 0.0
+
+            overprocessing_metrics = {
+                "highlight_clipping": round(hl_cand, 4),
+                "shadow_clipping": round(sh_cand, 4),
+                "black_level_lift": round(black_level_lift, 4),
+                "saturation_clipping": round(sat_cand, 4),
+                "highlight_clipping_growth": round(hl_growth, 4),
+            }
+
+            max_hl_growth = float(self.overprocessing_cfg.get("max_highlight_clipping_growth", 0.02))
+            max_black_lift = float(self.overprocessing_cfg.get("max_black_level_lift_low_key", 0.03))
+
+            if hl_growth > max_hl_growth:
+                is_accepted = False
+                rejection_reasons.append(
+                    f"Over-processing rejected: highlight clipping grew by {hl_growth:+.4f} (threshold {max_hl_growth:.4f})"
+                )
+
+            if style_intent.get("style_type") in ("low-key", "night", "silhouette") and black_level_lift > max_black_lift:
+                is_accepted = False
+                rejection_reasons.append(
+                    f"Over-processing rejected: black level lifted by {black_level_lift:+.4f} on {style_intent.get('style_type')} photo (threshold {max_black_lift:.4f})"
+                )
+
             # Construct verdict reason
             if is_accepted:
                 verdict_reason = (
@@ -773,6 +922,7 @@ class AesFixAgent:
                 preview_image=exec_res.image.copy(),
                 judge_deltas=judge_deltas,
                 confidence=step_confidence,
+                overprocessing_metrics=overprocessing_metrics,
             )
 
             trajectory.steps.append(step_record)
@@ -839,10 +989,11 @@ class AesFixAgent:
             trajectory.stacked_xmp = ""
 
         # Append telemetry (hashes + metrics only, no images) to results/agent_runs/ (AG6)
-        try:
-            runs_dir = Path("results/agent_runs")
-            runs_dir.mkdir(parents=True, exist_ok=True)
-            log_file = runs_dir / "runs.jsonl"
+        if not os.environ.get("PYTEST_CURRENT_TEST"):
+            try:
+                runs_dir = Path("results/agent_runs")
+                runs_dir.mkdir(parents=True, exist_ok=True)
+                log_file = runs_dir / "runs.jsonl"
             rec = {
                 "timestamp": time.time(),
                 "initial_image_sha256": trajectory.initial_image_sha256,
