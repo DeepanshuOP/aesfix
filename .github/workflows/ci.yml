@@ -41,6 +41,9 @@ jobs:
       - name: Verify ledger append-only integrity
         run: python scripts/check_ledger_append_only.py
 
+      - name: Verify zero fake telemetry in evidence files
+        run: python scripts/check_no_fake_telemetry.py
+
   gitleaks:
     runs-on: ubuntu-latest
     steps:
