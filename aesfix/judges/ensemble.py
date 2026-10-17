@@ -12,12 +12,15 @@ Individual aesthetic scorers suffer from strong idiosyncratic biases:
 """
 from __future__ import annotations
 
+import io
 import logging
 import os
 import statistics as stats
+import tempfile
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Sequence
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 import torch
 from PIL import Image
@@ -235,6 +238,179 @@ class ImscoreLaionJudge(BaseJudge):
             raise JudgeEvaluationError(f"Imscore LAION inference failed on {image_path}: {exc}") from exc
 
 
+def _find_hf_snapshot(repo_id: str) -> Optional[str]:
+    """Finds an existing snapshot directory for a model in local HF caches."""
+    cache_roots = []
+    if "HF_HOME" in os.environ:
+        cache_roots.append(os.path.join(os.environ["HF_HOME"], "hub"))
+    cache_roots.extend([
+        r"D:\aesfix-cache\hf\hub",
+        os.path.expanduser("~/.cache/huggingface/hub"),
+    ])
+    repo_folder = "models--" + repo_id.replace("/", "--")
+    for root in cache_roots:
+        snaps = os.path.join(root, repo_folder, "snapshots")
+        if os.path.exists(snaps):
+            subdirs = [os.path.join(snaps, d) for d in os.listdir(snaps) if os.path.isdir(os.path.join(snaps, d))]
+            if subdirs:
+                return subdirs[0]
+    return None
+
+
+class RsinemaAestheticJudge(BaseJudge):
+    """Independent aesthetic regression judge (rsinema/aesthetic-scorer).
+
+    Why this judge is required (Task D3.a):
+    The critic proposes fixes based on zero-shot CLIP aspect text prompts.
+    To avoid self-referential bias and Goodhart reward-hacking, gain verification
+    must use an independent judge trained specifically on aesthetic ratings.
+    """
+
+    name = "rsinema/aesthetic-scorer"
+
+    def __init__(self, model_id: str = "rsinema/aesthetic-scorer") -> None:
+        self.model_id = model_id
+        self._model: Optional[Any] = None
+        self._processor: Optional[Any] = None
+        self._head_weight: Optional[torch.Tensor] = None
+        self._head_bias: Optional[torch.Tensor] = None
+
+    def _ensure_loaded(self) -> None:
+        if self._model is not None and self._processor is not None:
+            return
+
+        rsinema_snap = _find_hf_snapshot(self.model_id)
+        clip_snap = _find_hf_snapshot("openai/clip-vit-base-patch32")
+
+        if not rsinema_snap or not clip_snap:
+            raise JudgeEvaluationError(
+                f"Missing local cache snapshots for {self.model_id} or openai/clip-vit-base-patch32"
+            )
+
+        try:
+            from transformers import CLIPProcessor, CLIPVisionModel
+
+            pt_path = os.path.join(rsinema_snap, "model.pt")
+            if not os.path.exists(pt_path):
+                raise FileNotFoundError(f"Weight file not found at {pt_path}")
+
+            state = torch.load(pt_path, map_location="cpu", weights_only=False)
+
+            vision = CLIPVisionModel.from_pretrained(clip_snap, local_files_only=True)
+            vision.eval()
+            proc = CLIPProcessor.from_pretrained(clip_snap, local_files_only=True)
+
+            clean_backbone = {}
+            for k, v in state.items():
+                if k.startswith("backbone."):
+                    clean_backbone[k.replace("backbone.", "")] = v
+
+            vision.vision_model.load_state_dict(clean_backbone, strict=False)
+
+            self._model = vision
+            self._processor = proc
+            self._head_weight = state["aesthetic_head.0.weight"]
+            self._head_bias = state["aesthetic_head.0.bias"]
+            logger.info("Loaded RsinemaAestheticJudge from %s", rsinema_snap)
+        except Exception as exc:
+            raise JudgeEvaluationError(f"Failed to initialize {self.model_id}: {exc}") from exc
+
+    def evaluate(self, image_path: str) -> JudgeScore:
+        self._validate_image_path(image_path)
+        self._ensure_loaded()
+        if self._model is None or self._processor is None:
+            raise JudgeEvaluationError(f"Model not initialized for {self.model_id}")
+
+        try:
+            pil_image = Image.open(image_path).convert("RGB")
+            inputs = self._processor(images=pil_image, return_tensors="pt")
+            with torch.no_grad():
+                out = self._model(**inputs)
+                cls_token = out.pooler_output
+                raw_score = (cls_token @ self._head_weight.T + self._head_bias).item()
+
+            norm_score = max(0.0, min(1.0, (raw_score - 1.0) / 9.0))
+            return JudgeScore(
+                name=self.name,
+                raw_score=round(raw_score, 4),
+                normalized_score=round(norm_score, 4),
+            )
+        except Exception as exc:
+            raise JudgeEvaluationError(f"Rsinema inference failed on {image_path}: {exc}") from exc
+
+
+def compute_noise_floor(
+    image_input: Union[str, Path, Image.Image],
+    judge_or_ensemble: Any,
+) -> float:
+    """Computes the per-image measurement noise floor ε (Task D3.b).
+
+    Perturbs the ORIGINAL image across 4 transformations:
+    1. JPEG re-encode (quality=90)
+    2. JPEG re-encode (quality=95)
+    3. Bilinear resize +2%
+    4. Bilinear resize -2%
+
+    ε = max |Δ| over these 4 perturbations.
+    """
+    if isinstance(image_input, (str, Path)):
+        orig = Image.open(str(image_input)).convert("RGB")
+    else:
+        orig = image_input.convert("RGB")
+
+    def _eval(img: Image.Image) -> float:
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tf:
+            img.save(tf.name, format="PNG")
+            temp_path = tf.name
+        try:
+            res = judge_or_ensemble.evaluate(temp_path)
+            if hasattr(res, "overall_score"):
+                return float(res.overall_score)
+            elif hasattr(res, "normalized_score"):
+                return float(res.normalized_score)
+            return float(res)
+        finally:
+            try:
+                os.remove(temp_path)
+            except OSError:
+                pass
+
+    baseline_score = _eval(orig)
+
+    # 1. JPEG q90
+    buf90 = io.BytesIO()
+    orig.save(buf90, format="JPEG", quality=90)
+    buf90.seek(0)
+    s_q90 = _eval(Image.open(buf90))
+
+    # 2. JPEG q95
+    buf95 = io.BytesIO()
+    orig.save(buf95, format="JPEG", quality=95)
+    buf95.seek(0)
+    s_q95 = _eval(Image.open(buf95))
+
+    # 3. +2% resize
+    w, h = orig.size
+    w_up, h_up = max(1, int(round(w * 1.02))), max(1, int(round(h * 1.02)))
+    img_up = orig.resize((w_up, h_up), Image.Resampling.BILINEAR)
+    s_up = _eval(img_up)
+
+    # 4. -2% resize
+    w_down, h_down = max(1, int(round(w * 0.98))), max(1, int(round(h * 0.98)))
+    img_down = orig.resize((w_down, h_down), Image.Resampling.BILINEAR)
+    s_down = _eval(img_down)
+
+    deltas = [
+        abs(s_q90 - baseline_score),
+        abs(s_q95 - baseline_score),
+        abs(s_up - baseline_score),
+        abs(s_down - baseline_score),
+    ]
+    epsilon = round(float(max(deltas)), 4)
+    # Guarantee at least 0.001 noise floor to prevent false claims on degenerate uniform inputs
+    return max(0.0010, epsilon)
+
+
 class JudgeEnsemble:
     """Ensemble orchestrator aggregating diverse frozen judges.
 
@@ -313,10 +489,22 @@ def create_default_ensemble(
 ) -> JudgeEnsemble:
     """Factory creating the standard judge ensemble.
 
-    By default, initializes with ClipAspectJudge (zero-cost, fast). Heavy models
-    (apv2.5, imscore_laion) are enabled when explicit or when weights are cached.
+    Why (Task D3.a): Enforces judge independence so that the gain judge is not the
+    critic's own zero-shot CLIP aspect probe. Attempts to load the independent
+    rsinema/aesthetic-scorer from local cache. If unavailable, falls back to
+    ClipAspectJudge labelled explicitly as a same-family non-independent judge.
     """
-    judges: List[BaseJudge] = [ClipAspectJudge()]
+    judges: List[BaseJudge] = []
+    try:
+        rsinema = RsinemaAestheticJudge()
+        rsinema._ensure_loaded()
+        judges.append(rsinema)
+        logger.info("Ensemble initialized with independent judge: %s", rsinema.name)
+    except Exception as exc:
+        logger.warning("Could not load independent judge rsinema/aesthetic-scorer: %s", exc)
+        clip_fallback = ClipAspectJudge()
+        clip_fallback.name = "clip_aspect (same-family judge, not independent)"
+        judges.append(clip_fallback)
 
     if include_heavy_models:
         try:

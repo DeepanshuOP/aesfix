@@ -74,11 +74,14 @@ def test_execute_job_sync_closed_loop_f1_outputs() -> None:
     assert job.error is None
     assert result.job_id == job.job_id
 
-    # 2. F1.1 Aspect scores & ANFIS rulebook trace
-    assert 0.0 <= result.overall_score <= 1.0
+    # 2. F1.1 Aspect scores & Honest ANFIS/Judge state
+    assert result.overall_score is None  # Untrained ANFIS grade removed from API for honesty
+    assert result.grade_label is None
     assert len(result.aspect_scores) == 5
-    assert len(result.top_fired_rules) >= 1
-    assert "Overall Aesthetic Score" in result.anfis_rulebook_summary
+    assert result.noise_floor >= 0.0
+    assert result.judge_id != ""
+    assert "Single judge" in result.uncertainty_badge or "Judge Consensus" in result.uncertainty_badge
+    assert result.image_verdict != ""
 
     # 3. F1.2 Critique card rationales
     assert len(result.critique_rationale) >= 1
@@ -88,13 +91,23 @@ def test_execute_job_sync_closed_loop_f1_outputs() -> None:
     for fix in result.verified_fixes:
         assert fix.fix_id.startswith(job.job_id)
         assert fix.op != ""
-        assert "Aesthetic Gain" in fix.gain_badge or "Vetoed" in fix.gain_badge
+        assert fix.verdict in ("measurable improvement", "no measurable improvement")
+        assert fix.judge_id == result.judge_id
+        assert fix.epsilon == result.noise_floor
+        assert fix.delta == round(fix.post_edit_score - fix.baseline_score, 4)
         assert "<x:xmpmeta" in fix.xmp_xml
         assert "crs:Exposure2012" in fix.xmp_xml or "crs:" in fix.xmp_xml
 
-    # 5. Best fix ranking
-    assert result.best_fix is not None
-    assert result.best_fix.aesthetic_gain >= result.verified_fixes[-1].aesthetic_gain
+    # 5. Best fix ranking or honest leave-it verdict
+    if result.best_fix is not None:
+        assert result.best_fix.verdict == "measurable improvement"
+        assert result.best_fix.aesthetic_gain >= result.verified_fixes[-1].aesthetic_gain
+    else:
+        assert result.image_verdict == "Leave it — no measurable improvement found"
+
+    # 6. In-memory preview images stored
+    assert job.original_image is not None
+    assert len(job.preview_images) >= 1
 
 
 @pytest.mark.asyncio

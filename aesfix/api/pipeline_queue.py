@@ -28,10 +28,11 @@ from typing import Any, AsyncGenerator, Dict, List, Optional, Union
 from PIL import Image
 
 from aesfix.api.billing import QuotaManager
-from aesfix.api.demo import compute_grade_label, get_demo_components
+from aesfix.api.demo import get_demo_components
 from aesfix.critic.critic import CriticFix
 from aesfix.executor.guard import IdentityGuard
 from aesfix.executor.tier_a import TierAExecutor
+from aesfix.judges.ensemble import compute_noise_floor
 
 logger = logging.getLogger("aesfix.pipeline_queue")
 
@@ -71,28 +72,37 @@ class VerifiedFixPreview:
     reasoning: str
     baseline_score: float
     post_edit_score: float
-    aesthetic_gain: float  # max(0, post - baseline) if passed guard, else 0.0
+    aesthetic_gain: float  # delta if measurable improvement, else 0.0
     guard_passed: bool
     guard_drift: float
     gain_badge: str
     xmp_xml: str
     execution_time_ms: float
+    delta: float = 0.0
+    epsilon: float = 0.0
+    judge_id: str = ""
+    verdict: str = "no measurable improvement"
+    direction: int = 1
+    claimed_aspect: str = ""
 
 
 @dataclass
 class JobResult:
     """Comprehensive diagnosis payload conforming to Core Features F1.1–F1.3."""
     job_id: str
-    overall_score: float
-    grade_label: str
     aspect_scores: Dict[str, float]
-    anfis_rulebook_summary: str
-    top_fired_rules: List[str]
     critique_rationale: Dict[str, str]
     verified_fixes: List[VerifiedFixPreview]
     best_fix: Optional[VerifiedFixPreview]
     uncertainty_badge: str
     total_latency_seconds: float
+    overall_score: Optional[float] = None
+    grade_label: Optional[str] = None
+    anfis_rulebook_summary: Optional[str] = None
+    top_fired_rules: List[str] = field(default_factory=list)
+    image_verdict: str = ""
+    noise_floor: float = 0.0
+    judge_id: str = ""
 
 
 class PipelineJob:
@@ -118,6 +128,8 @@ class PipelineJob:
         self.result: Optional[JobResult] = None
         self.error: Optional[str] = None
         self.event_subscribers: List[asyncio.Queue[JobEvent]] = []
+        self.preview_images: Dict[int, Image.Image] = {}
+        self.original_image: Optional[Image.Image] = None
 
     def record_event(self, stage: str, progress_percent: int, message: str, data: Optional[Dict[str, Any]] = None) -> JobEvent:
         """Appends a progress event and fans out to all active SSE subscribers."""
@@ -253,6 +265,10 @@ class PipelineQueueManager:
         try:
             critic, head, ensemble = get_demo_components()
 
+            # Materialize original image in memory for preview serving
+            with Image.open(job.image_path) as orig_img:
+                job.original_image = orig_img.convert("RGB")
+
             # --- Stage 1: Critic Analysis (F1.1, F1.2) ---
             job.record_event(
                 stage="critiquing",
@@ -265,25 +281,36 @@ class PipelineQueueManager:
                 genre=job.goal,
             )
 
-            # --- Stage 2: ANFIS Interpretable Rulebook Trace (F1.1) ---
+            # --- Stage 2: Quality & Noise Floor Baseline ---
             job.record_event(
                 stage="inferring_rulebook",
                 progress_percent=45,
-                message="Aggregating scores with differentiable neuro-fuzzy Takagi-Sugeno head...",
+                message="Measuring baseline aesthetic profile and computing empirical noise floor...",
             )
-            anfis_trace = head.explain(critic_out.aspect_scores, top_k=3)
-            overall_score = round(anfis_trace.overall_score, 4)
-            grade = compute_grade_label(overall_score)
 
-            # Baseline Judge Ensemble Evaluation
+            # Baseline Judge Evaluation & Noise Floor
             baseline_judge_res = ensemble.evaluate(job.image_path)
             baseline_score = round(baseline_judge_res.overall_score, 4)
+            noise_floor = round(compute_noise_floor(job.image_path, ensemble), 4)
+
+            # Primary Judge identification
+            primary_judge_name = ensemble.judges[0].name if ensemble.judges else "unknown"
+            judge_id = primary_judge_name
+
+            # Single-judge vs ensemble consensus badge
+            if len(ensemble.judges) == 1:
+                uncertainty_badge = f"Single judge ({primary_judge_name}) — 1 judge active"
+            else:
+                if baseline_judge_res.is_uncertain:
+                    uncertainty_badge = f"⚠️ High Aesthetic Disagreement (Var: {baseline_judge_res.disagreement:.3f}) — Taste-Dependent"
+                else:
+                    uncertainty_badge = f"✅ Judge Consensus (Var: {baseline_judge_res.disagreement:.3f}) — High Confidence"
 
             # --- Stage 3: Tier-A Execution & Verification (F1.3) ---
             job.record_event(
                 stage="executing_fixes",
                 progress_percent=70,
-                message="Applying deterministic photographic adjustments and testing against Identity Guard...",
+                message=f"Applying photographic adjustments and testing against noise floor (ε={noise_floor:.4f})...",
             )
 
             verified_previews: List[VerifiedFixPreview] = []
@@ -298,15 +325,20 @@ class PipelineQueueManager:
 
             temp_dir = tempfile.gettempdir()
 
-            for idx, fix in enumerate(candidate_fixes[:3], start=1):
+            for idx, fix in enumerate(candidate_fixes[:3]):
+                fix_num = idx + 1
                 # 1. Execute fix with Tier-A
                 tier_a_res = self.tier_a_executor.execute_fixes(
                     image_input=job.image_path,
                     fixes=[fix],
                 )
 
+                # Persist preview image in memory for preview endpoints
+                job.preview_images[idx] = tier_a_res.image.copy()
+                job.preview_images[fix_num] = tier_a_res.image.copy()
+
                 # Save edited image temporarily for judge evaluation
-                edit_path = os.path.join(temp_dir, f"edit_{job.job_id}_{idx}.jpg")
+                edit_path = os.path.join(temp_dir, f"edit_{job.job_id}_{fix_num}.jpg")
                 tier_a_res.image.save(edit_path, format="JPEG", quality=95)
 
                 # 2. Check Identity Guard drift
@@ -319,22 +351,33 @@ class PipelineQueueManager:
                 post_judge_res = ensemble.evaluate(edit_path)
                 post_score = round(post_judge_res.overall_score, 4)
 
-                # Compute verified gain
-                raw_delta = post_score - baseline_score
-                if guard_verdict.is_valid:
-                    gain = round(max(0.0, raw_delta), 4)
-                    badge = f"+{gain:.3f} Verified Aesthetic Gain"
+                # Compute delta and honest verdict against empirical noise floor
+                raw_delta = round(post_score - baseline_score, 4)
+                is_improvement = guard_verdict.is_valid and (raw_delta > noise_floor)
+
+                if is_improvement:
+                    verdict = "measurable improvement"
+                    gain = raw_delta
+                    badge = f"+{gain:.3f} Measurable Gain"
                 else:
+                    verdict = "no measurable improvement"
                     gain = 0.0
-                    badge = "Vetoed by Identity Guard (Structural Drift)"
+                    if not guard_verdict.is_valid:
+                        badge = "Vetoed by Identity Guard (Structural Drift)"
+                    elif raw_delta <= 0:
+                        badge = f"No aesthetic improvement (Δ={raw_delta:+.4f})"
+                    else:
+                        badge = f"Below noise floor (Δ={raw_delta:+.4f} ≤ ε={noise_floor:.4f})"
 
                 reasoning_text = getattr(fix, "nl_instruction", getattr(fix, "reasoning", ""))
+                claimed_aspect = getattr(fix, "expected_aspect", "overall") or "overall"
+
                 verified_previews.append(
                     VerifiedFixPreview(
-                        fix_id=f"{job.job_id}_fix_{idx}",
+                        fix_id=f"{job.job_id}_fix_{fix_num}",
                         op=fix.op,
                         params=fix.params,
-                        expected_aspect=fix.expected_aspect or "overall",
+                        expected_aspect=claimed_aspect,
                         reasoning=reasoning_text,
                         baseline_score=baseline_score,
                         post_edit_score=post_score,
@@ -344,6 +387,12 @@ class PipelineQueueManager:
                         gain_badge=badge,
                         xmp_xml=tier_a_res.xmp_sidecar,
                         execution_time_ms=round(tier_a_res.duration_ms, 2),
+                        delta=raw_delta,
+                        epsilon=noise_floor,
+                        judge_id=judge_id,
+                        verdict=verdict,
+                        direction=1,
+                        claimed_aspect=claimed_aspect,
                     )
                 )
 
@@ -353,30 +402,33 @@ class PipelineQueueManager:
                 except OSError:
                     pass
 
-            # Rank fixes by verified aesthetic gain descending
-            verified_previews.sort(key=lambda f: f.aesthetic_gain, reverse=True)
-            best_fix = verified_previews[0] if verified_previews else None
-
-            # --- Stage 4: Consensus & Uncertainty Badge (F1.6) ---
-            if baseline_judge_res.is_uncertain:
-                uncertainty_badge = f"⚠️ High Aesthetic Disagreement (Var: {baseline_judge_res.disagreement:.3f}) — Taste-Dependent"
+            # Determine best fix and overall image recommendation
+            qualifying_fixes = [f for f in verified_previews if f.verdict == "measurable improvement"]
+            if qualifying_fixes:
+                qualifying_fixes.sort(key=lambda f: f.aesthetic_gain, reverse=True)
+                best_fix = qualifying_fixes[0]
+                image_verdict = f"Fix recommended: {best_fix.op} ({best_fix.gain_badge})"
             else:
-                uncertainty_badge = f"✅ Judge Consensus (Var: {baseline_judge_res.disagreement:.3f}) — High Confidence"
+                best_fix = None
+                image_verdict = "Leave it — no measurable improvement found"
 
             total_elapsed = round(time.perf_counter() - start_time, 2)
 
             result = JobResult(
                 job_id=job.job_id,
-                overall_score=overall_score,
-                grade_label=grade,
+                overall_score=None,
+                grade_label=None,
                 aspect_scores=critic_out.aspect_scores,
-                anfis_rulebook_summary=anfis_trace.rulebook_summary,
-                top_fired_rules=anfis_trace.top_fired_rules,
+                anfis_rulebook_summary=None,
+                top_fired_rules=[],
                 critique_rationale=critic_out.rationales,
                 verified_fixes=verified_previews,
                 best_fix=best_fix,
                 uncertainty_badge=uncertainty_badge,
                 total_latency_seconds=total_elapsed,
+                image_verdict=image_verdict,
+                noise_floor=noise_floor,
+                judge_id=judge_id,
             )
 
             job.result = result
@@ -385,8 +437,8 @@ class PipelineQueueManager:
             job.record_event(
                 stage="completed",
                 progress_percent=100,
-                message=f"Diagnosis completed in {total_elapsed}s. Best verified gain: {best_fix.gain_badge if best_fix else 'None'}",
-                data={"overall_score": overall_score, "grade": grade},
+                message=f"Diagnosis completed in {total_elapsed}s. Verdict: {image_verdict}",
+                data={"image_verdict": image_verdict, "noise_floor": noise_floor, "judge_id": judge_id},
             )
             return result
 
