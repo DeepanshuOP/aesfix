@@ -428,3 +428,171 @@ def test_ineffective_edit_check_rejected(dummy_image: str) -> None:
     # Feedback was supplied to LLM for next step
     assert "ineffective edit (no visible change)" in fake_llm.prompts_received[1]
 
+
+def test_anti_greedy_repeat_proposal_rejected(dummy_image: str) -> None:
+    """Verifies that duplicate proposals are rejected without execution as 'repeat proposal' (AQ2)."""
+    prop = json.dumps({
+        "op": "adjust_exposure",
+        "params": {"ev_delta": 0.3},
+        "aspect": "lighting",
+        "direction": 1,
+        "rationale": "First exposure lift.",
+    })
+    prop3 = json.dumps({
+        "op": "adjust_contrast",
+        "params": {"factor": 1.1},
+        "aspect": "technical",
+        "direction": 1,
+        "rationale": "Different op after repeat rejection.",
+    })
+    # Propose the exact same op+params twice, then a different op
+    fake_llm = FakeLLM([prop, prop, prop3])
+    agent = AesFixAgent(llm_client=fake_llm, max_steps=3, consecutive_rejections_stop=3)
+
+    mock_scores = [
+        ({"lighting": 0.50, "technical": 0.50}, 0.50),  # baseline
+        ({"lighting": 0.55, "technical": 0.50}, 0.55),  # step 1
+        ({"lighting": 0.55, "technical": 0.55}, 0.55),  # step 3
+    ]
+
+    with patch.object(agent, "_extract_aspect_scores", side_effect=mock_scores), \
+         patch("aesfix.agent.loop.compute_noise_floor", return_value=0.01), \
+         patch.object(agent.guard, "evaluate", return_value=GuardVerdict(
+             is_valid=True, composite_drift=0.02, feature_drift=0.01, structural_drift=0.01,
+             threshold=0.35, backend_name="rgb_layout_stat", guard_backend="SSIM + rgb_layout_stat",
+         )):
+        trajectory = agent.run(dummy_image)
+
+    assert len(trajectory.steps) == 3
+    assert trajectory.steps[0].status == "accepted"
+    assert trajectory.steps[1].status == "rejected"
+    assert "repeat proposal" in trajectory.steps[1].verdict_reason
+    assert "repeat proposal" in fake_llm.prompts_received[2]
+
+
+def test_anti_greedy_max_accepted_per_op_quota(dummy_image: str) -> None:
+    """Verifies that an op cannot be accepted more than max_accepted_per_op times (default 2) (AQ2)."""
+    props = [
+        json.dumps({"op": "adjust_exposure", "params": {"ev_delta": 0.15}, "aspect": "lighting", "direction": 1, "rationale": "Lift 1"}),
+        json.dumps({"op": "adjust_exposure", "params": {"ev_delta": 0.18}, "aspect": "lighting", "direction": 1, "rationale": "Lift 2"}),
+        json.dumps({"op": "adjust_exposure", "params": {"ev_delta": 0.20}, "aspect": "lighting", "direction": 1, "rationale": "Lift 3"}),
+    ]
+    fake_llm = FakeLLM(props)
+    agent = AesFixAgent(llm_client=fake_llm, max_steps=3, consecutive_rejections_stop=3, max_accepted_per_op=2)
+
+    mock_scores = [
+        ({"lighting": 0.50}, 0.50),  # baseline
+        ({"lighting": 0.53}, 0.53),  # step 1 (accepted)
+        ({"lighting": 0.56}, 0.56),  # step 2 (accepted)
+        ({"lighting": 0.59}, 0.59),  # step 3 (should reject due to quota)
+    ]
+
+    with patch.object(agent, "_extract_aspect_scores", side_effect=mock_scores), \
+         patch("aesfix.agent.loop.compute_noise_floor", return_value=0.01), \
+         patch.object(agent.guard, "evaluate", return_value=GuardVerdict(
+             is_valid=True, composite_drift=0.02, feature_drift=0.01, structural_drift=0.01,
+             threshold=0.35, backend_name="rgb_layout_stat", guard_backend="SSIM + rgb_layout_stat",
+         )):
+        trajectory = agent.run(dummy_image)
+
+    assert len(trajectory.steps) == 3
+    assert trajectory.steps[0].status == "accepted"
+    assert trajectory.steps[1].status == "accepted"
+    assert trajectory.steps[2].status == "rejected"
+    assert "maximum accepted quota (2 per run)" in trajectory.steps[2].verdict_reason
+
+
+def test_anti_greedy_cumulative_magnitude_cap(dummy_image: str) -> None:
+    """Verifies that cumulative exposure magnitude cap (+/- 0.6 EV default) rejects excessive lift (AQ2)."""
+    props = [
+        json.dumps({"op": "adjust_exposure", "params": {"ev_delta": 0.4}, "aspect": "lighting", "direction": 1, "rationale": "Lift 1"}),
+        # 0.4 + 0.3 = 0.7 > 0.6 EV cap
+        json.dumps({"op": "adjust_exposure", "params": {"ev_delta": 0.3}, "aspect": "lighting", "direction": 1, "rationale": "Lift 2"}),
+    ]
+    fake_llm = FakeLLM(props)
+    agent = AesFixAgent(llm_client=fake_llm, max_steps=2, consecutive_rejections_stop=3, op_magnitude_caps={"adjust_exposure": 0.6})
+
+    mock_scores = [
+        ({"lighting": 0.50}, 0.50),  # baseline
+        ({"lighting": 0.55}, 0.55),  # step 1 (+0.05, cumulative=0.4 EV)
+        ({"lighting": 0.60}, 0.60),  # step 2 (+0.05, cumulative=0.7 EV > 0.6 EV cap)
+    ]
+
+    with patch.object(agent, "_extract_aspect_scores", side_effect=mock_scores), \
+         patch("aesfix.agent.loop.compute_noise_floor", return_value=0.01), \
+         patch.object(agent.guard, "evaluate", return_value=GuardVerdict(
+             is_valid=True, composite_drift=0.02, feature_drift=0.01, structural_drift=0.01,
+             threshold=0.35, backend_name="rgb_layout_stat", guard_backend="SSIM + rgb_layout_stat",
+         )):
+        trajectory = agent.run(dummy_image)
+
+    assert len(trajectory.steps) == 2
+    assert trajectory.steps[0].status == "accepted"
+    assert trajectory.steps[1].status == "rejected"
+    assert "exceed cumulative magnitude cap" in trajectory.steps[1].verdict_reason
+
+
+def test_anti_greedy_gate_against_original(dummy_image: str) -> None:
+    """Verifies that steps are rejected if cumulative gain against ORIGINAL does not exceed epsilon (AQ2)."""
+    props = [
+        json.dumps({"op": "adjust_exposure", "params": {"ev_delta": 0.2}, "aspect": "lighting", "direction": 1, "rationale": "Lift 1"}),
+        json.dumps({"op": "adjust_contrast", "params": {"factor": 1.2}, "aspect": "lighting", "direction": 1, "rationale": "Contrast 1"}),
+    ]
+    fake_llm = FakeLLM(props)
+    agent = AesFixAgent(llm_client=fake_llm, max_steps=2, consecutive_rejections_stop=3)
+
+    mock_scores = [
+        ({"lighting": 0.50}, 0.50),  # original baseline
+        ({"lighting": 0.53}, 0.53),  # step 1: gain = +0.03 > eps 0.02 (accepted)
+        # step 2: post = 0.51, step delta = -0.02; or suppose step 1 had post=0.52 and step 2 has post=0.515
+        ({"lighting": 0.515}, 0.515), # cumulative gain against original = 0.515 - 0.50 = 0.015 <= eps 0.02!
+    ]
+
+    with patch.object(agent, "_extract_aspect_scores", side_effect=mock_scores), \
+         patch("aesfix.agent.loop.compute_noise_floor", return_value=0.02), \
+         patch.object(agent.guard, "evaluate", return_value=GuardVerdict(
+             is_valid=True, composite_drift=0.02, feature_drift=0.01, structural_drift=0.01,
+             threshold=0.35, backend_name="rgb_layout_stat", guard_backend="SSIM + rgb_layout_stat",
+         )):
+        trajectory = agent.run(dummy_image)
+
+    assert len(trajectory.steps) == 2
+    assert trajectory.steps[0].status == "accepted"
+    assert trajectory.steps[1].status == "rejected"
+    assert "Cumulative gain against original image" in trajectory.steps[1].verdict_reason
+
+
+def test_anti_greedy_diminishing_returns_stop(dummy_image: str) -> None:
+    """Verifies that loop terminates early when accepted gain shrinks two steps in a row (AQ2)."""
+    props = [
+        json.dumps({"op": "adjust_exposure", "params": {"ev_delta": 0.20}, "aspect": "lighting", "direction": 1, "rationale": "Lift 1"}),
+        json.dumps({"op": "adjust_exposure", "params": {"ev_delta": -0.15}, "aspect": "lighting", "direction": 1, "rationale": "Fine tune 2"}),
+        json.dumps({"op": "smart_crop", "params": {"top": 0.05, "left": 0.05, "bottom": 0.95, "right": 0.95}, "aspect": "composition", "direction": 1, "rationale": "Crop 3"}),
+        json.dumps({"op": "adjust_contrast", "params": {"factor": 1.20}, "aspect": "technical", "direction": 1, "rationale": "Contrast 4"}),
+    ]
+    fake_llm = FakeLLM(props)
+    # Max steps = 4, but diminishing returns should stop at step 3
+    agent = AesFixAgent(llm_client=fake_llm, max_steps=4, consecutive_rejections_stop=3)
+
+    # Step 1 delta: 0.58 - 0.50 = +0.08
+    # Step 2 delta: 0.63 - 0.58 = +0.05 (< 0.08, first shrink)
+    # Step 3 delta: 0.66 - 0.63 = +0.03 (< 0.05, second shrink in a row -> STOP!)
+    mock_scores = [
+        ({"lighting": 0.50, "composition": 0.50}, 0.50),  # baseline
+        ({"lighting": 0.58, "composition": 0.50}, 0.58),  # step 1 (+0.08)
+        ({"lighting": 0.64, "composition": 0.50}, 0.63),  # step 2 (+0.05)
+        ({"lighting": 0.64, "composition": 0.55}, 0.66),  # step 3 (+0.03 -> stop)
+    ]
+
+    with patch.object(agent, "_extract_aspect_scores", side_effect=mock_scores), \
+         patch("aesfix.agent.loop.compute_noise_floor", return_value=0.01), \
+         patch.object(agent.guard, "evaluate", return_value=GuardVerdict(
+             is_valid=True, composite_drift=0.02, feature_drift=0.01, structural_drift=0.01,
+             threshold=0.35, backend_name="rgb_layout_stat", guard_backend="SSIM + rgb_layout_stat",
+         )):
+        trajectory = agent.run(dummy_image)
+
+    # Stopped at step 3 despite max_steps=4
+    assert len(trajectory.steps) == 3
+    assert len(trajectory.accepted_steps) == 3
+

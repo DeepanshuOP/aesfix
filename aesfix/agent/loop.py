@@ -26,6 +26,7 @@ import os
 import random
 import tempfile
 import time
+from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
@@ -179,6 +180,8 @@ class AesFixAgent:
         max_steps: int = 6,
         consecutive_rejections_stop: int = 2,
         seed: int = 42,
+        max_accepted_per_op: Optional[int] = None,
+        op_magnitude_caps: Optional[Dict[str, float]] = None,
     ) -> None:
         self.llm_client = llm_client or LLMClient(provider="heuristic")
         self.critic = critic
@@ -188,6 +191,32 @@ class AesFixAgent:
         self.max_steps = max_steps
         self.consecutive_rejections_stop = consecutive_rejections_stop
         self.seed = seed
+        self.max_accepted_per_op = max_accepted_per_op
+        self.op_magnitude_caps = dict(op_magnitude_caps or {})
+        self._load_agent_config()
+
+    def _load_agent_config(self) -> None:
+        """Loads default loop constraints from config/agent.yaml if available."""
+        config_path = Path("config/agent.yaml")
+        if config_path.exists():
+            try:
+                import yaml
+                with open(config_path, "r", encoding="utf-8") as f:
+                    cfg = yaml.safe_load(f) or {}
+                loop_cfg = cfg.get("loop", {})
+                if "max_accepted_per_op" in loop_cfg and self.max_accepted_per_op is None:
+                    self.max_accepted_per_op = int(loop_cfg["max_accepted_per_op"])
+                if "op_magnitude_caps" in loop_cfg and not self.op_magnitude_caps:
+                    self.op_magnitude_caps = {
+                        str(k): float(v) for k, v in loop_cfg["op_magnitude_caps"].items()
+                    }
+            except Exception as exc:
+                logger.debug("Could not parse config/agent.yaml: %s", exc)
+
+        if self.max_accepted_per_op is None:
+            self.max_accepted_per_op = 2
+        if not self.op_magnitude_caps:
+            self.op_magnitude_caps = {"adjust_exposure": 0.6}
 
     def _set_deterministic_seed(self) -> None:
         """Sets random seeds for deterministic inference across all frameworks."""
@@ -311,6 +340,13 @@ class AesFixAgent:
         system_prompt = generate_tool_schema_prompt()
         dialogue_history: List[str] = []
 
+        # Anti-greedy state tracking (AQ2)
+        seen_proposals: List[Tuple[str, tuple]] = []
+        accepted_op_counts: Dict[str, int] = defaultdict(int)
+        cumulative_op_magnitudes: Dict[str, float] = defaultdict(float)
+        accepted_step_deltas: List[float] = []
+        should_stop_diminishing: bool = False
+
         for step_idx in range(1, self.max_steps + 1):
             if consecutive_rejections >= self.consecutive_rejections_stop:
                 logger.info(
@@ -397,6 +433,55 @@ class AesFixAgent:
                 if step_callback:
                     step_callback(step_record)
                 continue
+
+            # Anti-greedy rule (AQ2): Reject repeat proposals without execution
+            param_sig = tuple(
+                sorted(
+                    (k, round(float(v), 4) if isinstance(v, (int, float)) else str(v))
+                    for k, v in proposal.params.items()
+                )
+            )
+            prop_key = (proposal.op, param_sig)
+            if prop_key in seen_proposals:
+                repeat_reason = "repeat proposal: choose a different operation or stop"
+                logger.info("Step %d rejected without execution: %s", step_idx, repeat_reason)
+                consecutive_rejections += 1
+                step_record = AgentStep(
+                    step_number=step_idx,
+                    proposal=proposal,
+                    status="rejected",
+                    verdict_reason=repeat_reason,
+                    baseline_overall_score=current_overall,
+                    post_overall_score=current_overall,
+                    overall_delta=0.0,
+                    noise_floor=noise_floor,
+                    claimed_aspect=proposal.aspect,
+                    claimed_aspect_delta=0.0,
+                    claimed_aspect_direction=proposal.direction,
+                    aspect_scores_before=current_aspects,
+                    aspect_scores_after=current_aspects,
+                    aspect_deltas={},
+                    guard_drift=0.0,
+                    guard_passed=True,
+                    guard_backend="SSIM + rgb_layout_stat",
+                    execution_duration_ms=0.0,
+                    xmp_xml="",
+                    baseline_image_sha256=baseline_step_sha256,
+                    candidate_image_sha256=baseline_step_sha256,
+                    preview_image=current_image.copy(),
+                )
+                trajectory.steps.append(step_record)
+                trajectory.rejected_steps.append(step_record)
+                dialogue_history.append(
+                    f"Step {step_idx}: REJECTED {proposal.op} with {proposal.params}. Reason: {repeat_reason}"
+                )
+                if step_callback:
+                    step_callback(step_record)
+                if consecutive_rejections >= self.consecutive_rejections_stop:
+                    logger.info("Early stopping: %d consecutive rejections", consecutive_rejections)
+                    break
+                continue
+            seen_proposals.append(prop_key)
 
             # Act: Execute tool call via TierAExecutor
             t_exec_start = time.perf_counter()
@@ -558,6 +643,32 @@ class AesFixAgent:
                     )
                     break
 
+            # 5. Anti-greedy (AQ2): Op acceptance quota (at most 2 times per run)
+            if accepted_op_counts[proposal.op] >= self.max_accepted_per_op:
+                is_accepted = False
+                rejection_reasons.append(
+                    f"Operation '{proposal.op}' reached maximum accepted quota ({self.max_accepted_per_op} per run)"
+                )
+
+            # 6. Anti-greedy (AQ2): Cumulative magnitude cap
+            if proposal.op == "adjust_exposure":
+                cap = self.op_magnitude_caps.get("adjust_exposure", 0.6)
+                delta_ev = float(proposal.params.get("ev_delta", 0.0))
+                if abs(cumulative_op_magnitudes["adjust_exposure"] + delta_ev) > (cap + 1e-4):
+                    is_accepted = False
+                    rejection_reasons.append(
+                        f"Operation '{proposal.op}' would exceed cumulative magnitude cap of ±{cap:.2f} EV "
+                        f"(current: {cumulative_op_magnitudes['adjust_exposure']:+.2f} EV, proposed delta: {delta_ev:+.2f} EV)"
+                    )
+
+            # 7. Anti-greedy (AQ2): Per-step gate check against ORIGINAL image baseline
+            cumulative_gain = round(post_overall - initial_overall_score, 4)
+            if cumulative_gain <= noise_floor:
+                is_accepted = False
+                rejection_reasons.append(
+                    f"Cumulative gain against original image ({cumulative_gain:+.4f}) does not exceed noise floor ({noise_floor:.4f})"
+                )
+
             # Construct verdict reason
             if is_accepted:
                 verdict_reason = (
@@ -604,6 +715,22 @@ class AesFixAgent:
                 trajectory.accepted_steps.append(step_record)
                 consecutive_rejections = 0
                 dialogue_history.append(f"Step {step_idx}: ACCEPTED {proposal.op} ({proposal.rationale})")
+
+                # Anti-greedy accounting (AQ2)
+                accepted_op_counts[proposal.op] += 1
+                if proposal.op == "adjust_exposure":
+                    cumulative_op_magnitudes["adjust_exposure"] += float(proposal.params.get("ev_delta", 0.0))
+
+                accepted_step_deltas.append(overall_delta)
+                if len(accepted_step_deltas) >= 3:
+                    if (accepted_step_deltas[-1] < accepted_step_deltas[-2]) and (
+                        accepted_step_deltas[-2] < accepted_step_deltas[-3]
+                    ):
+                        logger.info(
+                            "Diminishing returns triggered: accepted gains shrunk two steps in a row (%s)",
+                            accepted_step_deltas[-3:],
+                        )
+                        should_stop_diminishing = True
             else:
                 # Reject step: retain current image, increment consecutive rejections
                 trajectory.rejected_steps.append(step_record)
@@ -614,6 +741,14 @@ class AesFixAgent:
 
             if step_callback:
                 step_callback(step_record)
+
+            if is_accepted and should_stop_diminishing:
+                dim_reason = (
+                    f"Early stopping at step {step_idx}: accepted Δ shrunk two steps in a row (diminishing returns: "
+                    f"{accepted_step_deltas[-3]:+.4f} -> {accepted_step_deltas[-2]:+.4f} -> {accepted_step_deltas[-1]:+.4f})"
+                )
+                dialogue_history.append(dim_reason)
+                break
 
         # Assemble final trajectory outputs
         trajectory.total_steps = len(trajectory.steps)

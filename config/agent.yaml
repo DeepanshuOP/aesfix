@@ -23,3 +23,6 @@ loop:
   max_steps: 6
   consecutive_rejections_stop: 2
   deterministic_seed: 42
+  max_accepted_per_op: 2
+  op_magnitude_caps:
+    adjust_exposure: 0.6
