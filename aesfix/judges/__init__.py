@@ -13,6 +13,7 @@ from .ensemble import (
     JudgeEvaluationError,
     JudgeResult,
     JudgeScore,
+    RsinemaAestheticJudge,
     create_default_ensemble,
 )
 from .taste import (
@@ -33,6 +34,7 @@ __all__ = [
     "JudgeEvaluationError",
     "JudgeResult",
     "JudgeScore",
+    "RsinemaAestheticJudge",
     "create_default_ensemble",
     "BUILTIN_TASTE_PACKS",
     "DEFAULT_ASPECT_PRIORS",

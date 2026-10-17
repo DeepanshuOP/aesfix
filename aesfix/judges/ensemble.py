@@ -258,22 +258,39 @@ def _find_hf_snapshot(repo_id: str) -> Optional[str]:
 
 
 class RsinemaAestheticJudge(BaseJudge):
-    """Independent aesthetic regression judge (rsinema/aesthetic-scorer).
+    """fine-tuned CLIP ViT-B/32 aesthetic judge (same backbone family as the critic — partially independent).
 
-    Why this judge is required (Task D3.a):
-    The critic proposes fixes based on zero-shot CLIP aspect text prompts.
-    To avoid self-referential bias and Goodhart reward-hacking, gain verification
-    must use an independent judge trained specifically on aesthetic ratings.
+    Why this judge is verified (Task D3b):
+    1. Key mapping verification: when loading into vision_model, missing and unexpected
+       key counts must both be 0.
+    2. Non-backbone tensors in model.pt:
+       - aesthetic_head.0.weight: [1, 768]
+       - aesthetic_head.0.bias:   [1]
+       - quality_head.0.weight:   [1, 768]
+       - quality_head.0.bias:     [1]
+       - composition_head.0.weight: [1, 768]
+       - composition_head.0.bias: [1]
+       - light_head.0.weight:     [1, 768]
+       - light_head.0.bias:       [1]
+       - color_head.0.weight:     [1, 768]
+       - color_head.0.bias:       [1]
+       - dof_head.0.weight:       [1, 768]
+       - dof_head.0.bias:         [1]
+       - content_head.0.weight:   [1, 768]
+       - content_head.0.bias:     [1]
+       Each per-aspect head is exposed as a named score labelled 'unvalidated'.
+    3. Output scale: the repo files contain no documentation confirming a (raw-1)/9 mapping,
+       so raw scores are reported directly without artificial re-scaling.
+    4. Label: 'fine-tuned CLIP ViT-B/32 aesthetic judge (same backbone family as the critic — partially independent)'
     """
 
-    name = "rsinema/aesthetic-scorer"
+    name = "fine-tuned CLIP ViT-B/32 aesthetic judge (same backbone family as the critic — partially independent)"
 
     def __init__(self, model_id: str = "rsinema/aesthetic-scorer") -> None:
         self.model_id = model_id
         self._model: Optional[Any] = None
         self._processor: Optional[Any] = None
-        self._head_weight: Optional[torch.Tensor] = None
-        self._head_bias: Optional[torch.Tensor] = None
+        self._heads: Dict[str, tuple[torch.Tensor, torch.Tensor]] = {}
 
     def _ensure_loaded(self) -> None:
         if self._model is not None and self._processor is not None:
@@ -305,13 +322,38 @@ class RsinemaAestheticJudge(BaseJudge):
                 if k.startswith("backbone."):
                     clean_backbone[k.replace("backbone.", "")] = v
 
-            vision.vision_model.load_state_dict(clean_backbone, strict=False)
+            # Verify key counts: both missing_keys and unexpected_keys must be 0
+            incompatible = vision.vision_model.load_state_dict(clean_backbone, strict=False)
+            missing_count = len(incompatible.missing_keys)
+            unexpected_count = len(incompatible.unexpected_keys)
+            print(f"Rsinema backbone load: missing_keys={missing_count}, unexpected_keys={unexpected_count}")
+            logger.info("Rsinema backbone load: missing_keys=%d, unexpected_keys=%d", missing_count, unexpected_count)
+            if missing_count != 0 or unexpected_count != 0:
+                raise JudgeEvaluationError(
+                    f"Non-zero key counts loading backbone: missing={missing_count}, unexpected={unexpected_count}"
+                )
+            vision.vision_model.load_state_dict(clean_backbone, strict=True)
 
             self._model = vision
             self._processor = proc
-            self._head_weight = state["aesthetic_head.0.weight"]
-            self._head_bias = state["aesthetic_head.0.bias"]
-            logger.info("Loaded RsinemaAestheticJudge from %s", rsinema_snap)
+
+            # Extract full set of non-backbone heads
+            self._heads = {}
+            for head_name in ["aesthetic", "quality", "composition", "light", "color", "dof", "content"]:
+                w_key = f"{head_name}_head.0.weight"
+                b_key = f"{head_name}_head.0.bias"
+                if w_key in state and b_key in state:
+                    self._heads[head_name] = (state[w_key], state[b_key])
+
+            if "aesthetic" not in self._heads:
+                raise JudgeEvaluationError("Missing aesthetic_head in model.pt")
+
+            logger.info(
+                "Loaded %s from %s with heads: %s",
+                self.name,
+                rsinema_snap,
+                list(self._heads.keys()),
+            )
         except Exception as exc:
             raise JudgeEvaluationError(f"Failed to initialize {self.model_id}: {exc}") from exc
 
@@ -327,16 +369,25 @@ class RsinemaAestheticJudge(BaseJudge):
             with torch.no_grad():
                 out = self._model(**inputs)
                 cls_token = out.pooler_output
-                raw_score = (cls_token @ self._head_weight.T + self._head_bias).item()
+                raw_score = (cls_token @ self._heads["aesthetic"][0].T + self._heads["aesthetic"][1]).item()
 
-            norm_score = max(0.0, min(1.0, (raw_score - 1.0) / 9.0))
+                aspect_scores: Dict[str, float] = {}
+                for h_name, (w, b) in self._heads.items():
+                    if h_name == "aesthetic":
+                        continue
+                    h_score = (cls_token @ w.T + b).item()
+                    aspect_scores[f"{h_name} (unvalidated)"] = round(h_score, 4)
+
+            # Output scale unconfirmed in repo files — reporting raw scores as required
             return JudgeScore(
                 name=self.name,
                 raw_score=round(raw_score, 4),
-                normalized_score=round(norm_score, 4),
+                normalized_score=round(raw_score, 4),
+                aspects=aspect_scores,
             )
         except Exception as exc:
             raise JudgeEvaluationError(f"Rsinema inference failed on {image_path}: {exc}") from exc
+
 
 
 def compute_noise_floor(
@@ -489,8 +540,8 @@ def create_default_ensemble(
 ) -> JudgeEnsemble:
     """Factory creating the standard judge ensemble.
 
-    Why (Task D3.a): Enforces judge independence so that the gain judge is not the
-    critic's own zero-shot CLIP aspect probe. Attempts to load the independent
+    Why (Task D3b): Uses the fine-tuned CLIP ViT-B/32 aesthetic judge
+    (same backbone family as the critic — partially independent). Attempts to load
     rsinema/aesthetic-scorer from local cache. If unavailable, falls back to
     ClipAspectJudge labelled explicitly as a same-family non-independent judge.
     """
@@ -499,9 +550,9 @@ def create_default_ensemble(
         rsinema = RsinemaAestheticJudge()
         rsinema._ensure_loaded()
         judges.append(rsinema)
-        logger.info("Ensemble initialized with independent judge: %s", rsinema.name)
+        logger.info("Ensemble initialized with judge: %s", rsinema.name)
     except Exception as exc:
-        logger.warning("Could not load independent judge rsinema/aesthetic-scorer: %s", exc)
+        logger.warning("Could not load fine-tuned CLIP ViT-B/32 aesthetic judge (same backbone family as the critic — partially independent): %s", exc)
         clip_fallback = ClipAspectJudge()
         clip_fallback.name = "clip_aspect (same-family judge, not independent)"
         judges.append(clip_fallback)

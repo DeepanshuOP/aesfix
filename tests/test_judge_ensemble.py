@@ -18,6 +18,7 @@ from aesfix.judges import (
     JudgeEnsemble,
     JudgeEvaluationError,
     JudgeScore,
+    RsinemaAestheticJudge,
 )
 
 _PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -126,3 +127,68 @@ def test_af04_calibration_images_ordering_dod():
     # 4. Image ranking utility orders test.jpg above degraded variants
     ranked = ensemble.rank_images([_BLUR_JPG, _DARK_JPG, _TEST_JPG])
     assert ranked[0].image_path == _TEST_JPG
+
+
+def test_rsinema_aesthetic_judge_loads_zero_key_counts_and_all_heads():
+    """Task D3b: Verify RsinemaAestheticJudge backbone key counts, heads, output scale and label."""
+    judge = RsinemaAestheticJudge()
+    judge._ensure_loaded()
+
+    # 1. Label verification
+    expected_label = (
+        "fine-tuned CLIP ViT-B/32 aesthetic judge "
+        "(same backbone family as the critic — partially independent)"
+    )
+    assert judge.name == expected_label
+
+    # 2. All 7 heads loaded
+    assert set(judge._heads.keys()) == {
+        "aesthetic",
+        "quality",
+        "composition",
+        "light",
+        "color",
+        "dof",
+        "content",
+    }
+
+    # 3. Evaluate image
+    score = judge.evaluate(_TEST_JPG)
+
+    # 4. Raw score reported directly without (raw-1)/9 mapping
+    assert score.raw_score == score.normalized_score
+    assert score.name == expected_label
+
+    # 5. Named per-aspect scores labelled 'unvalidated'
+    expected_aspect_names = {
+        "quality (unvalidated)",
+        "composition (unvalidated)",
+        "light (unvalidated)",
+        "color (unvalidated)",
+        "dof (unvalidated)",
+        "content (unvalidated)",
+    }
+    assert score.aspects is not None
+    assert set(score.aspects.keys()) == expected_aspect_names
+    for v in score.aspects.values():
+        assert isinstance(v, float)
+
+
+def test_rsinema_aesthetic_judge_fails_if_key_counts_nonzero(monkeypatch):
+    """Task D3b: Verify loading fails loudly if backbone key counts are non-zero."""
+    import torch
+
+    judge = RsinemaAestheticJudge()
+    original_torch_load = torch.load
+
+    def mocked_torch_load(*args, **kwargs):
+        state = original_torch_load(*args, **kwargs)
+        # Inject an unexpected key into backbone to simulate mismatched key mapping
+        corrupted_state = dict(state)
+        corrupted_state["backbone.unexpected_tensor_key"] = torch.zeros(1)
+        return corrupted_state
+
+    monkeypatch.setattr(torch, "load", mocked_torch_load)
+    with pytest.raises(JudgeEvaluationError, match="Non-zero key counts loading backbone"):
+        judge._ensure_loaded()
+
