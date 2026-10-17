@@ -82,6 +82,8 @@ class AgentStep:
     judge_deltas: Dict[str, float] = field(default_factory=dict)
     confidence: str = "high"
     overprocessing_metrics: Dict[str, float] = field(default_factory=dict)
+    provider: str = ""
+    model_id: str = ""
 
     def to_dict(self) -> Dict[str, Any]:
         """Serializes step record for API responses and telemetry logging."""
@@ -129,6 +131,8 @@ class AgentStep:
             "judge_deltas": self.judge_deltas,
             "confidence": self.confidence,
             "overprocessing_metrics": self.overprocessing_metrics,
+            "provider": self.provider,
+            "model_id": self.model_id,
         }
 
 
@@ -151,6 +155,8 @@ class AgentTrajectory:
     total_steps: int = 0
     provider: str = ""
     model_id: str = ""
+    providers_used: List[str] = field(default_factory=list)
+    fallback_reason: Optional[str] = None
     seed: int = 42
     confidence: str = "high"
     style_intent: Dict[str, Any] = field(default_factory=dict)
@@ -171,6 +177,8 @@ class AgentTrajectory:
             "num_rejected": len(self.rejected_steps),
             "provider": self.provider,
             "model_id": self.model_id,
+            "providers_used": self.providers_used,
+            "fallback_reason": self.fallback_reason,
             "seed": self.seed,
             "steps": [s.to_dict() for s in self.steps],
             "accepted_ops": [s.proposal.op for s in self.accepted_steps],
@@ -458,6 +466,8 @@ class AesFixAgent:
         should_stop_diminishing: bool = False
 
         llm_calls_count = 0
+        providers_used: List[str] = []
+        fallback_reasons: List[str] = []
 
         for step_idx in range(1, self.max_steps + 1):
             if consecutive_rejections >= self.consecutive_rejections_stop:
@@ -493,6 +503,15 @@ class AesFixAgent:
                 system_instruction=system_prompt,
             )
             llm_calls_count += 1
+
+            step_provider = getattr(llm_resp, "provider", self.llm_client.provider)
+            step_model_id = getattr(llm_resp, "model_id", self.llm_client.model_id)
+            if step_provider == "heuristic":
+                step_model_id = "heuristic-v1"
+
+            providers_used.append(step_provider)
+            if getattr(llm_resp, "fallback_reason", None):
+                fallback_reasons.append(str(llm_resp.fallback_reason))
 
             if getattr(llm_resp, "used_fallback", False):
                 fallback_prov = getattr(llm_resp, "fallback_provider", None) or getattr(llm_resp, "provider", None)
@@ -541,6 +560,8 @@ class AesFixAgent:
                     baseline_image_sha256=baseline_step_sha256,
                     candidate_image_sha256=baseline_step_sha256,
                     preview_image=current_image.copy(),
+                    provider=step_provider,
+                    model_id=step_model_id,
                 )
                 trajectory.steps.append(step_record)
                 trajectory.rejected_steps.append(step_record)
@@ -586,6 +607,8 @@ class AesFixAgent:
                     baseline_image_sha256=baseline_step_sha256,
                     candidate_image_sha256=baseline_step_sha256,
                     preview_image=current_image.copy(),
+                    provider=step_provider,
+                    model_id=step_model_id,
                 )
                 trajectory.steps.append(step_record)
                 trajectory.rejected_steps.append(step_record)
@@ -678,6 +701,8 @@ class AesFixAgent:
                     baseline_image_sha256=baseline_step_sha256,
                     candidate_image_sha256=candidate_step_sha256,
                     preview_image=exec_res.image.copy(),
+                    provider=step_provider,
+                    model_id=step_model_id,
                 )
                 trajectory.steps.append(step_record)
                 trajectory.rejected_steps.append(step_record)
@@ -935,6 +960,8 @@ class AesFixAgent:
                 judge_deltas=judge_deltas,
                 confidence=step_confidence,
                 overprocessing_metrics=overprocessing_metrics,
+                provider=step_provider,
+                model_id=step_model_id,
             )
 
             trajectory.steps.append(step_record)
@@ -990,6 +1017,14 @@ class AesFixAgent:
         trajectory.final_overall_score = current_overall
         trajectory.total_gain = round(current_overall - initial_overall_score, 4)
         trajectory.llm_calls_count = llm_calls_count
+        trajectory.providers_used = list(dict.fromkeys(providers_used))
+        trajectory.fallback_reason = " | ".join(dict.fromkeys(fallback_reasons)) if fallback_reasons else None
+        if providers_used:
+            trajectory.provider = providers_used[-1]
+            if trajectory.provider == "heuristic":
+                trajectory.model_id = "heuristic-v1"
+            elif hasattr(self.llm_client, "model_id") and self.llm_client.provider == trajectory.provider:
+                trajectory.model_id = self.llm_client.model_id
 
         if accepted_fixes:
             if run_confidence == "single-judge measurement (low confidence)":
@@ -1010,6 +1045,8 @@ class AesFixAgent:
                 "initial_image_sha256": trajectory.initial_image_sha256,
                 "provider": trajectory.provider,
                 "model_id": trajectory.model_id,
+                "providers_used": trajectory.providers_used,
+                "fallback_reason": trajectory.fallback_reason,
                 "seed": trajectory.seed,
                 "verdict": trajectory.verdict,
                 "initial_overall_score": trajectory.initial_overall_score,

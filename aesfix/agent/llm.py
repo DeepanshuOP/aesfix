@@ -192,7 +192,7 @@ class LLMClient:
         elif prov == "openrouter":
             return DEFAULT_OPENROUTER_MODEL
         elif prov == "heuristic":
-            return "deterministic-heuristic-critic-v1"
+            return "heuristic-v1"
         return prov
 
     def generate(
@@ -239,7 +239,10 @@ class LLMClient:
         for idx in range(start_idx, len(self.provider_chain)):
             candidate_provider = self.provider_chain[idx]
             self.provider = candidate_provider
-            self.model_id = self._custom_model_id if candidate_provider == original_provider and self._custom_model_id else self._get_model_id_for_provider(candidate_provider)
+            if candidate_provider == "heuristic":
+                self.model_id = "heuristic-v1"
+            else:
+                self.model_id = self._custom_model_id if candidate_provider == original_provider and self._custom_model_id else self._get_model_id_for_provider(candidate_provider)
             t0 = time.perf_counter()
 
             try:
@@ -490,7 +493,7 @@ class LLMClient:
         return LLMResponse(
             content=json.dumps(payload, indent=2),
             provider="heuristic",
-            model_id=self.model_id,
+            model_id="heuristic-v1",
             timestamp=time.time(),
             parsed_json=payload,
         )
