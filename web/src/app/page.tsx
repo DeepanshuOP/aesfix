@@ -120,6 +120,25 @@ export default function StudioPage(): React.JSX.Element {
     }
   };
 
+  const handleLoadSample = async (sampleName: string): Promise<void> => {
+    try {
+      setIsProcessing(true);
+      setErrorMessage(null);
+      const res = await fetch(`/samples/${sampleName}`);
+      if (!res.ok) throw new Error(`Could not load sample ${sampleName}`);
+      const blob = await res.blob();
+      const file = new File([blob], sampleName, { type: "image/jpeg" });
+      setSelectedFile(file);
+      setLocalPreviewUrl(URL.createObjectURL(file));
+      setJobResult(null);
+      setJobId(null);
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : "Error loading sample.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const handleDrop = (e: React.DragEvent<HTMLDivElement>): void => {
     e.preventDefault();
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
@@ -338,6 +357,36 @@ export default function StudioPage(): React.JSX.Element {
                   <p className="text-[10px] text-zinc-500 mt-1">JPEG, PNG up to 20MB</p>
                 </>
               )}
+            </div>
+
+            {/* Quick Pilot Sample Selector */}
+            <div className="mt-3">
+              <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider block mb-1.5">
+                Or Load A Benchmark Pilot Sample:
+              </span>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleLoadSample("test.jpg")}
+                  className="rounded-lg bg-zinc-900 px-2 py-1.5 text-[11px] font-mono text-zinc-300 border border-zinc-800 hover:border-cyan-500 hover:text-white transition-all text-center"
+                >
+                  Reference
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleLoadSample("dark.jpg")}
+                  className="rounded-lg bg-zinc-900 px-2 py-1.5 text-[11px] font-mono text-zinc-300 border border-zinc-800 hover:border-amber-500 hover:text-white transition-all text-center"
+                >
+                  Underexposed
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleLoadSample("blur.jpg")}
+                  className="rounded-lg bg-zinc-900 px-2 py-1.5 text-[11px] font-mono text-zinc-300 border border-zinc-800 hover:border-pink-500 hover:text-white transition-all text-center"
+                >
+                  Motion Blur
+                </button>
+              </div>
             </div>
 
             {/* User Critique Input */}
@@ -608,6 +657,55 @@ export default function StudioPage(): React.JSX.Element {
           )}
         </div>
       </div>
+
+      {/* How It Works Section */}
+      <section id="how-it-works" className="mt-16 border-t border-zinc-800 pt-12">
+        <div className="mb-8">
+          <div className="inline-flex items-center gap-2 rounded-full bg-cyan-950/60 px-3 py-1 text-xs font-mono font-medium text-cyan-400 border border-cyan-800/40 mb-2">
+            <span>Closed-Loop Architecture</span>
+          </div>
+          <h2 className="text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
+            How AesFix Works
+          </h2>
+          <p className="mt-2 text-sm text-zinc-400 max-w-3xl leading-relaxed">
+            Every candidate photographic edit is generated deterministically, gated against structural drift, and evaluated against the empirical noise floor before recommending adjustments.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="glass-card rounded-2xl p-5 border border-zinc-800">
+            <span className="font-mono text-xs font-bold text-cyan-400 block mb-2">STEP 1</span>
+            <h3 className="text-base font-bold text-white mb-2">Aspect Criticism</h3>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Diagnoses composition, lighting, color, clarity, and technical precision to identify true photographic bottlenecks.
+            </p>
+          </div>
+
+          <div className="glass-card rounded-2xl p-5 border border-zinc-800">
+            <span className="font-mono text-xs font-bold text-amber-400 block mb-2">STEP 2</span>
+            <h3 className="text-base font-bold text-white mb-2">Deterministic Edits</h3>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Executes continuous, parameterized operations (exposure shoulder curves, mid-grey contrast pivot, white balance) reproducible in Lightroom.
+            </p>
+          </div>
+
+          <div className="glass-card rounded-2xl p-5 border border-zinc-800">
+            <span className="font-mono text-xs font-bold text-emerald-400 block mb-2">STEP 3</span>
+            <h3 className="text-base font-bold text-white mb-2">Identity Guard</h3>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Monitors structural similarity and layout embeddings to veto adjustments that compromise photographic identity or induce clipping.
+            </p>
+          </div>
+
+          <div className="glass-card rounded-2xl p-5 border border-zinc-800">
+            <span className="font-mono text-xs font-bold text-purple-400 block mb-2">STEP 4</span>
+            <h3 className="text-base font-bold text-white mb-2">Noise Floor Gating</h3>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Calculates empirical perturbation noise floor ε. Fixes are only approved when measured aesthetic gain Δ strictly exceeds ε; otherwise advising to leave it alone.
+            </p>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
