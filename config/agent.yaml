@@ -4,14 +4,14 @@
 default_provider: "gemini"
 
 gemini:
-  model_id: "gemini-2.5-flash"
+  model_id: "gemini-3.8-flash"
   description: "Primary fast vision-language model for photographic diagnosis and parametric fix planning."
   max_tokens: 1024
   temperature: 0.2
 
 openrouter:
   # Pinned explicit model id; never use generic openrouter/free
-  model_id: "nvidia/nemotron-3.5-super-vl:free"
+  model_id: "google/gemma-4-31b-it:free"
   description: "Pinned free vision model on OpenRouter for open-weights multimodal fallback."
   max_tokens: 1024
   temperature: 0.2
