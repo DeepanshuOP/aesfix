@@ -19,6 +19,7 @@ Termination:
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import os
@@ -530,6 +531,32 @@ class AesFixAgent:
         else:
             trajectory.verdict = "leave it"
             trajectory.stacked_xmp = ""
+
+        # Append telemetry (hashes + metrics only, no images) to results/agent_runs/ (AG6)
+        try:
+            runs_dir = Path("results/agent_runs")
+            runs_dir.mkdir(parents=True, exist_ok=True)
+            log_file = runs_dir / "runs.jsonl"
+            rec = {
+                "timestamp": time.time(),
+                "initial_image_sha256": hashlib.sha256(current_image.tobytes()).hexdigest(),
+                "provider": trajectory.provider,
+                "model_id": trajectory.model_id,
+                "seed": trajectory.seed,
+                "verdict": trajectory.verdict,
+                "initial_overall_score": trajectory.initial_overall_score,
+                "final_overall_score": trajectory.final_overall_score,
+                "total_gain": trajectory.total_gain,
+                "noise_floor": trajectory.noise_floor,
+                "total_steps": trajectory.total_steps,
+                "accepted_count": len(trajectory.accepted_steps),
+                "rejected_count": len(trajectory.rejected_steps),
+                "accepted_ops": [s.proposal.op for s in trajectory.accepted_steps],
+            }
+            with open(log_file, "a", encoding="utf-8") as f:
+                f.write(json.dumps(rec) + "\n")
+        except Exception as exc:
+            logger.debug("Failed logging agent run telemetry: %s", exc)
 
         # Clean up temp files
         try:

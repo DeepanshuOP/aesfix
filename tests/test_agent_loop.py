@@ -116,7 +116,7 @@ def test_fake_llm_accept(dummy_image: str) -> None:
     assert s0.overall_delta > s0.noise_floor
     assert trajectory.verdict == "measured improvement"
     assert len(trajectory.accepted_steps) == 1
-    assert "xpacket" in trajectory.stacked_xmp
+    assert "x:xmpmeta" in trajectory.stacked_xmp
 
 
 def test_fake_llm_reject_with_feedback(dummy_image: str) -> None:
