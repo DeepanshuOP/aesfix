@@ -38,7 +38,6 @@ from PIL import Image
 from aesfix.agent.llm import LLMClient
 from aesfix.agent.schema import (
     AgentProposal,
-    format_validation_error_feedback,
     generate_tool_schema_prompt,
     validate_proposal,
 )
@@ -155,6 +154,8 @@ class AgentTrajectory:
     seed: int = 42
     confidence: str = "high"
     style_intent: Dict[str, Any] = field(default_factory=dict)
+    llm_calls_count: int = 0
+    fallback_provider: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         """Serializes trajectory metadata and steps."""
@@ -175,6 +176,8 @@ class AgentTrajectory:
             "accepted_ops": [s.proposal.op for s in self.accepted_steps],
             "confidence": self.confidence,
             "style_intent": self.style_intent,
+            "llm_calls_count": self.llm_calls_count,
+            "fallback_provider": self.fallback_provider,
         }
 
 
@@ -452,6 +455,8 @@ class AesFixAgent:
         accepted_step_deltas: List[float] = []
         should_stop_diminishing: bool = False
 
+        llm_calls_count = 0
+
         for step_idx in range(1, self.max_steps + 1):
             if consecutive_rejections >= self.consecutive_rejections_stop:
                 logger.info(
@@ -479,30 +484,31 @@ class AesFixAgent:
 
             perception_prompt += "\nPropose your next single parametric tool call in valid JSON:"
 
-            # Plan: Generate candidate proposal via LLMClient
+            # Plan: Generate candidate proposal via LLMClient (AQ5: strictly one LLM call per step at most)
             llm_resp = self.llm_client.generate(
                 prompt=perception_prompt,
                 image_input=current_temp_path,
                 system_instruction=system_prompt,
             )
+            llm_calls_count += 1
+
+            if getattr(llm_resp, "used_fallback", False):
+                fallback_prov = getattr(llm_resp, "fallback_provider", None) or getattr(llm_resp, "provider", None)
+                trajectory.fallback_provider = fallback_prov
+                logger.info(
+                    "Step %d used fallback provider: %s (%s)",
+                    step_idx,
+                    fallback_prov,
+                    getattr(llm_resp, "fallback_reason", ""),
+                )
 
             # Validate Proposal with Pydantic
             proposal, val_err = validate_proposal(llm_resp.content)
             if val_err or proposal is None:
-                # Invalid schema: feed error back and count as rejection
-                err_feedback = format_validation_error_feedback(val_err or "Unknown error", llm_resp.content)
+                # AQ5: Strictly one LLM call per step at most (no immediate retry).
+                # Record error feedback for future steps and reject this step.
+                rejection_reason = f"Pydantic schema validation error: {val_err}"
                 dialogue_history.append(f"Model proposal rejected by schema validator: {val_err}")
-
-                # Retry once immediately with explicit feedback
-                retry_resp = self.llm_client.generate(
-                    prompt=err_feedback,
-                    image_input=current_temp_path,
-                    system_instruction=system_prompt,
-                )
-                proposal, val_err = validate_proposal(retry_resp.content)
-
-            if proposal is None:
-                # If still invalid, record step as rejected and increment consecutive rejections
                 consecutive_rejections += 1
                 step_record = AgentStep(
                     step_number=step_idx,
@@ -514,7 +520,7 @@ class AesFixAgent:
                         rationale=f"Invalid schema from model: {val_err}",
                     ),
                     status="rejected",
-                    verdict_reason=f"Pydantic schema validation error: {val_err}",
+                    verdict_reason=rejection_reason,
                     baseline_overall_score=current_overall,
                     post_overall_score=current_overall,
                     overall_delta=0.0,
@@ -532,11 +538,15 @@ class AesFixAgent:
                     xmp_xml="",
                     baseline_image_sha256=baseline_step_sha256,
                     candidate_image_sha256=baseline_step_sha256,
+                    preview_image=current_image.copy(),
                 )
                 trajectory.steps.append(step_record)
                 trajectory.rejected_steps.append(step_record)
                 if step_callback:
                     step_callback(step_record)
+                if consecutive_rejections >= self.consecutive_rejections_stop:
+                    logger.info("Early stopping: %d consecutive rejections", consecutive_rejections)
+                    break
                 continue
 
             # Anti-greedy rule (AQ2): Reject repeat proposals without execution
@@ -977,6 +987,7 @@ class AesFixAgent:
         trajectory.final_image = current_image
         trajectory.final_overall_score = current_overall
         trajectory.total_gain = round(current_overall - initial_overall_score, 4)
+        trajectory.llm_calls_count = llm_calls_count
 
         if accepted_fixes:
             if run_confidence == "single-judge measurement (low confidence)":
@@ -994,27 +1005,29 @@ class AesFixAgent:
                 runs_dir = Path("results/agent_runs")
                 runs_dir.mkdir(parents=True, exist_ok=True)
                 log_file = runs_dir / "runs.jsonl"
-            rec = {
-                "timestamp": time.time(),
-                "initial_image_sha256": trajectory.initial_image_sha256,
-                "provider": trajectory.provider,
-                "model_id": trajectory.model_id,
-                "seed": trajectory.seed,
-                "verdict": trajectory.verdict,
-                "initial_overall_score": trajectory.initial_overall_score,
-                "final_overall_score": trajectory.final_overall_score,
-                "total_gain": trajectory.total_gain,
-                "noise_floor": trajectory.noise_floor,
-                "total_steps": trajectory.total_steps,
-                "accepted_count": len(trajectory.accepted_steps),
-                "rejected_count": len(trajectory.rejected_steps),
-                "accepted_ops": [s.proposal.op for s in trajectory.accepted_steps],
-                "steps": [s.to_dict() for s in trajectory.steps],
-            }
-            with open(log_file, "a", encoding="utf-8") as f:
-                f.write(json.dumps(rec) + "\n")
-        except Exception as exc:
-            logger.debug("Failed logging agent run telemetry: %s", exc)
+                rec = {
+                    "timestamp": time.time(),
+                    "initial_image_sha256": trajectory.initial_image_sha256,
+                    "provider": trajectory.provider,
+                    "model_id": trajectory.model_id,
+                    "seed": trajectory.seed,
+                    "verdict": trajectory.verdict,
+                    "initial_overall_score": trajectory.initial_overall_score,
+                    "final_overall_score": trajectory.final_overall_score,
+                    "total_gain": trajectory.total_gain,
+                    "noise_floor": trajectory.noise_floor,
+                    "total_steps": trajectory.total_steps,
+                    "accepted_count": len(trajectory.accepted_steps),
+                    "rejected_count": len(trajectory.rejected_steps),
+                    "accepted_ops": [s.proposal.op for s in trajectory.accepted_steps],
+                    "steps": [s.to_dict() for s in trajectory.steps],
+                    "llm_calls_count": trajectory.llm_calls_count,
+                    "fallback_provider": trajectory.fallback_provider,
+                }
+                with open(log_file, "a", encoding="utf-8") as f:
+                    f.write(json.dumps(rec) + "\n")
+            except Exception as exc:
+                logger.debug("Failed logging agent run telemetry: %s", exc)
 
         # Clean up temp files
         try:

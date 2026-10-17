@@ -50,6 +50,7 @@ class LLMResponse:
     latency_seconds: float = 0.0
     used_fallback: bool = False
     fallback_reason: Optional[str] = None
+    fallback_provider: Optional[str] = None
     parsed_json: Optional[Dict[str, Any]] = None
 
     def get_parsed_json(self) -> Optional[Dict[str, Any]]:
@@ -140,11 +141,23 @@ class LLMClient:
         cache_dir: Optional[Union[str, Path]] = None,
         max_retries: int = 3,
         enable_cache: bool = True,
+        provider_chain: Optional[List[str]] = None,
     ) -> None:
-        self.provider = provider.lower().strip()
         self.max_retries = max_retries
         self.enable_cache = enable_cache
         self.cache = DiskCache(cache_dir=cache_dir)
+        self.total_calls: int = 0
+        self.cache_hits: int = 0
+
+        # Load provider chain (AQ5)
+        if provider_chain is not None:
+            self.provider_chain = [str(p).lower().strip() for p in provider_chain]
+        else:
+            self.provider_chain = self._load_provider_chain_from_config()
+
+        self.provider = provider.lower().strip()
+        if self.provider not in self.provider_chain:
+            self.provider_chain = [self.provider] + self.provider_chain
 
         # Enforce explicit model IDs (never openrouter/free)
         if model_id and model_id.strip().lower() in ("openrouter/free", "free"):
@@ -153,14 +166,34 @@ class LLMClient:
                 "Never pass generic 'openrouter/free'."
             )
 
-        if self.provider == "gemini":
-            self.model_id = model_id or DEFAULT_GEMINI_MODEL
-        elif self.provider == "openrouter":
-            self.model_id = model_id or DEFAULT_OPENROUTER_MODEL
-        elif self.provider == "heuristic":
-            self.model_id = model_id or "deterministic-heuristic-critic-v1"
-        else:
-            raise ValueError(f"Unsupported LLM provider: {provider!r}")
+        self._custom_model_id = model_id
+        self.model_id = model_id or self._get_model_id_for_provider(self.provider)
+
+    @staticmethod
+    def _load_provider_chain_from_config() -> List[str]:
+        """Loads provider_chain list from config/agent.yaml if present."""
+        cfg_path = Path("config/agent.yaml")
+        if cfg_path.exists():
+            try:
+                import yaml
+                with open(cfg_path, "r", encoding="utf-8") as f:
+                    cfg = yaml.safe_load(f) or {}
+                chain = cfg.get("provider_chain")
+                if chain and isinstance(chain, list):
+                    return [str(p).lower().strip() for p in chain]
+            except Exception as exc:
+                logger.debug("Failed to read provider_chain from config/agent.yaml: %s", exc)
+        return ["gemini", "openrouter", "heuristic"]
+
+    def _get_model_id_for_provider(self, prov: str) -> str:
+        """Returns the pinned explicit model identifier for a given provider."""
+        if prov == "gemini":
+            return DEFAULT_GEMINI_MODEL
+        elif prov == "openrouter":
+            return DEFAULT_OPENROUTER_MODEL
+        elif prov == "heuristic":
+            return "deterministic-heuristic-critic-v1"
+        return prov
 
     def generate(
         self,
@@ -170,7 +203,8 @@ class LLMClient:
         temperature: float = 0.2,
         max_tokens: int = 1024,
     ) -> LLMResponse:
-        """Dispatches multimodal completion to configured provider with backoff and caching."""
+        """Dispatches multimodal completion to configured provider with backoff, caching, and fallback chain."""
+        self.total_calls += 1
         image_bytes, pil_image = self._normalize_image(image_input)
         full_prompt = f"{system_instruction or ''}\n\n{prompt}".strip()
 
@@ -179,6 +213,7 @@ class LLMClient:
         if self.enable_cache:
             cached_data = self.cache.get(cache_key)
             if cached_data is not None:
+                self.cache_hits += 1
                 return LLMResponse(
                     content=cached_data.get("content", ""),
                     provider=cached_data.get("provider", self.provider),
@@ -188,60 +223,71 @@ class LLMClient:
                     latency_seconds=0.0,
                     used_fallback=cached_data.get("used_fallback", False),
                     fallback_reason=cached_data.get("fallback_reason"),
+                    fallback_provider=cached_data.get("fallback_provider"),
                     parsed_json=cached_data.get("parsed_json"),
                 )
 
-        t0 = time.perf_counter()
-
-        # 2. Heuristic fast-path
-        if self.provider == "heuristic":
-            resp = self._call_heuristic(pil_image, prompt)
-            resp.latency_seconds = round(time.perf_counter() - t0, 4)
-            if self.enable_cache:
-                self._save_cache(cache_key, resp)
-            return resp
-
-        # 3. Call Remote Provider (Gemini / OpenRouter) with retry and 429 backoff
+        # 2. Iterate provider chain starting from current provider
         try:
-            if self.provider == "gemini":
-                resp = self._call_gemini_with_backoff(
-                    prompt=prompt,
-                    image_bytes=image_bytes,
-                    system_instruction=system_instruction,
-                    temperature=temperature,
-                    max_tokens=max_tokens,
-                )
-            elif self.provider == "openrouter":
-                resp = self._call_openrouter_with_backoff(
-                    prompt=prompt,
-                    image_bytes=image_bytes,
-                    system_instruction=system_instruction,
-                    temperature=temperature,
-                    max_tokens=max_tokens,
-                )
-            else:
-                resp = self._call_heuristic(pil_image, prompt)
+            start_idx = self.provider_chain.index(self.provider)
+        except ValueError:
+            start_idx = 0
 
-            resp.latency_seconds = round(time.perf_counter() - t0, 4)
-            if self.enable_cache:
-                self._save_cache(cache_key, resp)
-            return resp
+        errors_encountered: List[str] = []
+        original_provider = self.provider
 
-        except Exception as exc:
-            # On quota exhaustion or fatal API failure, fall back to heuristic provider
-            logger.warning(
-                "Primary provider %s (%s) failed with %s. Falling back to heuristic provider.",
-                self.provider,
-                self.model_id,
-                exc,
-            )
-            fallback_resp = self._call_heuristic(pil_image, prompt)
-            fallback_resp.used_fallback = True
-            fallback_resp.fallback_reason = f"{type(exc).__name__}: {str(exc)[:120]}"
-            fallback_resp.latency_seconds = round(time.perf_counter() - t0, 4)
-            if self.enable_cache:
-                self._save_cache(cache_key, fallback_resp)
-            return fallback_resp
+        for idx in range(start_idx, len(self.provider_chain)):
+            candidate_provider = self.provider_chain[idx]
+            self.provider = candidate_provider
+            self.model_id = self._custom_model_id if candidate_provider == original_provider and self._custom_model_id else self._get_model_id_for_provider(candidate_provider)
+            t0 = time.perf_counter()
+
+            try:
+                if candidate_provider == "gemini":
+                    resp = self._call_gemini_with_backoff(
+                        prompt=prompt,
+                        image_bytes=image_bytes,
+                        system_instruction=system_instruction,
+                        temperature=temperature,
+                        max_tokens=max_tokens,
+                    )
+                elif candidate_provider == "openrouter":
+                    resp = self._call_openrouter_with_backoff(
+                        prompt=prompt,
+                        image_bytes=image_bytes,
+                        system_instruction=system_instruction,
+                        temperature=temperature,
+                        max_tokens=max_tokens,
+                    )
+                else:
+                    resp = self._call_heuristic(pil_image, prompt)
+
+                resp.latency_seconds = round(time.perf_counter() - t0, 4)
+                if candidate_provider != original_provider:
+                    resp.used_fallback = True
+                    resp.fallback_provider = candidate_provider
+                    resp.fallback_reason = " | ".join(errors_encountered)
+
+                if self.enable_cache:
+                    self._save_cache(cache_key, resp)
+                return resp
+
+            except Exception as exc:
+                err_msg = f"{candidate_provider} failed: {type(exc).__name__}: {str(exc)[:120]}"
+                logger.warning("Provider %s failed in chain (%s). Moving to next provider.", candidate_provider, err_msg)
+                errors_encountered.append(err_msg)
+                continue
+
+        # If all candidates exhausted, emergency fallback to heuristic
+        t0 = time.perf_counter()
+        resp = self._call_heuristic(pil_image, prompt)
+        resp.used_fallback = True
+        resp.fallback_provider = "heuristic"
+        resp.fallback_reason = " | ".join(errors_encountered)
+        resp.latency_seconds = round(time.perf_counter() - t0, 4)
+        if self.enable_cache:
+            self._save_cache(cache_key, resp)
+        return resp
 
     def _call_gemini_with_backoff(
         self,

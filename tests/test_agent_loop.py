@@ -683,3 +683,61 @@ def test_overprocessing_metrics_reported_on_step_cards(dummy_image: str) -> None
     assert "highlight_clipping_growth" in metrics
 
 
+def test_provider_chain_fallback_on_quota_exhaustion(dummy_image: str) -> None:
+    """Verifies that 429 / quota exhaustion advances provider_chain and marks trajectory (AQ5)."""
+    from aesfix.agent.llm import LLMClient
+
+    client = LLMClient(
+        provider="gemini",
+        provider_chain=["gemini", "openrouter", "heuristic"],
+        enable_cache=False,
+    )
+
+    with patch.object(client, "_call_gemini_with_backoff", side_effect=RuntimeError("HTTP 429: Daily quota exceeded")), \
+         patch.object(client, "_call_openrouter_with_backoff", side_effect=RuntimeError("HTTP 429: Rate limit")):
+        resp = client.generate(prompt="Analyze image", image_input=dummy_image)
+
+    assert resp.used_fallback is True
+    assert resp.fallback_provider == "heuristic"
+    assert "HTTP 429" in resp.fallback_reason
+    assert client.provider == "heuristic"
+
+
+def test_one_llm_call_per_step_maximum(dummy_image: str) -> None:
+    """Verifies strictly at most one LLM call per step even on schema validation error (AQ5)."""
+    invalid_json = "this is not valid json at all"
+    fake_llm = FakeLLM([invalid_json])
+    agent = AesFixAgent(llm_client=fake_llm, max_steps=1)
+
+    with patch("aesfix.agent.loop.compute_noise_floor", return_value=0.01), \
+         patch.object(agent, "_extract_aspect_scores", return_value=({"lighting": 0.5}, 0.5)):
+        traj = agent.run(dummy_image)
+
+    assert len(traj.steps) == 1
+    assert traj.steps[0].status == "rejected"
+    assert "Pydantic schema validation error" in traj.steps[0].verdict_reason
+    # Exactly one LLM call made, no immediate retry
+    assert fake_llm.call_count == 1
+    assert traj.llm_calls_count == 1
+
+
+def test_llm_cache_hit_on_identical_prompt(tmp_path: Path, dummy_image: str) -> None:
+    """Verifies that repeated identical prompts hit disk cache (AQ5)."""
+    from aesfix.agent.llm import LLMClient
+
+    client = LLMClient(
+        provider="heuristic",
+        cache_dir=tmp_path / "llm_cache",
+        enable_cache=True,
+    )
+
+    resp1 = client.generate(prompt="Identical prompt test", image_input=dummy_image)
+    assert resp1.cached is False
+    assert client.cache_hits == 0
+
+    resp2 = client.generate(prompt="Identical prompt test", image_input=dummy_image)
+    assert resp2.cached is True
+    assert client.cache_hits == 1
+
+
+
