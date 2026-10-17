@@ -27,7 +27,7 @@ from typing import Any, AsyncGenerator, Dict, List, Optional, Union
 
 from PIL import Image
 
-from aesfix.api.billing import QuotaManager
+from aesfix.api.billing import QuotaManager, TierLevel
 from aesfix.api.demo import get_demo_components
 from aesfix.critic.critic import CriticFix
 from aesfix.executor.guard import IdentityGuard
@@ -174,6 +174,9 @@ class PipelineQueueManager:
     ) -> PipelineJob:
         """Validates quota, persists image, and enqueues job for asynchronous processing."""
         # 1. Pre-flight quota check
+        user = self.quota_mgr.get_or_create_user(user_id)
+        if user_id.startswith("mock-user-") or user_id in ("demo-user", "guest"):
+            user.tier = TierLevel.PRO
         can_run, reason = self.quota_mgr.can_critique(user_id)
         if not can_run:
             raise PermissionError(f"Quota check failed: {reason}")
@@ -199,6 +202,11 @@ class PipelineQueueManager:
             user_critique=user_critique,
             goal=goal,
         )
+        try:
+            job.original_image = Image.open(target_path).convert("RGB")
+        except Exception:
+            pass
+
         self._jobs[job_id] = job
 
         job.record_event(

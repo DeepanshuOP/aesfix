@@ -186,8 +186,8 @@ class BatchDiagnosisAggregator:
         total_photos = len(results)
 
         # 1. Overall and aspect averages
-        overall_scores = [r.overall_score for r in results]
-        mean_score = round(float(stats.fmean(overall_scores)), 4)
+        overall_scores = [r.overall_score for r in results if r.overall_score is not None]
+        mean_score = round(float(stats.fmean(overall_scores)), 4) if overall_scores else 0.0
 
         aspect_sums: Dict[str, float] = {dim: 0.0 for dim in ASPECT_DIMENSIONS}
         for r in results:
@@ -205,7 +205,7 @@ class BatchDiagnosisAggregator:
 
         # 3. Photos below goal quality threshold
         below_thresh: List[str] = [
-            r.job_id for r in results if r.overall_score < profile.min_quality_threshold
+            r.job_id for r in results if r.overall_score is not None and r.overall_score < profile.min_quality_threshold
         ]
 
         # 4. Defect frequency across fixes
@@ -228,10 +228,10 @@ class BatchDiagnosisAggregator:
                 )
             )
 
-        # 5. Crown Hero Shot (highest overall score)
-        best_result = max(results, key=lambda r: r.overall_score)
+        # 5. Crown Hero Shot (highest overall score, or fallback to first photo if unmeasured)
+        best_result = max(results, key=lambda r: (r.overall_score or 0.0))
         hero_job_id = best_result.job_id
-        hero_score = best_result.overall_score
+        hero_score = best_result.overall_score or 0.0
 
         # 6. Executive Shoot Summary
         summary = (
