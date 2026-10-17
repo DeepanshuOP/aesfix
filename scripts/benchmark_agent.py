@@ -267,6 +267,7 @@ def main() -> int:
         print(f"  [Single-Pass] Δ={sp_delta:+.4f} | Verdict: {sp_verdict} | Ops: {sp_ops}")
         print(f"  [Agent]       Δ={agent_delta:+.4f} | Verdict: {agent_verdict} | Steps: {traj.total_steps} (acc: {len(traj.accepted_steps)})")
 
+        accepted_ops = [s.proposal.op for s in traj.accepted_steps]
         legacy_details.append({
             "image": img_name,
             "noise_floor": noise_floor,
@@ -276,6 +277,7 @@ def main() -> int:
             "agent_verdict": agent_verdict,
             "agent_steps": traj.total_steps,
             "agent_accepted": len(traj.accepted_steps),
+            "accepted_ops": accepted_ops,
         })
 
     # -------------------------------------------------------------
@@ -338,18 +340,22 @@ def main() -> int:
         print(f"  [Single-Pass] Δ={sp_delta:+.4f} | Lab recovery: {sp_lab_recovery:+.2f} ({init_lab_dist:.2f} -> {sp_lab_dist:.2f})")
         print(f"  [Agent]       Δ={agent_delta:+.4f} | Lab recovery: {agent_lab_recovery:+.2f} ({init_lab_dist:.2f} -> {agent_lab_dist:.2f}) | Recovered: {recovered_toward_clean}")
 
+        synth_accepted_ops = [s.proposal.op for s in traj.accepted_steps]
         synthetic_details.append({
             "image": case_name,
             "label": label,
             "noise_floor": noise_floor,
             "init_lab": init_lab_dist,
+            "final_lab": agent_lab_dist,
             "sp_delta": sp_delta,
             "sp_lab_recovery": sp_lab_recovery,
             "agent_delta": agent_delta,
+            "agent_verdict": agent_verdict,
             "agent_lab_recovery": agent_lab_recovery,
             "agent_recovered": recovered_toward_clean,
             "agent_steps": traj.total_steps,
             "agent_accepted": len(traj.accepted_steps),
+            "accepted_ops": synth_accepted_ops,
         })
 
     # Summary metrics across suites
@@ -394,19 +400,18 @@ def main() -> int:
     print(f"Synthetic Clean Recovery Rate: {metrics['synthetic_recovery_rate'] * 100:.1f}% ({agent_recovered_count}/{len(synthetic_details)} moved toward clean original)")
     print("=" * 70)
 
-    # Markdown Tables
-    print("\n### 1. Legacy Images (5)")
-    print("| Image | Noise Floor ε | SP Δ | SP Verdict | Agent Δ | Agent Verdict | Steps (Acc) |")
+    # Per-image table formatted as requested by F7:
+    # image | ε | single-pass Δ | agent Δ | accepted ops | verdict | (synthetic only) ΔE before → after
+    print("\n### Complete Per-Image Benchmark Table (F7)")
+    print("| Image | ε | Single-pass Δ | Agent Δ | Accepted Ops | Verdict | ΔE Before → After |")
     print("| :--- | :---: | :---: | :---: | :---: | :---: | :---: |")
     for d in legacy_details:
-        print(f"| `{d['image']}` | {d['noise_floor']:.4f} | {d['sp_delta']:+.4f} | {d['sp_verdict']} | {d['agent_delta']:+.4f} | {d['agent_verdict']} | {d['agent_steps']} ({d['agent_accepted']}) |")
-
-    print("\n### 2. Synthetic Test Images (8) — Ground Truth CIELAB Recovery")
-    print("| Case | Degradation | Noise Floor ε | Init Lab Dist | SP Δ (Lab Recov) | Agent Δ (Lab Recov) | Toward Clean? |")
-    print("| :--- | :--- | :---: | :---: | :---: | :---: | :---: |")
+        ops_str = ", ".join(d["accepted_ops"]) if d["accepted_ops"] else "none"
+        print(f"| `{d['image']}` | {d['noise_floor']:.4f} | {d['sp_delta']:+.4f} | {d['agent_delta']:+.4f} | {ops_str} | {d['agent_verdict']} | N/A (legacy) |")
     for d in synthetic_details:
-        toward = "YES" if d["agent_recovered"] else "NO"
-        print(f"| `{d['image']}` | {d['label']} | {d['noise_floor']:.4f} | {d['init_lab']:.2f} | {d['sp_delta']:+.4f} ({d['sp_lab_recovery']:+.2f}) | {d['agent_delta']:+.4f} ({d['agent_lab_recovery']:+.2f}) | **{toward}** |")
+        ops_str = ", ".join(d["accepted_ops"]) if d["accepted_ops"] else "none"
+        delta_e_str = f"{d['init_lab']:.2f} → {d['final_lab']:.2f}"
+        print(f"| `{d['image']}` | {d['noise_floor']:.4f} | {d['sp_delta']:+.4f} | {d['agent_delta']:+.4f} | {ops_str} | {d['agent_verdict']} | {delta_e_str} |")
 
     return 0
 
