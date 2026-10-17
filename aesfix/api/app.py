@@ -23,6 +23,7 @@ from typing import Any, Dict
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
+from aesfix.api.routes_agent import router as agent_router
 from aesfix.api.routes_batch import router as batch_router
 from aesfix.api.routes_beta import router as beta_router
 from aesfix.api.routes_billing import router as billing_router
@@ -79,6 +80,7 @@ def create_app() -> FastAPI:
     app.include_router(observability_router)
     app.include_router(billing_router)
     app.include_router(pipeline_router)
+    app.include_router(agent_router)
     app.include_router(batch_router)
     app.include_router(trust_router)
     app.include_router(beta_router)
