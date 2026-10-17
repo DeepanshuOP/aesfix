@@ -75,6 +75,8 @@ class AgentStep:
     guard_backend: str
     execution_duration_ms: float
     xmp_xml: str
+    baseline_image_sha256: str = ""
+    candidate_image_sha256: str = ""
     preview_image: Optional[Image.Image] = None
 
     def to_dict(self) -> Dict[str, Any]:
@@ -87,20 +89,39 @@ class AgentStep:
             "direction": self.proposal.direction,
             "rationale": self.proposal.rationale,
             "status": self.status,
+            "decision": self.status,
             "verdict_reason": self.verdict_reason,
+            "reason": self.verdict_reason,
             "baseline_overall_score": self.baseline_overall_score,
             "post_overall_score": self.post_overall_score,
+            "judge_scores": {
+                "before": self.baseline_overall_score,
+                "after": self.post_overall_score,
+            },
             "overall_delta": self.overall_delta,
+            "delta": self.overall_delta,
             "noise_floor": self.noise_floor,
+            "epsilon": self.noise_floor,
             "claimed_aspect": self.claimed_aspect,
             "claimed_aspect_delta": self.claimed_aspect_delta,
             "guard_drift": self.guard_drift,
             "guard_passed": self.guard_passed,
+            "guard": {
+                "drift": self.guard_drift,
+                "passed": self.guard_passed,
+                "backend": self.guard_backend,
+            },
             "guard_backend": self.guard_backend,
             "aspect_scores_before": self.aspect_scores_before,
             "aspect_scores_after": self.aspect_scores_after,
             "aspect_deltas": self.aspect_deltas,
             "execution_duration_ms": self.execution_duration_ms,
+            "baseline_image_sha256": self.baseline_image_sha256,
+            "candidate_image_sha256": self.candidate_image_sha256,
+            "image_hashes": {
+                "before": self.baseline_image_sha256,
+                "after": self.candidate_image_sha256,
+            },
         }
 
 
@@ -115,6 +136,7 @@ class AgentTrajectory:
     final_overall_score: float
     total_gain: float
     noise_floor: float
+    initial_image_sha256: str = ""
     steps: List[AgentStep] = field(default_factory=list)
     accepted_steps: List[AgentStep] = field(default_factory=list)
     rejected_steps: List[AgentStep] = field(default_factory=list)
@@ -132,6 +154,7 @@ class AgentTrajectory:
             "final_overall_score": self.final_overall_score,
             "total_gain": self.total_gain,
             "noise_floor": self.noise_floor,
+            "initial_image_sha256": self.initial_image_sha256,
             "total_steps": self.total_steps,
             "num_accepted": len(self.accepted_steps),
             "num_rejected": len(self.rejected_steps),
@@ -208,16 +231,18 @@ class AesFixAgent:
         for j in getattr(ensemble, "judges", []):
             if hasattr(j, "_heads") and j._heads:
                 try:
-                    # Rsinema judge exposes aspect_scores
+                    # JudgeScore exposes per-aspect scores on the .aspects attribute
                     j_score = j.evaluate(image_path)
-                    raw_aspects = getattr(j_score, "aspect_scores", {})
+                    raw_aspects = getattr(j_score, "aspects", None) or getattr(j_score, "aspect_scores", {})
                     if raw_aspects:
                         found_rsinema = True
                         aspect_scores["composition (unvalidated)"] = raw_aspects.get("composition (unvalidated)", 0.5)
                         aspect_scores["lighting (unvalidated)"] = raw_aspects.get("light (unvalidated)", 0.5)
                         aspect_scores["color (unvalidated)"] = raw_aspects.get("color (unvalidated)", 0.5)
                         aspect_scores["technical (unvalidated)"] = raw_aspects.get("quality (unvalidated)", 0.5)
-                        aspect_scores["sharpness (unvalidated)"] = raw_aspects.get("dof (unvalidated)", 0.5)
+                        dof_val = raw_aspects.get("dof (unvalidated)", 0.5)
+                        aspect_scores["sharpness (unvalidated)"] = dof_val
+                        aspect_scores["subject_clarity (unvalidated)"] = dof_val
                         break
                 except Exception as exc:
                     logger.debug("Failed extracting rsinema heads: %s", exc)
@@ -227,6 +252,8 @@ class AesFixAgent:
             critique = critic.critique(image_path)
             for k, v in critique.aspect_scores.items():
                 aspect_scores[f"{k} (unvalidated)"] = round(float(v), 4)
+            if "subject_clarity" in critique.aspect_scores and "sharpness (unvalidated)" not in aspect_scores:
+                aspect_scores["sharpness (unvalidated)"] = round(float(critique.aspect_scores["subject_clarity"]), 4)
 
         return aspect_scores, overall_score
 
@@ -253,6 +280,9 @@ class AesFixAgent:
             raise TypeError(f"Unsupported image_input type: {type(image_input)}")
 
         current_image.save(orig_temp_path, format="JPEG", quality=95)
+        with open(orig_temp_path, "rb") as fh:
+            initial_image_sha256 = hashlib.sha256(fh.read()).hexdigest()
+        logger.info("Baseline image materialized: path=%s, sha256=%s", orig_temp_path, initial_image_sha256)
 
         # Compute noise floor on initial image
         noise_floor = round(compute_noise_floor(orig_temp_path, ensemble), 4)
@@ -270,6 +300,7 @@ class AesFixAgent:
             final_overall_score=initial_overall_score,
             total_gain=0.0,
             noise_floor=noise_floor,
+            initial_image_sha256=initial_image_sha256,
             provider=self.llm_client.provider,
             model_id=self.llm_client.model_id,
             seed=self.seed,
@@ -291,6 +322,8 @@ class AesFixAgent:
 
             current_temp_path = os.path.join(temp_dir, f"step_{step_idx}_in.jpg")
             current_image.save(current_temp_path, format="JPEG", quality=95)
+            with open(current_temp_path, "rb") as fh:
+                baseline_step_sha256 = hashlib.sha256(fh.read()).hexdigest()
 
             # Construct perception prompt with current measurements
             perception_prompt = (
@@ -356,6 +389,8 @@ class AesFixAgent:
                     guard_backend="SSIM + rgb_layout_stat",
                     execution_duration_ms=0.0,
                     xmp_xml="",
+                    baseline_image_sha256=baseline_step_sha256,
+                    candidate_image_sha256=baseline_step_sha256,
                 )
                 trajectory.steps.append(step_record)
                 trajectory.rejected_steps.append(step_record)
@@ -390,6 +425,16 @@ class AesFixAgent:
 
             candidate_temp_path = os.path.join(temp_dir, f"step_{step_idx}_candidate.jpg")
             exec_res.image.save(candidate_temp_path, format="JPEG", quality=95)
+            with open(candidate_temp_path, "rb") as fh:
+                candidate_step_sha256 = hashlib.sha256(fh.read()).hexdigest()
+
+            logger.info(
+                "Step %d evaluation: baseline_sha256=%s, candidate_sha256=%s (pixels_changed=%s)",
+                step_idx,
+                baseline_step_sha256,
+                candidate_step_sha256,
+                candidate_step_sha256 != baseline_step_sha256,
+            )
 
             # Verify: Evaluate Identity Guard drift
             guard_verdict = self.guard.evaluate(
@@ -493,6 +538,8 @@ class AesFixAgent:
                 guard_backend=getattr(guard_verdict, "guard_backend", f"SSIM + {guard_verdict.backend_name}"),
                 execution_duration_ms=exec_time_ms,
                 xmp_xml=exec_res.xmp_sidecar,
+                baseline_image_sha256=baseline_step_sha256,
+                candidate_image_sha256=candidate_step_sha256,
                 preview_image=exec_res.image.copy(),
             )
 
@@ -539,7 +586,7 @@ class AesFixAgent:
             log_file = runs_dir / "runs.jsonl"
             rec = {
                 "timestamp": time.time(),
-                "initial_image_sha256": hashlib.sha256(current_image.tobytes()).hexdigest(),
+                "initial_image_sha256": trajectory.initial_image_sha256,
                 "provider": trajectory.provider,
                 "model_id": trajectory.model_id,
                 "seed": trajectory.seed,
@@ -552,6 +599,7 @@ class AesFixAgent:
                 "accepted_count": len(trajectory.accepted_steps),
                 "rejected_count": len(trajectory.rejected_steps),
                 "accepted_ops": [s.proposal.op for s in trajectory.accepted_steps],
+                "steps": [s.to_dict() for s in trajectory.steps],
             }
             with open(log_file, "a", encoding="utf-8") as f:
                 f.write(json.dumps(rec) + "\n")

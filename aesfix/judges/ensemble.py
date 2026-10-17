@@ -12,6 +12,7 @@ Individual aesthetic scorers suffer from strong idiosyncratic biases:
 """
 from __future__ import annotations
 
+import hashlib
 import io
 import logging
 import os
@@ -480,9 +481,32 @@ class JudgeEnsemble:
             raise ValueError("JudgeEnsemble requires at least one judge.")
         self.judges = list(judges)
         self.disagreement_threshold = disagreement_threshold
+        # Keyed strictly by sha256(image_bytes) to prevent path-dependent cache collisions
+        self._content_hash_cache: Dict[str, JudgeResult] = {}
 
     def evaluate(self, image_path: str) -> JudgeResult:
         """Evaluate an image across all judges in the ensemble."""
+        if not image_path or not os.path.exists(image_path):
+            raise JudgeEvaluationError(f"Image not found or unreadable: {image_path!r}")
+
+        # Compute content hash so cache keys are independent of file paths or job IDs
+        try:
+            with open(image_path, "rb") as fh:
+                content_hash = hashlib.sha256(fh.read()).hexdigest()
+        except Exception as exc:
+            raise JudgeEvaluationError(f"Could not read image bytes from {image_path}: {exc}") from exc
+
+        if content_hash in self._content_hash_cache:
+            cached = self._content_hash_cache[content_hash]
+            return JudgeResult(
+                image_path=image_path,
+                overall_score=cached.overall_score,
+                judge_scores=cached.judge_scores,
+                disagreement=cached.disagreement,
+                is_uncertain=cached.is_uncertain,
+                aspects=cached.aspects,
+            )
+
         scores_by_name: Dict[str, JudgeScore] = {}
         collected_aspects: Dict[str, float] = {}
 
@@ -515,7 +539,7 @@ class JudgeEnsemble:
         disagreement = float(stats.pvariance(normalized_vals)) if len(normalized_vals) > 1 else 0.0
         is_uncertain = disagreement >= self.disagreement_threshold
 
-        return JudgeResult(
+        res = JudgeResult(
             image_path=image_path,
             overall_score=round(overall, 4),
             judge_scores=scores_by_name,
@@ -523,6 +547,8 @@ class JudgeEnsemble:
             is_uncertain=is_uncertain,
             aspects=collected_aspects,
         )
+        self._content_hash_cache[content_hash] = res
+        return res
 
     def evaluate_batch(self, image_paths: Sequence[str]) -> List[JudgeResult]:
         """Evaluate a batch of images sequentially."""

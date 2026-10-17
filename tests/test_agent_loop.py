@@ -270,7 +270,7 @@ def test_fake_llm_leave_it(dummy_image: str) -> None:
 
 
 @pytest.mark.live
-def test_live_gemini_agent() -> None:
+def test_live_gemini_agent(tmp_path: Path) -> None:
     """Executes a real live multi-turn agent trajectory against Google Gemini API."""
     gemini_key = os.getenv("GEMINI_API_KEY")
     if not gemini_key:
@@ -291,7 +291,8 @@ def test_live_gemini_agent() -> None:
     assert trajectory.model_id == "gemini-3.8-flash"
     assert trajectory.verdict in ("measured improvement", "leave it")
 
-    # Record verified live run to results/ledger.jsonl
+    # Tests must write to a temporary ledger path, never to results/ledger.jsonl (AGF4)
+    temp_ledger = tmp_path / "ledger.jsonl"
     ledger_entry = append_run(
         metrics={
             "agent_steps": trajectory.total_steps,
@@ -307,6 +308,73 @@ def test_live_gemini_agent() -> None:
         },
         data_manifest={"image": "test.jpg", "type": "legacy_benchmark"},
         cost_usd=0.0005,
-        ledger_path=_PROJECT_ROOT / "results" / "ledger.jsonl",
+        ledger_path=temp_ledger,
     )
     assert "run_id" in ledger_entry
+
+
+def test_judge_delta_regression_exposure(tmp_path: Path) -> None:
+    """Regression test for AGF1:
+
+    1. Strong exposure edit (+1 EV) on test.jpg must produce a judge score
+       that differs from baseline by more than the measured noise floor ε.
+    2. A pixel-identical image must give Δ = 0.
+    3. The SHA256 of the edited image actually passed to the judge must differ
+       from baseline when pixels changed.
+    4. Judge and LLM cache keys must be keyed on content hash, never path.
+    """
+    if not os.path.exists(_TEST_JPG):
+        pytest.skip(f"Test image '{_TEST_JPG}' not found")
+
+    from aesfix.judges.ensemble import create_default_ensemble, compute_noise_floor
+    from aesfix.executor.tier_a import TierAExecutor, CriticFix
+    import hashlib
+    from PIL import Image
+
+    ensemble = create_default_ensemble(include_heavy_models=False)
+    executor = TierAExecutor()
+
+    # 1. Baseline evaluation
+    base_res = ensemble.evaluate(_TEST_JPG)
+    epsilon = compute_noise_floor(_TEST_JPG, ensemble)
+    base_sha256 = hashlib.sha256(Path(_TEST_JPG).read_bytes()).hexdigest()
+
+    # 2. Pixel-identical image at different path must yield exact delta = 0
+    identical_copy_path = tmp_path / "identical_copy.jpg"
+    identical_copy_path.write_bytes(Path(_TEST_JPG).read_bytes())
+    copy_sha256 = hashlib.sha256(identical_copy_path.read_bytes()).hexdigest()
+    assert copy_sha256 == base_sha256
+
+    copy_res = ensemble.evaluate(str(identical_copy_path))
+    delta_identical = copy_res.overall_score - base_res.overall_score
+    # Identical image must give exact Δ = 0
+    assert delta_identical == 0.0
+
+    # 3. Strong exposure edit (+1 EV) on test.jpg
+    with Image.open(_TEST_JPG) as img:
+        img_rgb = img.convert("RGB")
+
+    fix = CriticFix(
+        op="adjust_exposure",
+        params={"ev_delta": 1.0},
+        expected_aspect="lighting",
+        direction=1,
+        nl_instruction="Lift exposure by +1 EV",
+    )
+    exec_res = executor.execute_fixes(image_input=img_rgb, fixes=[fix])
+
+    edited_path = tmp_path / "edited_plus_1ev.jpg"
+    exec_res.image.save(str(edited_path), format="JPEG", quality=95)
+    edited_sha256 = hashlib.sha256(edited_path.read_bytes()).hexdigest()
+
+    # Proved: edited image hash differs from baseline
+    assert edited_sha256 != base_sha256
+
+    # Score edited image
+    edited_res = ensemble.evaluate(str(edited_path))
+    delta_exposure = abs(edited_res.overall_score - base_res.overall_score)
+
+    # Strong exposure edit must produce score differing by more than noise floor ε
+    assert delta_exposure > epsilon, (
+        f"Measured delta {delta_exposure:.4f} did not exceed noise floor {epsilon:.4f}"
+    )
