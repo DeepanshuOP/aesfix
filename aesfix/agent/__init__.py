@@ -6,6 +6,7 @@ tool schema generation, and deterministic acceptance criteria.
 from __future__ import annotations
 
 from aesfix.agent.llm import LLMClient, LLMResponse
+from aesfix.agent.loop import AesFixAgent, AgentStep, AgentTrajectory
 from aesfix.agent.schema import (
     AgentProposal,
     VALID_ASPECTS,
@@ -18,6 +19,9 @@ from aesfix.agent.schema import (
 __all__ = [
     "LLMClient",
     "LLMResponse",
+    "AesFixAgent",
+    "AgentStep",
+    "AgentTrajectory",
     "AgentProposal",
     "VALID_ASPECTS",
     "VALID_OPS",
