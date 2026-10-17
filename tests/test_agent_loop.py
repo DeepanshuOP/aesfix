@@ -378,3 +378,53 @@ def test_judge_delta_regression_exposure(tmp_path: Path) -> None:
     assert delta_exposure > epsilon, (
         f"Measured delta {delta_exposure:.4f} did not exceed noise floor {epsilon:.4f}"
     )
+
+
+def test_ineffective_edit_check_rejected(dummy_image: str) -> None:
+    """Verifies that an edit with mean|Δpixel| < 1e-3 is rejected as ineffective edit."""
+    # Proposal with ev_delta = 0.0 produces zero pixel delta
+    ineffective_proposal = json.dumps({
+        "op": "adjust_exposure",
+        "params": {"ev_delta": 0.0},
+        "aspect": "lighting",
+        "direction": 1,
+        "rationale": "Proposing zero delta exposure adjustment.",
+    })
+    improving_proposal = json.dumps({
+        "op": "adjust_exposure",
+        "params": {"ev_delta": 0.5},
+        "aspect": "lighting",
+        "direction": 1,
+        "rationale": "Actual exposure adjustment.",
+    })
+    fake_llm = FakeLLM([ineffective_proposal, improving_proposal])
+    agent = AesFixAgent(llm_client=fake_llm, max_steps=2, consecutive_rejections_stop=3)
+
+    mock_scores = [
+        ({"lighting": 0.50}, 0.50),  # baseline
+        ({"lighting": 0.56}, 0.56),  # step 2
+    ]
+
+    with patch.object(agent, "_extract_aspect_scores", side_effect=mock_scores), \
+         patch("aesfix.agent.loop.compute_noise_floor", return_value=0.01), \
+         patch.object(agent.guard, "evaluate", return_value=GuardVerdict(
+             is_valid=True,
+             composite_drift=0.02,
+             feature_drift=0.01,
+             structural_drift=0.01,
+             threshold=0.35,
+             backend_name="rgb_layout_stat",
+             guard_backend="SSIM + rgb_layout_stat",
+         )):
+
+        trajectory = agent.run(dummy_image)
+
+    assert len(trajectory.steps) == 2
+    # Step 1 was caught by ineffective edit check
+    step1 = trajectory.steps[0]
+    assert step1.status == "rejected"
+    assert step1.verdict_reason == "ineffective edit (no visible change)"
+
+    # Feedback was supplied to LLM for next step
+    assert "ineffective edit (no visible change)" in fake_llm.prompts_received[1]
+

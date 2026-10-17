@@ -436,6 +436,56 @@ class AesFixAgent:
                 candidate_step_sha256 != baseline_step_sha256,
             )
 
+            # Ineffective-edit check (Roadmap v6 Part IV.3): short-circuit evaluation if an operation
+            # produces sub-perceptual changes (|Δpixel| < 1e-3) or leaves image bytes identical,
+            # preventing false certifier claims and LLM hallucination loops.
+            is_ineffective = False
+            if candidate_step_sha256 == baseline_step_sha256:
+                is_ineffective = True
+            elif current_image.size == exec_res.image.size:
+                arr_curr = np.asarray(current_image, dtype=np.float32) / 255.0
+                arr_cand = np.asarray(exec_res.image, dtype=np.float32) / 255.0
+                mean_pixel_delta = float(np.mean(np.abs(arr_cand - arr_curr)))
+                if mean_pixel_delta < 1e-3:
+                    is_ineffective = True
+
+            if is_ineffective:
+                ineffective_reason = "ineffective edit (no visible change)"
+                logger.info("Step %d rejected: %s", step_idx, ineffective_reason)
+                consecutive_rejections += 1
+                step_record = AgentStep(
+                    step_number=step_idx,
+                    proposal=proposal,
+                    status="rejected",
+                    verdict_reason=ineffective_reason,
+                    baseline_overall_score=current_overall,
+                    post_overall_score=current_overall,
+                    overall_delta=0.0,
+                    noise_floor=noise_floor,
+                    claimed_aspect=proposal.aspect,
+                    claimed_aspect_delta=0.0,
+                    claimed_aspect_direction=proposal.direction,
+                    aspect_scores_before=current_aspects,
+                    aspect_scores_after=current_aspects,
+                    aspect_deltas={},
+                    guard_drift=0.0,
+                    guard_passed=True,
+                    guard_backend="SSIM + rgb_layout_stat",
+                    execution_duration_ms=exec_time_ms,
+                    xmp_xml=exec_res.xmp_sidecar,
+                    baseline_image_sha256=baseline_step_sha256,
+                    candidate_image_sha256=candidate_step_sha256,
+                    preview_image=exec_res.image.copy(),
+                )
+                trajectory.steps.append(step_record)
+                trajectory.rejected_steps.append(step_record)
+                dialogue_history.append(
+                    f"Step {step_idx}: REJECTED {proposal.op}. Reason: {ineffective_reason}"
+                )
+                if step_callback:
+                    step_callback(step_record)
+                continue
+
             # Verify: Evaluate Identity Guard drift
             guard_verdict = self.guard.evaluate(
                 original=orig_temp_path,
