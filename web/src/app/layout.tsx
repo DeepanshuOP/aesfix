@@ -1,11 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import React from "react";
-import { Camera, Sparkles, Trophy, BookOpen, ExternalLink, Terminal } from "lucide-react";
+import { Camera, Sparkles, BookOpen, ExternalLink, Terminal } from "lucide-react";
+import { HealthPill } from "@/components/HealthPill";
 
-// Why explicit viewport metadata is isolated:
-// Next.js 15 requires viewport attributes (scale, width) in a dedicated export
-// to prevent layout-shift warnings on mobile viewports.
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1.0,
@@ -14,21 +12,24 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "AesFix — Closed-Loop Image Aesthetics via Verified Critique",
+  title: "AesFix — Closed-Loop Image Aesthetics via Measured Critique",
   description:
-    "Grounded 5-aspect photo criticism, deterministic Tier-A retouching, and verified aesthetic gain (AG@k) with Lightroom XMP export.",
+    "Grounded 5-aspect photo criticism, deterministic Tier-A retouching, and measured aesthetic gain with Lightroom XMP export.",
 };
 
 interface RootLayoutProps {
   children: React.ReactNode;
 }
 
-// Why functional components with typed props are strictly enforced:
-// Adheres to contemporary React 19 standards and ensures complete tree-shaking.
 export default function RootLayout({ children }: RootLayoutProps): React.JSX.Element {
   return (
     <html lang="en" className="dark">
       <body className="min-h-screen bg-zinc-950 text-zinc-100 antialiased selection:bg-cyan-500 selection:text-black">
+        {/* Persistent Research Prototype Banner */}
+        <div className="w-full bg-amber-500/10 border-b border-amber-500/25 px-4 py-2 text-center text-xs font-mono text-amber-300 tracking-wide">
+          Research prototype — measurements are pilot, not human-calibrated.
+        </div>
+
         {/* Navigation Bar */}
         <header className="sticky top-0 z-50 w-full border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-md">
           <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -43,11 +44,11 @@ export default function RootLayout({ children }: RootLayoutProps): React.JSX.Ele
                     Aes<span className="text-cyan-400">Fix</span>
                   </span>
                   <span className="rounded-full bg-cyan-950/80 px-2 py-0.5 font-mono text-[10px] font-semibold text-cyan-400 border border-cyan-800/50">
-                    v1.0 • AG@k
+                    Pilot • Closed Loop
                   </span>
                 </div>
                 <p className="hidden text-[11px] text-zinc-400 sm:block">
-                  Closed-Loop Aesthetics &amp; Edit Verification
+                  Aesthetic Diagnostics &amp; Measured Gain
                 </p>
               </div>
             </div>
@@ -55,25 +56,18 @@ export default function RootLayout({ children }: RootLayoutProps): React.JSX.Ele
             {/* Navigation Links */}
             <nav className="hidden items-center gap-6 md:flex">
               <a
-                href="#studio"
+                href="/"
                 className="flex items-center gap-1.5 text-xs font-medium text-zinc-300 transition-colors hover:text-cyan-400"
               >
                 <Sparkles className="h-3.5 w-3.5" />
                 Studio
               </a>
               <a
-                href="#curriculum"
+                href="/research"
                 className="flex items-center gap-1.5 text-xs font-medium text-zinc-400 transition-colors hover:text-cyan-400"
               >
                 <BookOpen className="h-3.5 w-3.5" />
-                Curriculum
-              </a>
-              <a
-                href="#leaderboard"
-                className="flex items-center gap-1.5 text-xs font-medium text-zinc-400 transition-colors hover:text-cyan-400"
-              >
-                <Trophy className="h-3.5 w-3.5" />
-                AGX Leaderboard
+                Research Notes
               </a>
               <a
                 href="http://localhost:8000/docs"
@@ -82,16 +76,13 @@ export default function RootLayout({ children }: RootLayoutProps): React.JSX.Ele
                 className="flex items-center gap-1.5 text-xs font-medium text-zinc-400 transition-colors hover:text-cyan-400"
               >
                 <Terminal className="h-3.5 w-3.5" />
-                FastAPI / MCP
+                API Docs
               </a>
             </nav>
 
             {/* Gateway Status Badge & GitHub */}
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5 rounded-full bg-zinc-900 px-3 py-1 text-xs text-zinc-300 border border-zinc-800">
-                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="font-mono text-[11px]">API :8000</span>
-              </div>
+              <HealthPill />
               <a
                 href="https://github.com/DeepanshuOP/CritiQ"
                 target="_blank"
