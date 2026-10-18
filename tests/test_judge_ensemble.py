@@ -13,6 +13,7 @@ import os
 import pytest
 
 from aesfix.judges import (
+    AesFixPrefJudge,
     BaseJudge,
     ClipAspectJudge,
     JudgeEnsemble,
@@ -319,5 +320,17 @@ def test_multi_judge_family_agreement_rules():
     assert traj_agree.steps[0].status == "accepted"
     assert traj_agree.steps[0].judge_deltas["clip_judge"] == 0.05
     assert traj_agree.steps[0].judge_deltas["nonclip_judge"] == 0.04
+
+
+def test_aesfix_pref_judge_loads_and_evaluates():
+    """Verify AesFixPrefJudge loads weights, evaluates test.jpg, and outputs within [0, 1]."""
+    judge = AesFixPrefJudge()
+    judge._ensure_loaded()
+    assert judge.name == "aesfix_pref (human pairwise preference)"
+    assert judge.family == "aesfix_pref"
+    res = judge.evaluate(_TEST_JPG)
+    assert isinstance(res.raw_score, float)
+    assert 0.0 <= res.normalized_score <= 1.0
+
 
 

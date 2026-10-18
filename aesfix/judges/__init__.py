@@ -5,6 +5,7 @@ Judges must be strictly frozen and decoupled from critic policy weights to preve
 reward gaming and ensure that evaluation benchmarks remain objective across iterations.
 """
 from .ensemble import (
+    AesFixPrefJudge,
     AestheticPredictorV25Judge,
     BaseJudge,
     ClipAspectJudge,
@@ -26,6 +27,7 @@ from .taste import (
 )
 
 __all__ = [
+    "AesFixPrefJudge",
     "AestheticPredictorV25Judge",
     "BaseJudge",
     "ClipAspectJudge",

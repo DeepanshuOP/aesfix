@@ -445,6 +445,100 @@ class MusiqAestheticJudge(BaseJudge):
             raise JudgeEvaluationError(f"MUSIQ inference failed on {image_path}: {exc}") from exc
 
 
+class AesFixPrefJudge(BaseJudge):
+    """AesFix-Pref human preference judge trained via Bradley-Terry loss on DEAR (arXiv:2512.05209).
+
+    Why this judge is primary:
+    Directly aligns with human pairwise preferences on photographic edits (MIT-Adobe FiveK experts),
+    achieving 74.55% overall pairwise accuracy and 80.21% accuracy on brightness differences.
+    Evaluated efficiently on CPU with frozen CLIP ViT-B/32 encoder and linear head.
+    """
+
+    name = "aesfix_pref (human pairwise preference)"
+    family = "aesfix_pref"
+
+    def __init__(
+        self,
+        weights_path: Optional[str] = None,
+        model_id: str = "openai/clip-vit-base-patch32",
+    ) -> None:
+        self.model_id = model_id
+        self.weights_path = weights_path
+        self._model: Optional[Any] = None
+        self._processor: Optional[Any] = None
+        self._weight: Optional[torch.Tensor] = None
+        self._bias: Optional[torch.Tensor] = None
+
+    def _find_weights_file(self) -> Optional[str]:
+        if self.weights_path and os.path.exists(self.weights_path):
+            return self.weights_path
+        candidates = [
+            "results/aesfix_pref_head.pt",
+            r"D:\aesfix-data\kaggle_runs\dear\aesfix_pref_head.pt",
+            os.path.join(os.path.dirname(__file__), "..", "..", "results", "aesfix_pref_head.pt"),
+        ]
+        for c in candidates:
+            if os.path.exists(c):
+                return c
+        return None
+
+    def _ensure_loaded(self) -> None:
+        if self._model is not None and self._processor is not None and self._weight is not None:
+            return
+
+        w_path = self._find_weights_file()
+        if not w_path:
+            raise JudgeEvaluationError("AesFix-Pref weights file (aesfix_pref_head.pt) not found.")
+
+        try:
+            from transformers import CLIPModel, CLIPProcessor
+
+            ckpt = torch.load(w_path, map_location="cpu", weights_only=False)
+            state_dict = ckpt.get("state_dict", ckpt)
+            self._weight = state_dict["weight"].float()
+            self._bias = state_dict["bias"].float()
+
+            clip_snap = _find_hf_snapshot(self.model_id)
+            if clip_snap:
+                self._model = CLIPModel.from_pretrained(clip_snap, local_files_only=True)
+                self._processor = CLIPProcessor.from_pretrained(clip_snap, local_files_only=True)
+            else:
+                self._model = CLIPModel.from_pretrained(self.model_id)
+                self._processor = CLIPProcessor.from_pretrained(self.model_id)
+
+            self._model.eval()
+            logger.info("Loaded AesFixPrefJudge from %s using encoder %s", w_path, self.model_id)
+        except Exception as exc:
+            raise JudgeEvaluationError(f"Failed to load AesFixPrefJudge: {exc}") from exc
+
+    def evaluate(self, image_path: str) -> JudgeScore:
+        self._validate_image_path(image_path)
+        self._ensure_loaded()
+        if self._model is None or self._processor is None or self._weight is None or self._bias is None:
+            raise JudgeEvaluationError("AesFixPrefJudge not properly initialized.")
+
+        try:
+            pil_image = Image.open(image_path).convert("RGB")
+            inputs = self._processor(images=pil_image, return_tensors="pt")
+            with torch.no_grad():
+                vision_outputs = self._model.vision_model(pixel_values=inputs["pixel_values"])
+                pooled = vision_outputs[1]
+                proj = self._model.visual_projection(pooled)
+                proj_norm = proj / proj.norm(p=2, dim=-1, keepdim=True)
+                raw_score = float((proj_norm @ self._weight.T + self._bias).squeeze().item())
+                # Sigmoid maps the Bradley-Terry latent logit to [0, 1] probability scale
+                norm_score = float(torch.sigmoid(torch.tensor(raw_score)).item())
+
+            return JudgeScore(
+                name=self.name,
+                raw_score=round(raw_score, 4),
+                normalized_score=round(norm_score, 4),
+            )
+        except Exception as exc:
+            raise JudgeEvaluationError(f"AesFixPrefJudge failed on {image_path}: {exc}") from exc
+
+
+
 
 def compute_noise_floor(
     image_input: Union[str, Path, Image.Image],
@@ -703,12 +797,23 @@ def create_default_ensemble(
 ) -> JudgeEnsemble:
     """Factory creating the standard judge ensemble.
 
-    Why (Task D3b): Uses the fine-tuned CLIP ViT-B/32 aesthetic judge
-    (same backbone family as the critic — partially independent). Attempts to load
-    rsinema/aesthetic-scorer from local cache. If unavailable, falls back to
-    ClipAspectJudge labelled explicitly as a same-family non-independent judge.
+    Why (Task D3b & K2): Uses AesFix-Pref (human preference judge trained via
+    Bradley-Terry loss on DEAR) as the primary judge family whenever weights are
+    available. Adds fine-tuned CLIP ViT-B/32 aesthetic judge (rsinema) and MUSIQ (non-CLIP)
+    for multi-judge non-inferiority verification.
     """
     judges: List[BaseJudge] = []
+
+    # 1. Primary judge: AesFix-Pref (human preference judge trained on DEAR / MIT-Adobe FiveK)
+    try:
+        pref = AesFixPrefJudge()
+        pref._ensure_loaded()
+        judges.append(pref)
+        logger.info("Ensemble initialized with primary judge: %s", pref.name)
+    except Exception as exc:
+        logger.info("AesFixPrefJudge not loaded (%s), proceeding with standard ensemble baseline.", exc)
+
+    # 2. RSinema aesthetic judge
     try:
         rsinema = RsinemaAestheticJudge()
         rsinema._ensure_loaded()
