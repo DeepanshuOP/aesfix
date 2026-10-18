@@ -1,0 +1,40 @@
+{
+  "dataset": "DEAR test_processed_markup",
+  "total_test_scenes": 1233,
+  "total_test_pairs": 18995,
+  "scene_luma_distribution": {
+    "p01": 0.2461,
+    "p05": 0.3433,
+    "p50_median": 0.4798,
+    "p95": 0.6117,
+    "scenes_luma_lt_0_20_count": 6,
+    "scenes_luma_lt_0_20_fraction": 0.0049
+  },
+  "part_a_large_delta_pairs": {
+    "luma_delta_threshold": 0.15,
+    "pairs_count": 3069,
+    "scenes_count": 904,
+    "human_prefers_brighter_rate": 0.6999,
+    "ci_95": [
+      0.6737,
+      0.7243
+    ]
+  },
+  "part_b_dark_scenes": {
+    "dark_threshold_luma": 0.2,
+    "dark_scenes_count": 6,
+    "dark_pairs_count": 90,
+    "human_prefers_darker_rate": 0.3,
+    "human_prefers_brighter_rate": 0.7,
+    "ci_95_darker": [
+      0.1556,
+      0.4444
+    ]
+  },
+  "part_c_judge_bias_gap": {
+    "human_brighter_preference_rate": 0.6999,
+    "aesfix_pref_brighter_preference_rate": 0.8021,
+    "excess_judge_bias_gap": 0.1022,
+    "excess_judge_bias_gap_pct": 10.22
+  }
+}
