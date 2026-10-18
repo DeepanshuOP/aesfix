@@ -34,10 +34,11 @@ def clopper_pearson_upper_p_value(k: int, n: int, alpha: float) -> float:
         alpha: Target error rate threshold (e.g. 0.05, 0.10, 0.20).
 
     Returns:
-        p-value in [0.0, 1.0]. If n == 0, returns 0.0 (trivially 0 false improvements).
+        p-value in [0.0, 1.0]. If n <= 0, returns 1.0 (empty release set cannot reject H_0).
     """
     if n <= 0:
-        return 0.0
+        # Why: An empty release set has no statistical evidence to reject H_0.
+        return 1.0
     if k < 0:
         k = 0
     if k >= n:
@@ -80,14 +81,18 @@ def learn_then_test_threshold(
     scores_arr = np.asarray(scores, dtype=np.float64)
     human_arr = np.asarray(human_prefers_edit, dtype=bool)
 
+    # Why: For k=0 failures, (1-alpha)^n <= delta requires n >= log(delta)/log(1-alpha).
+    # Testing candidate thresholds with fewer samples than n_min cannot reject H_0
+    # under any data, so scanning them would prematurely abort fixed-sequence testing.
+    n_min = int(np.ceil(np.log(delta) / np.log(1.0 - alpha))) if (0.0 < alpha < 1.0 and 0.0 < delta < 1.0) else 1
+
     last_passing_threshold: Optional[float] = None
 
     for thresh in candidate_thresholds:
         released_mask = scores_arr >= thresh
         n_released = int(np.sum(released_mask))
-        if n_released == 0:
-            # Conservative empty release set is trivially safe
-            last_passing_threshold = float(thresh)
+        if n_released < n_min:
+            # Insufficient statistical power to ever reject H_0; advance to testable thresholds
             continue
 
         # False improvements: released edits that humans did NOT prefer
@@ -181,10 +186,6 @@ def run_certifier_pilot(
     unique_scenes = np.array(sorted(list(scene_to_indices.keys())))
     n_scenes = len(unique_scenes)
 
-    if candidate_thresholds is None:
-        # Candidate threshold grid from conservative (+2.5) down to liberal (-0.5)
-        candidate_thresholds = np.linspace(2.5, -0.5, 61)
-
     results: Dict[str, List[PilotRunSummary]] = defaultdict(list)
 
     for alpha in alphas:
@@ -215,11 +216,20 @@ def run_certifier_pilot(
             s_eval = [scores[i] for i in eval_idx]
             y_eval = [human_prefers_edit[i] for i in eval_idx]
 
+            if candidate_thresholds is None:
+                # Why: Construct candidate threshold sequence over calibration quantiles
+                # from conservative (85th percentile) down to liberal (10th percentile).
+                # This guarantees thresholds align with the empirical score support.
+                cand_thresh = np.quantile(s_calib, np.linspace(0.85, 0.10, 31))
+                cand_thresh = np.unique(cand_thresh)[::-1]
+            else:
+                cand_thresh = candidate_thresholds
+
             # 1. LTT threshold selection
             chosen_thresh = learn_then_test_threshold(
                 scores=s_calib,
                 human_prefers_edit=y_calib,
-                candidate_thresholds=candidate_thresholds,
+                candidate_thresholds=cand_thresh,
                 alpha=alpha,
                 delta=delta,
             )

@@ -33,8 +33,8 @@ def test_sim_clopper_pearson_exact() -> None:
     p0 = clopper_pearson_upper_p_value(0, 10, 0.10)
     assert p0 == pytest.approx(0.348678, abs=1e-4)
 
-    # Empty release set is trivially safe
-    assert clopper_pearson_upper_p_value(0, 0, 0.10) == 0.0
+    # Why: Empty release set has no data to reject H_0, returning 1.0
+    assert clopper_pearson_upper_p_value(0, 0, 0.10) == 1.0
 
     # 10 false improvements out of 10 is maximum risk
     assert clopper_pearson_upper_p_value(10, 10, 0.10) == 1.0
@@ -55,36 +55,77 @@ def test_sim_fixed_sequence_abstain_everywhere() -> None:
         alpha=0.02,
         delta=0.05,
     )
-    # LTT should abstain or select a very conservative threshold with 0 releases
-    if thresh is not None:
-        fir, cov, n_rel, n_false = evaluate_decision_rule(scores, human_prefers, thresh)
-        assert n_rel == 0 or fir <= 0.02
+    # LTT should abstain when no threshold can reject H_0
+    assert thresh is None
 
 
-def test_sim_fir_guarantee_across_500_runs() -> None:
-    """Verifies that across 500 simulated runs, the FIR violation rate does not exceed delta."""
-    n_runs = 500
-    alpha = 0.15
+def test_sim_power_at_target_release() -> None:
+    """Task I2 Test (a): true FIR 0.05 at lambda releasing 50%, n_cal=150, alpha=0.20.
+
+    LTT selects a lambda with release >= 30% in >= 90% of 500 simulations.
+    """
+    n_sims = 500
+    n_cal = 150
+    alpha = 0.20
     delta = 0.10
-    candidate_thresholds = np.linspace(2.5, -0.5, 31)
+    rng = np.random.default_rng(12345)
 
-    rng = np.random.default_rng(42)
-    violations = 0
-    evaluated_runs = 0
+    passed_runs = 0
+    for _ in range(n_sims):
+        scores_cal = rng.uniform(0.0, 1.0, size=n_cal)
+        # Why: Score >= 0.5 has true human preference rate 0.95 (true FIR = 0.05).
+        # Score < 0.5 has human preference rate 0.60 (FIR = 0.40).
+        probs_cal = np.where(scores_cal >= 0.5, 0.95, 0.60)
+        human_cal = rng.uniform(0.0, 1.0, size=n_cal) < probs_cal
 
-    for _ in range(n_runs):
-        # 300 calibration pairs, 300 evaluation pairs
-        s_calib, y_calib = sim_generate_pairs(300, rng)
-        s_eval, y_eval = sim_generate_pairs(300, rng)
+        # Candidate thresholds spanning release rates from 30% to 50%
+        cand_thresholds = np.quantile(scores_cal, [0.70, 0.65, 0.60, 0.55, 0.50])[::-1]
 
         chosen_thresh = learn_then_test_threshold(
-            scores=s_calib,
-            human_prefers_edit=y_calib,
-            candidate_thresholds=candidate_thresholds,
+            scores=scores_cal,
+            human_prefers_edit=human_cal,
+            candidate_thresholds=cand_thresholds,
             alpha=alpha,
             delta=delta,
         )
+        if chosen_thresh is not None:
+            rel_rate = float(np.mean(scores_cal >= chosen_thresh))
+            if rel_rate >= 0.30:
+                passed_runs += 1
 
+    pass_rate = passed_runs / n_sims
+    assert pass_rate >= 0.90, f"Expected pass rate >= 0.90, got {pass_rate:.4f}"
+
+
+def test_sim_validity_across_500_runs() -> None:
+    """Task I2 Test (b): Validity: across 500 simulations, P(FIR_eval > alpha) <= delta + MC error."""
+    n_sims = 500
+    n_cal = 150
+    n_eval = 300
+    alpha = 0.20
+    delta = 0.10
+    rng = np.random.default_rng(54321)
+
+    violations = 0
+    evaluated_runs = 0
+    for _ in range(n_sims):
+        s_cal = rng.uniform(0.0, 1.0, size=n_cal)
+        p_cal = np.where(s_cal >= 0.5, 0.95, 0.60)
+        y_cal = rng.uniform(0.0, 1.0, size=n_cal) < p_cal
+
+        s_eval = rng.uniform(0.0, 1.0, size=n_eval)
+        p_eval = np.where(s_eval >= 0.5, 0.95, 0.60)
+        y_eval = rng.uniform(0.0, 1.0, size=n_eval) < p_eval
+
+        cand_thresh = np.quantile(s_cal, np.linspace(0.85, 0.20, 25))[::-1]
+
+        chosen_thresh = learn_then_test_threshold(
+            scores=s_cal,
+            human_prefers_edit=y_cal,
+            candidate_thresholds=cand_thresh,
+            alpha=alpha,
+            delta=delta,
+        )
         if chosen_thresh is not None:
             fir, cov, n_rel, _ = evaluate_decision_rule(s_eval, y_eval, chosen_thresh)
             if n_rel > 0:
@@ -92,10 +133,8 @@ def test_sim_fir_guarantee_across_500_runs() -> None:
                 if fir > alpha:
                     violations += 1
 
-    # Empirical violation rate must not exceed delta + binomial 3-sigma tolerance
-    # sigma = sqrt(0.10 * 0.90 / 500) = 0.0134 -> 3-sigma ~ 0.04
-    empirical_violation_rate = violations / evaluated_runs if evaluated_runs > 0 else 0.0
-    print(f"\nSimulated LTT: evaluated {evaluated_runs}/{n_runs} runs, violations: {violations} ({empirical_violation_rate:.4f})")
-    assert empirical_violation_rate <= delta + 0.04, (
-        f"Empirical violation rate {empirical_violation_rate:.4f} exceeds target delta {delta} + tolerance"
+    mc_error = 2.58 * np.sqrt(delta * (1.0 - delta) / n_sims)  # 99% CI tolerance ~ 0.035
+    emp_violation_rate = violations / evaluated_runs if evaluated_runs > 0 else 0.0
+    assert emp_violation_rate <= delta + mc_error, (
+        f"Empirical violation rate {emp_violation_rate:.4f} exceeded delta={delta} + MC error={mc_error:.4f}"
     )

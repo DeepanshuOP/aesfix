@@ -2,90 +2,143 @@
   "metadata": {
     "title": "Certifier Pilot C1: Learn-Then-Test Risk Control Evaluation",
     "label": "pilot \u2014 expert rendering vs original (DEAR/FiveK), not agent edits",
-    "dataset": "DEAR test split",
+    "dataset": "DEAR test split (pilot subset)",
     "num_scenes": 60,
     "num_pairs": 300,
     "judge": "AesFix-Pref (CLIP ViT-B/32 + Linear Head)",
     "delta": 0.1,
     "n_seeds": 20,
-    "human_edit_preference_rate": 0.6667
+    "human_edit_preference_rate": 0.6666666666666666,
+    "release_everything_baseline_fir": 0.33333333333333337
   },
   "results_by_alpha": {
     "alpha_0.05": {
       "ltt": {
         "method": "LTT (Learn-Then-Test, Clopper-Pearson)",
-        "mean_realized_fir": 0.0,
-        "max_realized_fir": 0.0,
-        "violation_rate": 0.0,
-        "mean_release_rate": 0.0063,
-        "abstain_rate": 0.0
-      },
-      "naive_zero": {
-        "method": "Naive (s > 0)",
-        "mean_realized_fir": 0.0713,
-        "max_realized_fir": 0.1304,
-        "violation_rate": 0.8,
-        "mean_release_rate": 0.4873,
-        "abstain_rate": 0.0
-      },
-      "naive_eps": {
-        "method": "Naive (s > 0.04)",
-        "mean_realized_fir": 0.0459,
-        "max_realized_fir": 0.0968,
-        "violation_rate": 0.4,
-        "mean_release_rate": 0.454,
-        "abstain_rate": 0.0
-      }
-    },
-    "alpha_0.1": {
-      "ltt": {
-        "method": "LTT (Learn-Then-Test, Clopper-Pearson)",
-        "mean_realized_fir": 0.0,
-        "max_realized_fir": 0.0,
-        "violation_rate": 0.0,
-        "mean_release_rate": 0.0063,
-        "abstain_rate": 0.0
-      },
-      "naive_zero": {
-        "method": "Naive (s > 0)",
-        "mean_realized_fir": 0.0713,
-        "max_realized_fir": 0.1304,
+        "mean_realized_fir": 0.0084,
+        "max_realized_fir": 0.087,
         "violation_rate": 0.1,
-        "mean_release_rate": 0.4873,
+        "mean_release_rate": 0.0433,
+        "abstain_rate": 0.85
+      },
+      "naive_zero": {
+        "method": "Naive (s > 0)",
+        "mean_realized_fir": 0.1847,
+        "max_realized_fir": 0.2366,
+        "violation_rate": 1.0,
+        "mean_release_rate": 0.6253,
         "abstain_rate": 0.0
       },
       "naive_eps": {
         "method": "Naive (s > 0.04)",
-        "mean_realized_fir": 0.0459,
-        "max_realized_fir": 0.0968,
-        "violation_rate": 0.0,
-        "mean_release_rate": 0.454,
+        "mean_realized_fir": 0.1817,
+        "max_realized_fir": 0.2333,
+        "violation_rate": 1.0,
+        "mean_release_rate": 0.6033,
         "abstain_rate": 0.0
       }
     },
-    "alpha_0.2": {
+    "alpha_0.10": {
       "ltt": {
         "method": "LTT (Learn-Then-Test, Clopper-Pearson)",
-        "mean_realized_fir": 0.0,
-        "max_realized_fir": 0.0,
-        "violation_rate": 0.0,
-        "mean_release_rate": 0.0063,
+        "mean_realized_fir": 0.0291,
+        "max_realized_fir": 0.1111,
+        "violation_rate": 0.05,
+        "mean_release_rate": 0.295,
         "abstain_rate": 0.0
       },
       "naive_zero": {
         "method": "Naive (s > 0)",
-        "mean_realized_fir": 0.0713,
-        "max_realized_fir": 0.1304,
-        "violation_rate": 0.0,
-        "mean_release_rate": 0.4873,
+        "mean_realized_fir": 0.1847,
+        "max_realized_fir": 0.2366,
+        "violation_rate": 1.0,
+        "mean_release_rate": 0.6253,
         "abstain_rate": 0.0
       },
       "naive_eps": {
         "method": "Naive (s > 0.04)",
-        "mean_realized_fir": 0.0459,
-        "max_realized_fir": 0.0968,
+        "mean_realized_fir": 0.1817,
+        "max_realized_fir": 0.2333,
+        "violation_rate": 1.0,
+        "mean_release_rate": 0.6033,
+        "abstain_rate": 0.0
+      }
+    },
+    "alpha_0.15": {
+      "ltt": {
+        "method": "LTT (Learn-Then-Test, Clopper-Pearson)",
+        "mean_realized_fir": 0.062,
+        "max_realized_fir": 0.1364,
         "violation_rate": 0.0,
-        "mean_release_rate": 0.454,
+        "mean_release_rate": 0.3647,
+        "abstain_rate": 0.0
+      },
+      "naive_zero": {
+        "method": "Naive (s > 0)",
+        "mean_realized_fir": 0.1847,
+        "max_realized_fir": 0.2366,
+        "violation_rate": 0.8,
+        "mean_release_rate": 0.6253,
+        "abstain_rate": 0.0
+      },
+      "naive_eps": {
+        "method": "Naive (s > 0.04)",
+        "mean_realized_fir": 0.1817,
+        "max_realized_fir": 0.2333,
+        "violation_rate": 0.8,
+        "mean_release_rate": 0.6033,
+        "abstain_rate": 0.0
+      }
+    },
+    "alpha_0.20": {
+      "ltt": {
+        "method": "LTT (Learn-Then-Test, Clopper-Pearson)",
+        "mean_realized_fir": 0.116,
+        "max_realized_fir": 0.2093,
+        "violation_rate": 0.05,
+        "mean_release_rate": 0.4677,
+        "abstain_rate": 0.0
+      },
+      "naive_zero": {
+        "method": "Naive (s > 0)",
+        "mean_realized_fir": 0.1847,
+        "max_realized_fir": 0.2366,
+        "violation_rate": 0.4,
+        "mean_release_rate": 0.6253,
+        "abstain_rate": 0.0
+      },
+      "naive_eps": {
+        "method": "Naive (s > 0.04)",
+        "mean_realized_fir": 0.1817,
+        "max_realized_fir": 0.2333,
+        "violation_rate": 0.35,
+        "mean_release_rate": 0.6033,
+        "abstain_rate": 0.0
+      }
+    },
+    "alpha_0.30": {
+      "ltt": {
+        "method": "LTT (Learn-Then-Test, Clopper-Pearson)",
+        "mean_realized_fir": 0.1999,
+        "max_realized_fir": 0.2893,
+        "violation_rate": 0.0,
+        "mean_release_rate": 0.6977,
+        "abstain_rate": 0.0
+      },
+      "naive_zero": {
+        "method": "Naive (s > 0)",
+        "mean_realized_fir": 0.1847,
+        "max_realized_fir": 0.2366,
+        "violation_rate": 0.0,
+        "mean_release_rate": 0.6253,
+        "abstain_rate": 0.0
+      },
+      "naive_eps": {
+        "method": "Naive (s > 0.04)",
+        "mean_realized_fir": 0.1817,
+        "max_realized_fir": 0.2333,
+        "violation_rate": 0.0,
+        "mean_release_rate": 0.6033,
         "abstain_rate": 0.0
       }
     }
