@@ -201,3 +201,5 @@ graphify-out/
 .playwright-mcp/
 UPDATEPLS/
 hf_space/
+kaggle/k2_output_remote/
+scratch/
