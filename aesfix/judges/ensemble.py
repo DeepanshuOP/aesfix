@@ -506,8 +506,19 @@ class AesFixPrefJudge(BaseJudge):
                 self._model = CLIPModel.from_pretrained(self.model_id)
                 self._processor = CLIPProcessor.from_pretrained(self.model_id)
 
+            # Checkpoint v1 was extracted from the rsinema fine-tuned vision backbone; load weights to preserve exact feature parity
+            backbone_type = ckpt.get("backbone", "rsinema")
+            if backbone_type == "rsinema":
+                rsinema_snap = _find_hf_snapshot("rsinema/aesthetic-scorer")
+                if rsinema_snap:
+                    rsinema_pt = os.path.join(rsinema_snap, "model.pt")
+                    if os.path.exists(rsinema_pt):
+                        rs_state = torch.load(rsinema_pt, map_location="cpu", weights_only=False)
+                        clean_bb = {k.replace("backbone.", ""): v for k, v in rs_state.items() if k.startswith("backbone.")}
+                        self._model.vision_model.load_state_dict(clean_bb, strict=True)
+
             self._model.eval()
-            logger.info("Loaded AesFixPrefJudge from %s using encoder %s", w_path, self.model_id)
+            logger.info("Loaded AesFixPrefJudge from %s using encoder %s (backbone: %s)", w_path, self.model_id, backbone_type)
         except Exception as exc:
             raise JudgeEvaluationError(f"Failed to load AesFixPrefJudge: {exc}") from exc
 
