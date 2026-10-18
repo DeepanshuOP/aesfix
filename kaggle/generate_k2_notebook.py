@@ -79,19 +79,29 @@ from tqdm.auto import tqdm
 
 start_time = time.time()
 
-# Verify HF_TOKEN from Kaggle Secrets
+# Verify HF_TOKEN from Kaggle Secrets (or attached dataset mount)
+hf_token = None
 try:
     from kaggle_secrets import UserSecretsClient
     user_secrets = UserSecretsClient()
-    hf_token = user_secrets.get_secret("HF_TOKEN")
-    if not hf_token or not str(hf_token).strip():
-        raise ValueError("HF_TOKEN secret retrieved from Kaggle Secrets is empty.")
-    os.environ["HF_TOKEN"] = str(hf_token).strip()
-    print("[Secrets] HF_TOKEN retrieved and verified successfully from Kaggle Secrets.")
+    val = user_secrets.get_secret("HF_TOKEN")
+    if val and str(val).strip():
+        hf_token = str(val).strip()
+        print("[Secrets] HF_TOKEN retrieved and verified successfully from Kaggle Secrets.")
 except Exception as e:
-    print(f"FATAL: HF_TOKEN missing or invalid from Kaggle Secrets: {e}", file=sys.stderr)
+    print(f"[Secrets] Note on Kaggle Secrets: {e}")
+
+if not hf_token:
+    token_p = Path("/kaggle/input/aesfix-hf-token/token.txt")
+    if token_p.exists():
+        hf_token = token_p.read_text().strip()
+        print("[Auth] HF_TOKEN retrieved from private dataset mount.")
+
+if not hf_token or not str(hf_token).strip():
+    print("FATAL: HF_TOKEN missing from Kaggle Secrets and dataset mount!", file=sys.stderr)
     raise SystemExit(1)
 
+os.environ["HF_TOKEN"] = str(hf_token).strip()
 print(f"Python: {sys.version}")
 """),
 
