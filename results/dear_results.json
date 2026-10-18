@@ -1,0 +1,77 @@
+{
+  "run_manifest": {
+    "task": "K2_dear_judges",
+    "dataset": "DEAR (arXiv:2512.05209)",
+    "pilot_train_scenes": 600,
+    "pilot_test_scenes": 300,
+    "total_test_pairs": 4425,
+    "brightness_test_pairs": 839,
+    "original_vs_edit_pairs": 1425,
+    "gpu_device": "Tesla T4",
+    "precision": "fp16",
+    "attention": "sdpa",
+    "runtime_seconds": 2361.39,
+    "gpu_hours": 0.6559,
+    "packages": {
+      "torch": "2.11.0+cu128",
+      "pyiqa": "0.1.16",
+      "transformers": "5.16.1"
+    }
+  },
+  "published_baselines": {
+    "human_ceiling": 0.896,
+    "best_mear_model": 0.81,
+    "citation": "Plohotnuk et al., DEAR (arXiv:2512.05209, Dec 2025)"
+  },
+  "test_pairwise_metrics": {
+    "pyiqa_musiq": {
+      "pairwise_accuracy": 0.5995,
+      "spearman_margin": -0.0513
+    },
+    "pyiqa_topiq_nr": {
+      "pairwise_accuracy": 0.7028,
+      "spearman_margin": -0.07
+    },
+    "pyiqa_liqe": {
+      "pairwise_accuracy": 0.6728,
+      "spearman_margin": -0.0708
+    },
+    "pyiqa_clip_iqa": {
+      "pairwise_accuracy": 0.6615,
+      "spearman_margin": -0.0357
+    },
+    "rsinema": {
+      "pairwise_accuracy": 0.7003,
+      "spearman_margin": -0.0747
+    },
+    "apv2_5": {
+      "pairwise_accuracy": 0.5824,
+      "spearman_margin": -0.0194
+    },
+    "aesfix_pref": {
+      "pairwise_accuracy": 0.7455,
+      "spearman_margin": -0.0785
+    }
+  },
+  "brightness_subset_metrics": {
+    "pyiqa_musiq": 0.6841,
+    "pyiqa_topiq_nr": 0.7592,
+    "pyiqa_liqe": 0.7652,
+    "pyiqa_clip_iqa": 0.6639,
+    "rsinema": 0.7354,
+    "apv2_5": 0.59,
+    "aesfix_pref": 0.8021
+  },
+  "original_vs_edit": {
+    "human_edit_win_rate": 0.7382,
+    "judge_accuracies": {
+      "pyiqa_musiq": 0.5235,
+      "pyiqa_topiq_nr": 0.6716,
+      "pyiqa_liqe": 0.5375,
+      "pyiqa_clip_iqa": 0.6765,
+      "rsinema": 0.5888,
+      "apv2_5": 0.6491,
+      "aesfix_pref": 0.687
+    }
+  }
+}

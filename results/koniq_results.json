@@ -1,0 +1,67 @@
+{
+  "run_manifest": {
+    "task": "K1_judges_koniq",
+    "dataset": "KonIQ-10k (DaRUS-2435)",
+    "official_test_split_count": 2015,
+    "gpu_device": "Tesla T4",
+    "precision": "fp16",
+    "attention": "sdpa",
+    "runtime_seconds": 618.37,
+    "gpu_hours": 0.1718,
+    "packages": {
+      "torch": "2.11.0+cu128",
+      "pyiqa": "0.1.16",
+      "transformers": "5.16.1"
+    }
+  },
+  "metrics_summary": {
+    "pyiqa_musiq": {
+      "measured_srcc": 0.8699,
+      "measured_plcc": 0.8977,
+      "published_srcc": 0.916,
+      "published_plcc": 0.928,
+      "citation": "Ke et al. MUSIQ (CVPR 2021)",
+      "url": "https://arxiv.org/abs/2108.05997"
+    },
+    "pyiqa_topiq_nr": {
+      "measured_srcc": 0.9299,
+      "measured_plcc": 0.9436,
+      "published_srcc": 0.894,
+      "published_plcc": 0.907,
+      "citation": "Chen et al. TOPIQ (IEEE TIP 2024)",
+      "url": "https://arxiv.org/abs/2308.03060"
+    },
+    "pyiqa_liqe": {
+      "measured_srcc": 0.8967,
+      "measured_plcc": 0.9023,
+      "published_srcc": 0.911,
+      "published_plcc": 0.921,
+      "citation": "Zhang et al. LIQE (CVPR 2023)",
+      "url": "https://arxiv.org/abs/2303.14968"
+    },
+    "pyiqa_clip_iqa": {
+      "measured_srcc": 0.6421,
+      "measured_plcc": 0.7089,
+      "published_srcc": 0.741,
+      "published_plcc": 0.76,
+      "citation": "Wang et al. CLIP-IQA (AAAI 2023)",
+      "url": "https://arxiv.org/abs/2207.12396"
+    },
+    "rsinema": {
+      "measured_srcc": 0.629,
+      "measured_plcc": 0.7088,
+      "published_srcc": null,
+      "published_plcc": null,
+      "citation": "RSinema Aesthetic Scorer (Hugging Face)",
+      "url": "https://huggingface.co/rsinema/aesthetic-scorer"
+    },
+    "apv2_5": {
+      "measured_srcc": 0.3003,
+      "measured_plcc": 0.3356,
+      "published_srcc": null,
+      "published_plcc": null,
+      "citation": "Aesthetic Predictor v2.5 (discus0434)",
+      "url": "https://huggingface.co/discus0434/aesthetic-predictor-v2-5"
+    }
+  }
+}
