@@ -10,6 +10,8 @@
   "enable_internet": true,
   "dataset_sources": [],
   "competition_sources": [],
-  "kernel_sources": [],
+  "kernel_sources": [
+    "deepanshuop12/aesfix-dear-512"
+  ],
   "model_sources": []
 }
