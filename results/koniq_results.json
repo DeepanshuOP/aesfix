@@ -16,64 +16,28 @@
   },
   "metrics_summary": {
     "pyiqa_musiq": {
-      "domain_status": "in-domain: trained on KonIQ",
-      "checkpoint_loaded": "musiq_koniq_ckpt-e95806b9.pth",
       "measured_srcc": 0.8699,
-      "measured_plcc": 0.8977,
-      "published_srcc": 0.916,
-      "published_plcc": 0.928,
-      "citation": "Ke et al. MUSIQ (CVPR 2021)",
-      "url": "https://arxiv.org/abs/2108.05997"
+      "measured_plcc": 0.8977
     },
     "pyiqa_topiq_nr": {
-      "domain_status": "in-domain: trained on KonIQ",
-      "checkpoint_loaded": "cfanet_nr_koniq_res50-9a73138b.pth",
       "measured_srcc": 0.9299,
-      "measured_plcc": 0.9436,
-      "published_srcc": "0.926-0.938 (in-domain KonIQ-10k test split; Table IV in paper reports 0.894 for cross-dataset)",
-      "published_plcc": 0.907,
-      "citation": "Chen et al. TOPIQ (IEEE TIP 2024)",
-      "url": "https://arxiv.org/abs/2308.03060"
+      "measured_plcc": 0.9436
     },
     "pyiqa_liqe": {
-      "domain_status": "in-domain: trained on KonIQ",
-      "checkpoint_loaded": "liqe_koniq.pt",
       "measured_srcc": 0.8967,
-      "measured_plcc": 0.9023,
-      "published_srcc": 0.911,
-      "published_plcc": 0.921,
-      "citation": "Zhang et al. LIQE (CVPR 2023)",
-      "url": "https://arxiv.org/abs/2303.14968"
+      "measured_plcc": 0.9023
     },
     "pyiqa_clip_iqa": {
-      "domain_status": "zero-shot",
-      "checkpoint_loaded": "openai/clip-vit-base-patch32 (zero-shot prompt weights)",
       "measured_srcc": 0.6421,
-      "measured_plcc": 0.7089,
-      "published_srcc": 0.741,
-      "published_plcc": 0.760,
-      "citation": "Wang et al. CLIP-IQA (AAAI 2023)",
-      "url": "https://arxiv.org/abs/2207.12396"
+      "measured_plcc": 0.7089
     },
     "rsinema": {
-      "domain_status": "partially independent (fine-tuned CLIP ViT-B/32)",
-      "checkpoint_loaded": "rsinema/aesthetic-scorer model.pt",
-      "measured_srcc": 0.6290,
-      "measured_plcc": 0.7088,
-      "published_srcc": "no source found",
-      "published_plcc": "no source found",
-      "citation": "RSinema Aesthetic Scorer (Hugging Face)",
-      "url": "https://huggingface.co/rsinema/aesthetic-scorer"
+      "measured_srcc": 0.629,
+      "measured_plcc": 0.7088
     },
     "apv2_5": {
-      "domain_status": "zero-shot SigLIP aesthetic predictor",
-      "checkpoint_loaded": "aesthetic_predictor_v2_5.pth",
       "measured_srcc": 0.3003,
-      "measured_plcc": 0.3356,
-      "published_srcc": "no source found",
-      "published_plcc": "no source found",
-      "citation": "Aesthetic Predictor v2.5 (discus0434)",
-      "url": "https://huggingface.co/discus0434/aesthetic-predictor-v2-5"
+      "measured_plcc": 0.3356
     }
   }
 }
