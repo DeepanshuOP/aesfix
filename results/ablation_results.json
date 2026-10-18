@@ -1,0 +1,899 @@
+{
+  "E1": {
+    "config_name": "rsinema primary, intent check & caps OFF",
+    "records": [
+      {
+        "image": "blur.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "N/A",
+        "de_after": "N/A",
+        "de_change": "N/A"
+      },
+      {
+        "image": "bright.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "N/A",
+        "de_after": "N/A",
+        "de_change": "N/A"
+      },
+      {
+        "image": "dark.jpg",
+        "verdict": "measured improvement",
+        "accepted_ops": [
+          "adjust_exposure"
+        ],
+        "overall_delta": 0.1997,
+        "std_delta": 0.914,
+        "de_before": "N/A",
+        "de_after": "N/A",
+        "de_change": "N/A"
+      },
+      {
+        "image": "temp.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "N/A",
+        "de_after": "N/A",
+        "de_change": "N/A"
+      },
+      {
+        "image": "test.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "N/A",
+        "de_after": "N/A",
+        "de_change": "N/A"
+      },
+      {
+        "image": "synth_test_exp_m1_5.jpg",
+        "verdict": "measured improvement",
+        "accepted_ops": [
+          "adjust_exposure",
+          "adjust_exposure"
+        ],
+        "overall_delta": 0.0714,
+        "std_delta": 0.3268,
+        "de_before": "20.50",
+        "de_after": "7.38",
+        "de_change": "-13.11"
+      },
+      {
+        "image": "synth_test_exp_p1_0.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "16.30",
+        "de_after": "16.30",
+        "de_change": "+0.00"
+      },
+      {
+        "image": "synth_test_contrast_0_6.jpg",
+        "verdict": "measured improvement",
+        "accepted_ops": [
+          "adjust_contrast"
+        ],
+        "overall_delta": 0.0887,
+        "std_delta": 0.4059,
+        "de_before": "13.22",
+        "de_after": "9.69",
+        "de_change": "-3.53"
+      },
+      {
+        "image": "synth_test_warm_cast.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "5.32",
+        "de_after": "5.32",
+        "de_change": "+0.00"
+      },
+      {
+        "image": "synth_temp_exp_m1_5.jpg",
+        "verdict": "measured improvement",
+        "accepted_ops": [
+          "adjust_contrast"
+        ],
+        "overall_delta": 0.0853,
+        "std_delta": 0.3904,
+        "de_before": "28.84",
+        "de_after": "28.66",
+        "de_change": "-0.19"
+      },
+      {
+        "image": "synth_temp_exp_p1_0.jpg",
+        "verdict": "measured improvement",
+        "accepted_ops": [
+          "adjust_exposure",
+          "adjust_contrast"
+        ],
+        "overall_delta": 0.2459,
+        "std_delta": 1.1254,
+        "de_before": "20.84",
+        "de_after": "13.24",
+        "de_change": "-7.60"
+      },
+      {
+        "image": "synth_temp_contrast_0_6.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "17.92",
+        "de_after": "17.92",
+        "de_change": "+0.00"
+      },
+      {
+        "image": "synth_temp_warm_cast.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "7.28",
+        "de_after": "7.28",
+        "de_change": "+0.00"
+      }
+    ],
+    "synth_recovered": 3,
+    "synth_worse": 0,
+    "dark_exposure_lifts": 1
+  },
+  "E2": {
+    "config_name": "AesFix-Pref primary, intent check & caps OFF",
+    "records": [
+      {
+        "image": "blur.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "N/A",
+        "de_after": "N/A",
+        "de_change": "N/A"
+      },
+      {
+        "image": "bright.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "N/A",
+        "de_after": "N/A",
+        "de_change": "N/A"
+      },
+      {
+        "image": "dark.jpg",
+        "verdict": "measured improvement",
+        "accepted_ops": [
+          "adjust_exposure"
+        ],
+        "overall_delta": 1.5413,
+        "std_delta": 7.054,
+        "de_before": "N/A",
+        "de_after": "N/A",
+        "de_change": "N/A"
+      },
+      {
+        "image": "temp.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "N/A",
+        "de_after": "N/A",
+        "de_change": "N/A"
+      },
+      {
+        "image": "test.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "N/A",
+        "de_after": "N/A",
+        "de_change": "N/A"
+      },
+      {
+        "image": "synth_test_exp_m1_5.jpg",
+        "verdict": "measured improvement",
+        "accepted_ops": [
+          "adjust_exposure",
+          "adjust_exposure"
+        ],
+        "overall_delta": 1.2645,
+        "std_delta": 5.7872,
+        "de_before": "20.50",
+        "de_after": "7.38",
+        "de_change": "-13.11"
+      },
+      {
+        "image": "synth_test_exp_p1_0.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "16.30",
+        "de_after": "16.30",
+        "de_change": "+0.00"
+      },
+      {
+        "image": "synth_test_contrast_0_6.jpg",
+        "verdict": "measured improvement",
+        "accepted_ops": [
+          "adjust_contrast"
+        ],
+        "overall_delta": 0.9002,
+        "std_delta": 4.1199,
+        "de_before": "13.22",
+        "de_after": "9.69",
+        "de_change": "-3.53"
+      },
+      {
+        "image": "synth_test_warm_cast.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "5.32",
+        "de_after": "5.32",
+        "de_change": "+0.00"
+      },
+      {
+        "image": "synth_temp_exp_m1_5.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "28.84",
+        "de_after": "28.84",
+        "de_change": "+0.00"
+      },
+      {
+        "image": "synth_temp_exp_p1_0.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "20.84",
+        "de_after": "20.84",
+        "de_change": "+0.00"
+      },
+      {
+        "image": "synth_temp_contrast_0_6.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "17.92",
+        "de_after": "17.92",
+        "de_change": "+0.00"
+      },
+      {
+        "image": "synth_temp_warm_cast.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "7.28",
+        "de_after": "7.28",
+        "de_change": "+0.00"
+      }
+    ],
+    "synth_recovered": 2,
+    "synth_worse": 0,
+    "dark_exposure_lifts": 1
+  },
+  "E3": {
+    "config_name": "AesFix-Pref primary, intent check & caps ON",
+    "records": [
+      {
+        "image": "blur.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "N/A",
+        "de_after": "N/A",
+        "de_change": "N/A"
+      },
+      {
+        "image": "bright.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "N/A",
+        "de_after": "N/A",
+        "de_change": "N/A"
+      },
+      {
+        "image": "dark.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "N/A",
+        "de_after": "N/A",
+        "de_change": "N/A"
+      },
+      {
+        "image": "temp.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "N/A",
+        "de_after": "N/A",
+        "de_change": "N/A"
+      },
+      {
+        "image": "test.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "N/A",
+        "de_after": "N/A",
+        "de_change": "N/A"
+      },
+      {
+        "image": "synth_test_exp_m1_5.jpg",
+        "verdict": "measured improvement",
+        "accepted_ops": [
+          "adjust_exposure",
+          "adjust_exposure"
+        ],
+        "overall_delta": 1.2645,
+        "std_delta": 5.7872,
+        "de_before": "20.50",
+        "de_after": "7.38",
+        "de_change": "-13.11"
+      },
+      {
+        "image": "synth_test_exp_p1_0.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "16.30",
+        "de_after": "16.30",
+        "de_change": "+0.00"
+      },
+      {
+        "image": "synth_test_contrast_0_6.jpg",
+        "verdict": "measured improvement",
+        "accepted_ops": [
+          "adjust_contrast"
+        ],
+        "overall_delta": 0.9002,
+        "std_delta": 4.1199,
+        "de_before": "13.22",
+        "de_after": "9.69",
+        "de_change": "-3.53"
+      },
+      {
+        "image": "synth_test_warm_cast.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "5.32",
+        "de_after": "5.32",
+        "de_change": "+0.00"
+      },
+      {
+        "image": "synth_temp_exp_m1_5.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "28.84",
+        "de_after": "28.84",
+        "de_change": "+0.00"
+      },
+      {
+        "image": "synth_temp_exp_p1_0.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "20.84",
+        "de_after": "20.84",
+        "de_change": "+0.00"
+      },
+      {
+        "image": "synth_temp_contrast_0_6.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "17.92",
+        "de_after": "17.92",
+        "de_change": "+0.00"
+      },
+      {
+        "image": "synth_temp_warm_cast.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "7.28",
+        "de_after": "7.28",
+        "de_change": "+0.00"
+      }
+    ],
+    "synth_recovered": 2,
+    "synth_worse": 0,
+    "dark_exposure_lifts": 0
+  },
+  "E4": {
+    "config_name": "AesFix-Pref + TTA (K=4), intent check & caps ON",
+    "records": [
+      {
+        "image": "blur.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "N/A",
+        "de_after": "N/A",
+        "de_change": "N/A",
+        "steps": [
+          {
+            "step": 1,
+            "op": "adjust_exposure",
+            "params": {
+              "ev_delta": -0.72
+            },
+            "aspect": "lighting",
+            "status": "rejected",
+            "reason": "Overall gain \u0394=-0.6676 does not exceed noise floor \u03b5=0.2380; Claimed aspect 'lighting' movement -0.1497 did not exceed noise floor 0.2380; Cumulative gain against original image (-0.6676) does not exceed noise floor (0.2380); Multi-judge non-inferiority rejected: independent family 'clip' (fine-tuned CLIP ViT-B/32 aesthetic judge (same backbone family as the critic \u2014 partially independent)) degraded beyond noise floor: \u0394=-0.0863 < -\u03b5=-0.0447 (\u0394/\u03b5 = -1.93)"
+          },
+          {
+            "step": 2,
+            "op": "adjust_contrast",
+            "params": {
+              "factor": 1.18
+            },
+            "aspect": "technical",
+            "status": "rejected",
+            "reason": "Overall gain \u0394=+0.1882 does not exceed noise floor \u03b5=0.2380; Claimed aspect 'technical' movement +0.0283 did not exceed noise floor 0.2380; Cumulative gain against original image (+0.1882) does not exceed noise floor (0.2380)"
+          }
+        ]
+      },
+      {
+        "image": "bright.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "N/A",
+        "de_after": "N/A",
+        "de_change": "N/A",
+        "steps": [
+          {
+            "step": 1,
+            "op": "adjust_exposure",
+            "params": {
+              "ev_delta": -0.3
+            },
+            "aspect": "lighting",
+            "status": "rejected",
+            "reason": "Overall gain \u0394=+0.1199 does not exceed noise floor \u03b5=2.1369; Claimed aspect 'lighting' movement -0.0132 did not exceed noise floor 2.1369; Cumulative gain against original image (+0.1199) does not exceed noise floor (2.1369)"
+          },
+          {
+            "step": 2,
+            "op": "adjust_highlights",
+            "params": {
+              "highlights": -15.0
+            },
+            "aspect": "lighting",
+            "status": "rejected",
+            "reason": "Overall gain \u0394=-0.3371 does not exceed noise floor \u03b5=2.1369; Claimed aspect 'lighting' movement -0.0578 did not exceed noise floor 2.1369; Cumulative gain against original image (-0.3371) does not exceed noise floor (2.1369)"
+          }
+        ]
+      },
+      {
+        "image": "dark.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "N/A",
+        "de_after": "N/A",
+        "de_change": "N/A",
+        "steps": [
+          {
+            "step": 1,
+            "op": "adjust_exposure",
+            "params": {
+              "ev_delta": 2.0
+            },
+            "aspect": "lighting",
+            "status": "rejected",
+            "reason": "Operation 'adjust_exposure' would exceed cumulative magnitude cap of \u00b10.60 EV (current: +0.00 EV, proposed delta: +2.00 EV); Intent check: photograph classified as intentional low-key; exposure/shadow lifts require explicit user opt-in via Goal Directives"
+          },
+          {
+            "step": 2,
+            "op": "adjust_contrast",
+            "params": {
+              "factor": 1.18
+            },
+            "aspect": "technical",
+            "status": "rejected",
+            "reason": "Overall gain \u0394=+0.1549 does not exceed noise floor \u03b5=0.1715; Claimed aspect 'technical' movement +0.0046 did not exceed noise floor 0.1715; Cumulative gain against original image (+0.1549) does not exceed noise floor (0.1715)"
+          }
+        ]
+      },
+      {
+        "image": "temp.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "N/A",
+        "de_after": "N/A",
+        "de_change": "N/A",
+        "steps": [
+          {
+            "step": 1,
+            "op": "adjust_exposure",
+            "params": {
+              "ev_delta": -0.67
+            },
+            "aspect": "lighting",
+            "status": "rejected",
+            "reason": "Overall gain \u0394=-0.3550 does not exceed noise floor \u03b5=0.0259; Claimed aspect 'lighting' movement -0.1177 did not exceed noise floor 0.0259; Aspect 'color' regressed by -0.0818, exceeding noise floor 0.0259; Cumulative gain against original image (-0.3550) does not exceed noise floor (0.0259); Multi-judge non-inferiority rejected: independent family 'clip' (fine-tuned CLIP ViT-B/32 aesthetic judge (same backbone family as the critic \u2014 partially independent)) degraded beyond noise floor: \u0394=-0.0314 < -\u03b5=-0.0067 (\u0394/\u03b5 = -4.69)"
+          },
+          {
+            "step": 2,
+            "op": "adjust_highlights",
+            "params": {
+              "highlights": -15.0
+            },
+            "aspect": "lighting",
+            "status": "rejected",
+            "reason": "Overall gain \u0394=-0.5764 does not exceed noise floor \u03b5=0.0259; Claimed aspect 'lighting' movement -0.1105 did not exceed noise floor 0.0259; Aspect 'color' regressed by -0.0818, exceeding noise floor 0.0259; Cumulative gain against original image (-0.5764) does not exceed noise floor (0.0259); Multi-judge non-inferiority rejected: independent family 'clip' (fine-tuned CLIP ViT-B/32 aesthetic judge (same backbone family as the critic \u2014 partially independent)) degraded beyond noise floor: \u0394=-0.0683 < -\u03b5=-0.0067 (\u0394/\u03b5 = -10.19)"
+          }
+        ]
+      },
+      {
+        "image": "test.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "N/A",
+        "de_after": "N/A",
+        "de_change": "N/A",
+        "steps": [
+          {
+            "step": 1,
+            "op": "adjust_exposure",
+            "params": {
+              "ev_delta": 0.0
+            },
+            "aspect": "lighting",
+            "status": "rejected",
+            "reason": "ineffective edit (no visible change)"
+          },
+          {
+            "step": 2,
+            "op": "adjust_exposure",
+            "params": {
+              "ev_delta": 0.0
+            },
+            "aspect": "lighting",
+            "status": "rejected",
+            "reason": "repeat proposal: choose a different operation or stop"
+          }
+        ]
+      },
+      {
+        "image": "synth_test_exp_m1_5.jpg",
+        "verdict": "measured improvement",
+        "accepted_ops": [
+          "adjust_exposure",
+          "adjust_exposure"
+        ],
+        "overall_delta": 1.2678,
+        "std_delta": 5.8023,
+        "de_before": "20.50",
+        "de_after": "7.38",
+        "de_change": "-13.11",
+        "steps": [
+          {
+            "step": 1,
+            "op": "adjust_exposure",
+            "params": {
+              "ev_delta": 0.71
+            },
+            "aspect": "lighting",
+            "status": "accepted",
+            "reason": "Accepted: \u0394=+0.8768 > \u03b5=0.0513, claimed aspect 'lighting' improved (+0.1858), other aspects preserved, guard passed (drift=0.0189)."
+          },
+          {
+            "step": 2,
+            "op": "adjust_exposure",
+            "params": {
+              "ev_delta": 0.37
+            },
+            "aspect": "lighting",
+            "status": "accepted",
+            "reason": "Accepted: \u0394=+0.3910 > \u03b5=0.0513, claimed aspect 'lighting' improved (+0.0870), other aspects preserved, guard passed (drift=0.0395)."
+          },
+          {
+            "step": 3,
+            "op": "adjust_exposure",
+            "params": {
+              "ev_delta": 0.2
+            },
+            "aspect": "lighting",
+            "status": "rejected",
+            "reason": "Claimed aspect 'lighting' movement +0.0386 did not exceed noise floor 0.0513; Operation 'adjust_exposure' reached maximum accepted quota (2 per run)"
+          },
+          {
+            "step": 4,
+            "op": "adjust_exposure",
+            "params": {
+              "ev_delta": 0.0
+            },
+            "aspect": "lighting",
+            "status": "rejected",
+            "reason": "ineffective edit (no visible change)"
+          }
+        ]
+      },
+      {
+        "image": "synth_test_exp_p1_0.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "16.30",
+        "de_after": "16.30",
+        "de_change": "+0.00",
+        "steps": [
+          {
+            "step": 1,
+            "op": "adjust_exposure",
+            "params": {
+              "ev_delta": -0.47
+            },
+            "aspect": "lighting",
+            "status": "rejected",
+            "reason": "Overall gain \u0394=-0.1907 does not exceed noise floor \u03b5=0.0534; Claimed aspect 'lighting' movement -0.0612 did not exceed noise floor 0.0534; Cumulative gain against original image (-0.1907) does not exceed noise floor (0.0534); Multi-judge non-inferiority rejected: independent family 'clip' (fine-tuned CLIP ViT-B/32 aesthetic judge (same backbone family as the critic \u2014 partially independent)) degraded beyond noise floor: \u0394=-0.0263 < -\u03b5=-0.0052 (\u0394/\u03b5 = -5.06)"
+          },
+          {
+            "step": 2,
+            "op": "adjust_highlights",
+            "params": {
+              "highlights": -15.0
+            },
+            "aspect": "lighting",
+            "status": "rejected",
+            "reason": "Overall gain \u0394=-0.2219 does not exceed noise floor \u03b5=0.0534; Claimed aspect 'lighting' movement -0.0502 did not exceed noise floor 0.0534; Cumulative gain against original image (-0.2219) does not exceed noise floor (0.0534); Multi-judge non-inferiority rejected: independent family 'clip' (fine-tuned CLIP ViT-B/32 aesthetic judge (same backbone family as the critic \u2014 partially independent)) degraded beyond noise floor: \u0394=-0.0196 < -\u03b5=-0.0052 (\u0394/\u03b5 = -3.77)"
+          }
+        ]
+      },
+      {
+        "image": "synth_test_contrast_0_6.jpg",
+        "verdict": "measured improvement",
+        "accepted_ops": [
+          "adjust_contrast"
+        ],
+        "overall_delta": 0.906,
+        "std_delta": 4.1465,
+        "de_before": "13.22",
+        "de_after": "9.69",
+        "de_change": "-3.53",
+        "steps": [
+          {
+            "step": 1,
+            "op": "adjust_contrast",
+            "params": {
+              "factor": 1.18
+            },
+            "aspect": "technical",
+            "status": "accepted",
+            "reason": "Accepted: \u0394=+0.9060 > \u03b5=0.0701, claimed aspect 'technical' improved (+0.0950), other aspects preserved, guard passed (drift=0.0060)."
+          },
+          {
+            "step": 2,
+            "op": "adjust_exposure",
+            "params": {
+              "ev_delta": 0.0
+            },
+            "aspect": "lighting",
+            "status": "rejected",
+            "reason": "ineffective edit (no visible change)"
+          },
+          {
+            "step": 3,
+            "op": "adjust_exposure",
+            "params": {
+              "ev_delta": 0.0
+            },
+            "aspect": "lighting",
+            "status": "rejected",
+            "reason": "repeat proposal: choose a different operation or stop"
+          }
+        ]
+      },
+      {
+        "image": "synth_test_warm_cast.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "5.32",
+        "de_after": "5.32",
+        "de_change": "+0.00",
+        "steps": [
+          {
+            "step": 1,
+            "op": "adjust_exposure",
+            "params": {
+              "ev_delta": 0.0
+            },
+            "aspect": "lighting",
+            "status": "rejected",
+            "reason": "ineffective edit (no visible change)"
+          },
+          {
+            "step": 2,
+            "op": "adjust_exposure",
+            "params": {
+              "ev_delta": 0.0
+            },
+            "aspect": "lighting",
+            "status": "rejected",
+            "reason": "repeat proposal: choose a different operation or stop"
+          }
+        ]
+      },
+      {
+        "image": "synth_temp_exp_m1_5.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "28.84",
+        "de_after": "28.84",
+        "de_change": "+0.00",
+        "steps": [
+          {
+            "step": 1,
+            "op": "adjust_contrast",
+            "params": {
+              "factor": 1.18
+            },
+            "aspect": "technical",
+            "status": "rejected",
+            "reason": "Claimed aspect 'technical' movement +0.0905 did not exceed noise floor 0.1971"
+          },
+          {
+            "step": 2,
+            "op": "adjust_exposure",
+            "params": {
+              "ev_delta": 0.0
+            },
+            "aspect": "lighting",
+            "status": "rejected",
+            "reason": "ineffective edit (no visible change)"
+          }
+        ]
+      },
+      {
+        "image": "synth_temp_exp_p1_0.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "20.84",
+        "de_after": "20.84",
+        "de_change": "+0.00",
+        "steps": [
+          {
+            "step": 1,
+            "op": "adjust_exposure",
+            "params": {
+              "ev_delta": -1.02
+            },
+            "aspect": "lighting",
+            "status": "rejected",
+            "reason": "Claimed aspect 'lighting' movement +0.1139 did not exceed noise floor 0.3033; Operation 'adjust_exposure' would exceed cumulative magnitude cap of \u00b10.60 EV (current: +0.00 EV, proposed delta: -1.02 EV)"
+          },
+          {
+            "step": 2,
+            "op": "adjust_contrast",
+            "params": {
+              "factor": 1.18
+            },
+            "aspect": "technical",
+            "status": "rejected",
+            "reason": "Overall gain \u0394=+0.0320 does not exceed noise floor \u03b5=0.3033; Claimed aspect 'technical' movement -0.0263 did not exceed noise floor 0.3033; Cumulative gain against original image (+0.0320) does not exceed noise floor (0.3033); Over-processing rejected: highlight clipping grew by +0.2153 (threshold 0.0200)"
+          }
+        ]
+      },
+      {
+        "image": "synth_temp_contrast_0_6.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "17.92",
+        "de_after": "17.92",
+        "de_change": "+0.00",
+        "steps": [
+          {
+            "step": 1,
+            "op": "adjust_exposure",
+            "params": {
+              "ev_delta": -0.48
+            },
+            "aspect": "lighting",
+            "status": "rejected",
+            "reason": "Overall gain \u0394=-0.1866 does not exceed noise floor \u03b5=0.3018; Claimed aspect 'lighting' movement -0.0789 did not exceed noise floor 0.3018; Cumulative gain against original image (-0.1866) does not exceed noise floor (0.3018)"
+          },
+          {
+            "step": 2,
+            "op": "adjust_contrast",
+            "params": {
+              "factor": 1.18
+            },
+            "aspect": "technical",
+            "status": "rejected",
+            "reason": "Claimed aspect 'technical' movement +0.0420 did not exceed noise floor 0.3018"
+          }
+        ]
+      },
+      {
+        "image": "synth_temp_warm_cast.jpg",
+        "verdict": "leave it",
+        "accepted_ops": [],
+        "overall_delta": 0.0,
+        "std_delta": 0.0,
+        "de_before": "7.28",
+        "de_after": "7.28",
+        "de_change": "+0.00",
+        "steps": [
+          {
+            "step": 1,
+            "op": "adjust_exposure",
+            "params": {
+              "ev_delta": -0.69
+            },
+            "aspect": "lighting",
+            "status": "rejected",
+            "reason": "Overall gain \u0394=-0.2209 does not exceed noise floor \u03b5=0.2630; Claimed aspect 'lighting' movement -0.0903 did not exceed noise floor 0.2630; Cumulative gain against original image (-0.2209) does not exceed noise floor (0.2630)"
+          },
+          {
+            "step": 2,
+            "op": "adjust_highlights",
+            "params": {
+              "highlights": -15.0
+            },
+            "aspect": "lighting",
+            "status": "rejected",
+            "reason": "Overall gain \u0394=-0.4882 does not exceed noise floor \u03b5=0.2630; Claimed aspect 'lighting' movement -0.0933 did not exceed noise floor 0.2630; Cumulative gain against original image (-0.4882) does not exceed noise floor (0.2630); Multi-judge non-inferiority rejected: independent family 'clip' (fine-tuned CLIP ViT-B/32 aesthetic judge (same backbone family as the critic \u2014 partially independent)) degraded beyond noise floor: \u0394=-0.0497 < -\u03b5=-0.0495 (\u0394/\u03b5 = -1.00)"
+          }
+        ]
+      }
+    ],
+    "synth_recovered": 2,
+    "synth_worse": 0,
+    "dark_exposure_lifts": 0
+  }
+}

@@ -1,0 +1,133 @@
+{
+  "tradeoff": [
+    {
+      "K": 1,
+      "description": "Single forward pass (baseline)"
+    },
+    {
+      "K": 2,
+      "description": "Original + subtle upscale (+2%)"
+    },
+    {
+      "K": 4,
+      "description": "Original + upscale + downscale + horizontal flip"
+    },
+    {
+      "K": 8,
+      "description": "K=4 + 2 crops + 2 subtle rotations"
+    }
+  ],
+  "table_13": [
+    {
+      "image": "blur.jpg",
+      "eps_before": 0.0110316202044487,
+      "eps_after": 0.007752683013677597,
+      "reduction": 1.4229422491524895,
+      "std_before": 0.05048796432241968,
+      "std_after": 0.035481386790286486
+    },
+    {
+      "image": "bright.jpg",
+      "eps_before": 0.0421675443649292,
+      "eps_after": 0.23430854082107544,
+      "reduction": 0.17996588693337268,
+      "std_before": 0.19298647306603753,
+      "std_after": 1.07235030124062
+    },
+    {
+      "image": "dark.jpg",
+      "eps_before": 0.02783776819705963,
+      "eps_after": 0.03464686870574951,
+      "reduction": 0.8034714026679145,
+      "std_before": 0.1274039734419205,
+      "std_after": 0.15856690483180555
+    },
+    {
+      "image": "temp.jpg",
+      "eps_before": 0.002665400505065918,
+      "eps_after": 0.0017211437225341797,
+      "reduction": 1.5486216927552292,
+      "std_before": 0.012198629313802828,
+      "std_after": 0.007877087974984804
+    },
+    {
+      "image": "test.jpg",
+      "eps_before": 2.9921531677246094e-05,
+      "eps_after": 2.6464462280273438e-05,
+      "reduction": 1.1306306306306306,
+      "std_before": 0.00013694064840844895,
+      "std_after": 0.00012111882050468392
+    },
+    {
+      "image": "synth_test_exp_m1_5.jpg",
+      "eps_before": 0.00017452239990234375,
+      "eps_after": 0.0001842975616455078,
+      "reduction": 0.9469598965071151,
+      "std_before": 0.0007987295190038616,
+      "std_after": 0.0008434671013524385
+    },
+    {
+      "image": "synth_test_exp_p1_0.jpg",
+      "eps_before": 8.881092071533203e-05,
+      "eps_after": 0.00010132789611816406,
+      "reduction": 0.8764705882352941,
+      "std_before": 0.00040645730304499783,
+      "std_after": 0.0004637432316620781
+    },
+    {
+      "image": "synth_test_contrast_0_6.jpg",
+      "eps_before": 0.0005153417587280273,
+      "eps_after": 0.0005387663841247559,
+      "reduction": 0.9565217391304348,
+      "std_before": 0.0023585435182060747,
+      "std_after": 0.0024657500417608965
+    },
+    {
+      "image": "synth_test_warm_cast.jpg",
+      "eps_before": 2.7179718017578125e-05,
+      "eps_after": 3.272294998168945e-05,
+      "reduction": 0.8306010928961749,
+      "std_before": 0.00012439230213994566,
+      "std_after": 0.00014976178481322403
+    },
+    {
+      "image": "synth_temp_exp_m1_5.jpg",
+      "eps_before": 0.0574151873588562,
+      "eps_after": 0.04539632797241211,
+      "reduction": 1.26475399934876,
+      "std_before": 0.26276973619613825,
+      "std_after": 0.20776351474788152
+    },
+    {
+      "image": "synth_temp_exp_p1_0.jpg",
+      "eps_before": 0.04966551065444946,
+      "eps_after": 0.052640289068222046,
+      "reduction": 0.943488562345901,
+      "std_before": 0.22730210825834996,
+      "std_after": 0.2409166547744716
+    },
+    {
+      "image": "synth_temp_contrast_0_6.jpg",
+      "eps_before": 0.047969818115234375,
+      "eps_after": 0.04347008466720581,
+      "reduction": 1.103513335262105,
+      "std_before": 0.2195415016715532,
+      "std_after": 0.1989477559139854
+    },
+    {
+      "image": "synth_temp_warm_cast.jpg",
+      "eps_before": 0.04623222351074219,
+      "eps_after": 0.040197908878326416,
+      "reduction": 1.1501151378466183,
+      "std_before": 0.21158912361895738,
+      "std_after": 0.18397212301293553
+    }
+  ],
+  "koniq_50": {
+    "mean_eps_before": 0.045888992138206956,
+    "mean_eps_after": 0.04744593580253422,
+    "std_eps_before": 0.2100182706554094,
+    "std_eps_after": 0.21714387094981338,
+    "reduction": 0.9671848886950586
+  }
+}
