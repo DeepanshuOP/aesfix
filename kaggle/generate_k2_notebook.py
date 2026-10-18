@@ -61,6 +61,7 @@ import os
 import sys
 import time
 import json
+import uuid
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 from collections import defaultdict
@@ -644,17 +645,20 @@ for jname in judge_names:
 elapsed_sec = time.time() - start_time
 gpu_hours_used = round(elapsed_sec / 3600.0, 4)
 
-# Save AesFix-Pref v2 weights
+# Save AesFix-Pref v2 weights with CPU tensors and complete metadata
 v2_save_path = "/kaggle/working/aesfix_pref_v2_head.pt"
+train_run_id = str(uuid.uuid4())
 torch.save({
-    "state_dict": best_head.state_dict(),
-    "encoder_name": best_encoder_name,
-    "candidate_id": best_candidate_id,
+    "state_dict": {k: v.cpu() for k, v in best_head.state_dict().items()},
+    "encoder_id": best_encoder_name,
     "feature_dim": encoder_dicts[best_encoder_name][1],
-    "architecture": best_row["architecture"],
-    "val_accuracy": best_row["val_accuracy"]
+    "head_architecture": best_row["architecture"],
+    "training_run_id": train_run_id,
+    "candidate_id": best_candidate_id,
+    "val_accuracy": best_row["val_accuracy"],
+    "val_loss": best_row["val_loss"]
 }, v2_save_path)
-print(f"Saved chosen head to {v2_save_path}")
+print(f"Saved chosen head to {v2_save_path} (run_id: {train_run_id}, CPU tensors)")
 
 # Save full results payload
 k2_full_payload = {
