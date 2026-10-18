@@ -23,11 +23,17 @@ def recompute_pair_metrics(pair_scores_path: Path) -> Dict[str, Any]:
     with open(pair_scores_path, "r", encoding="utf-8") as f:
         pairs: List[Dict[str, Any]] = json.load(f)
 
-    # Orientation: left = edit, right = original
-    # x = score(edit) - score(original)
-    # y = mos - 0.5 (where mos is human fraction preferring edit)
+    # Orientation: x = score(edit) - score(original)
+    # y = human_edit_margin = edit_win_rate - 0.5
+    # If human_prefers_edit == (mos > 0.5), left was edit (edit_win_rate = mos).
+    # If human_prefers_edit != (mos > 0.5), left was original (edit_win_rate = 1.0 - mos).
     x = np.array([float(p["score_delta"]) for p in pairs], dtype=np.float64)
-    y = np.array([float(p["mos"]) - 0.5 for p in pairs], dtype=np.float64)
+    y = np.array([
+        (float(p["mos"]) - 0.5)
+        if p.get("human_prefers_edit", p["mos"] > 0.5) == (p["mos"] > 0.5)
+        else (0.5 - float(p["mos"]))
+        for p in pairs
+    ], dtype=np.float64)
     n = len(pairs)
 
     sp = spearmanr(x, y)
