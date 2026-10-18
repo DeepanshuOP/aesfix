@@ -1,0 +1,616 @@
+{
+  "oracle_fix_results": [
+    {
+      "image": "synth_test_exp_m1_5.jpg",
+      "label": "test (-1.5 EV)",
+      "degradation": "adjust_exposure({'ev_delta': -1.5})",
+      "oracle_fix": "adjust_exposure({'ev_delta': 1.5})",
+      "judges": {
+        "rsinema": {
+          "score_degraded": 4.2283,
+          "score_oracle": 4.3038,
+          "delta": 0.0755,
+          "epsilon": 0.0055,
+          "standardized_delta": 13.73,
+          "passes_epsilon": true
+        },
+        "pyiqa_musiq": {
+          "score_degraded": 71.3707,
+          "score_oracle": 74.3035,
+          "delta": 2.9328,
+          "epsilon": 0.0298,
+          "standardized_delta": 98.42,
+          "passes_epsilon": true
+        },
+        "pyiqa_topiq_nr": {
+          "score_degraded": 0.6687,
+          "score_oracle": 0.6867,
+          "delta": 0.018,
+          "epsilon": 0.1011,
+          "standardized_delta": 0.18,
+          "passes_epsilon": false
+        },
+        "aesfix_pref_v1": {
+          "score_degraded": 5.795,
+          "score_oracle": 7.2813,
+          "delta": 1.4863,
+          "epsilon": 0.001,
+          "standardized_delta": 1486.3,
+          "passes_epsilon": true
+        }
+      }
+    },
+    {
+      "image": "synth_test_exp_p1_0.jpg",
+      "label": "test (+1.0 EV)",
+      "degradation": "adjust_exposure({'ev_delta': 1.0})",
+      "oracle_fix": "adjust_exposure({'ev_delta': -1.0})",
+      "judges": {
+        "rsinema": {
+          "score_degraded": 4.2348,
+          "score_oracle": 4.1614,
+          "delta": -0.0734,
+          "epsilon": 0.0057,
+          "standardized_delta": -12.88,
+          "passes_epsilon": false
+        },
+        "pyiqa_musiq": {
+          "score_degraded": 71.5232,
+          "score_oracle": 72.038,
+          "delta": 0.5148,
+          "epsilon": 0.0373,
+          "standardized_delta": 13.8,
+          "passes_epsilon": true
+        },
+        "pyiqa_topiq_nr": {
+          "score_degraded": 0.6622,
+          "score_oracle": 0.6554,
+          "delta": -0.0068,
+          "epsilon": 0.1107,
+          "standardized_delta": -0.06,
+          "passes_epsilon": false
+        },
+        "aesfix_pref_v1": {
+          "score_degraded": 6.5986,
+          "score_oracle": 5.9409,
+          "delta": -0.6577,
+          "epsilon": 0.001,
+          "standardized_delta": -657.7,
+          "passes_epsilon": false
+        }
+      }
+    },
+    {
+      "image": "synth_test_contrast_0_6.jpg",
+      "label": "test (contrast 0.6)",
+      "degradation": "adjust_contrast({'factor': 0.6})",
+      "oracle_fix": "adjust_contrast({'factor': 1.6667})",
+      "judges": {
+        "rsinema": {
+          "score_degraded": 4.107,
+          "score_oracle": 4.3038,
+          "delta": 0.1968,
+          "epsilon": 0.006,
+          "standardized_delta": 32.8,
+          "passes_epsilon": true
+        },
+        "pyiqa_musiq": {
+          "score_degraded": 74.7458,
+          "score_oracle": 74.5917,
+          "delta": -0.1541,
+          "epsilon": 0.0284,
+          "standardized_delta": -5.43,
+          "passes_epsilon": false
+        },
+        "pyiqa_topiq_nr": {
+          "score_degraded": 0.6618,
+          "score_oracle": 0.6879,
+          "delta": 0.0261,
+          "epsilon": 0.1115,
+          "standardized_delta": 0.23,
+          "passes_epsilon": false
+        },
+        "aesfix_pref_v1": {
+          "score_degraded": 5.0236,
+          "score_oracle": 7.2913,
+          "delta": 2.2677,
+          "epsilon": 0.001,
+          "standardized_delta": 2267.7,
+          "passes_epsilon": true
+        }
+      }
+    },
+    {
+      "image": "synth_test_warm_cast.jpg",
+      "label": "test (warm cast)",
+      "degradation": "adjust_white_balance({'temperature': 25.0, 'tint': 5.0})",
+      "oracle_fix": "adjust_white_balance({'temperature': -25.0, 'tint': -5.0})",
+      "judges": {
+        "rsinema": {
+          "score_degraded": 4.2994,
+          "score_oracle": 4.2949,
+          "delta": -0.0045,
+          "epsilon": 0.0043,
+          "standardized_delta": -1.05,
+          "passes_epsilon": false
+        },
+        "pyiqa_musiq": {
+          "score_degraded": 74.0911,
+          "score_oracle": 74.3726,
+          "delta": 0.2815,
+          "epsilon": 0.0241,
+          "standardized_delta": 11.68,
+          "passes_epsilon": true
+        },
+        "pyiqa_topiq_nr": {
+          "score_degraded": 0.6906,
+          "score_oracle": 0.692,
+          "delta": 0.0014,
+          "epsilon": 0.1109,
+          "standardized_delta": 0.01,
+          "passes_epsilon": false
+        },
+        "aesfix_pref_v1": {
+          "score_degraded": 7.2291,
+          "score_oracle": 7.2081,
+          "delta": -0.021,
+          "epsilon": 0.001,
+          "standardized_delta": -21.0,
+          "passes_epsilon": false
+        }
+      }
+    },
+    {
+      "image": "synth_temp_exp_m1_5.jpg",
+      "label": "temp (-1.5 EV)",
+      "degradation": "adjust_exposure({'ev_delta': -1.5})",
+      "oracle_fix": "adjust_exposure({'ev_delta': 1.5})",
+      "judges": {
+        "rsinema": {
+          "score_degraded": 3.1539,
+          "score_oracle": 3.3099,
+          "delta": 0.156,
+          "epsilon": 0.0449,
+          "standardized_delta": 3.47,
+          "passes_epsilon": true
+        },
+        "pyiqa_musiq": {
+          "score_degraded": 69.4084,
+          "score_oracle": 71.5402,
+          "delta": 2.1318,
+          "epsilon": 0.0336,
+          "standardized_delta": 63.45,
+          "passes_epsilon": true
+        },
+        "pyiqa_topiq_nr": {
+          "score_degraded": 0.5709,
+          "score_oracle": 0.5821,
+          "delta": 0.0112,
+          "epsilon": 0.0775,
+          "standardized_delta": 0.14,
+          "passes_epsilon": false
+        },
+        "aesfix_pref_v1": {
+          "score_degraded": 0.2101,
+          "score_oracle": 1.5493,
+          "delta": 1.3392,
+          "epsilon": 0.0574,
+          "standardized_delta": 23.33,
+          "passes_epsilon": true
+        }
+      }
+    },
+    {
+      "image": "synth_temp_exp_p1_0.jpg",
+      "label": "temp (+1.0 EV)",
+      "degradation": "adjust_exposure({'ev_delta': 1.0})",
+      "oracle_fix": "adjust_exposure({'ev_delta': -1.0})",
+      "judges": {
+        "rsinema": {
+          "score_degraded": 2.9607,
+          "score_oracle": 3.0819,
+          "delta": 0.1212,
+          "epsilon": 0.0393,
+          "standardized_delta": 3.08,
+          "passes_epsilon": true
+        },
+        "pyiqa_musiq": {
+          "score_degraded": 67.6998,
+          "score_oracle": 69.7317,
+          "delta": 2.0319,
+          "epsilon": 0.0398,
+          "standardized_delta": 51.05,
+          "passes_epsilon": true
+        },
+        "pyiqa_topiq_nr": {
+          "score_degraded": 0.5265,
+          "score_oracle": 0.5772,
+          "delta": 0.0507,
+          "epsilon": 0.072,
+          "standardized_delta": 0.7,
+          "passes_epsilon": false
+        },
+        "aesfix_pref_v1": {
+          "score_degraded": -0.7055,
+          "score_oracle": -0.1113,
+          "delta": 0.5942,
+          "epsilon": 0.0497,
+          "standardized_delta": 11.96,
+          "passes_epsilon": true
+        }
+      }
+    },
+    {
+      "image": "synth_temp_contrast_0_6.jpg",
+      "label": "temp (contrast 0.6)",
+      "degradation": "adjust_contrast({'factor': 0.6})",
+      "oracle_fix": "adjust_contrast({'factor': 1.6667})",
+      "judges": {
+        "rsinema": {
+          "score_degraded": 3.0945,
+          "score_oracle": 3.306,
+          "delta": 0.2115,
+          "epsilon": 0.0248,
+          "standardized_delta": 8.53,
+          "passes_epsilon": true
+        },
+        "pyiqa_musiq": {
+          "score_degraded": 70.8937,
+          "score_oracle": 71.5118,
+          "delta": 0.6181,
+          "epsilon": 0.0393,
+          "standardized_delta": 15.73,
+          "passes_epsilon": true
+        },
+        "pyiqa_topiq_nr": {
+          "score_degraded": 0.5674,
+          "score_oracle": 0.5783,
+          "delta": 0.0109,
+          "epsilon": 0.0799,
+          "standardized_delta": 0.14,
+          "passes_epsilon": false
+        },
+        "aesfix_pref_v1": {
+          "score_degraded": -0.5454,
+          "score_oracle": 1.4437,
+          "delta": 1.9891,
+          "epsilon": 0.0479,
+          "standardized_delta": 41.53,
+          "passes_epsilon": true
+        }
+      }
+    },
+    {
+      "image": "synth_temp_warm_cast.jpg",
+      "label": "temp (warm cast)",
+      "degradation": "adjust_white_balance({'temperature': 25.0, 'tint': 5.0})",
+      "oracle_fix": "adjust_white_balance({'temperature': -25.0, 'tint': -5.0})",
+      "judges": {
+        "rsinema": {
+          "score_degraded": 3.3403,
+          "score_oracle": 3.3011,
+          "delta": -0.0392,
+          "epsilon": 0.0589,
+          "standardized_delta": -0.67,
+          "passes_epsilon": false
+        },
+        "pyiqa_musiq": {
+          "score_degraded": 70.3686,
+          "score_oracle": 71.1143,
+          "delta": 0.7457,
+          "epsilon": 0.0348,
+          "standardized_delta": 21.43,
+          "passes_epsilon": true
+        },
+        "pyiqa_topiq_nr": {
+          "score_degraded": 0.5812,
+          "score_oracle": 0.5709,
+          "delta": -0.0103,
+          "epsilon": 0.0777,
+          "standardized_delta": -0.13,
+          "passes_epsilon": false
+        },
+        "aesfix_pref_v1": {
+          "score_degraded": 1.6395,
+          "score_oracle": 1.4852,
+          "delta": -0.1543,
+          "epsilon": 0.0463,
+          "standardized_delta": -3.33,
+          "passes_epsilon": false
+        }
+      }
+    }
+  ],
+  "agent_e3_step_traces": [
+    {
+      "image": "synth_test_exp_m1_5.jpg",
+      "label": "test (-1.5 EV)",
+      "degradation": "adjust_exposure({'ev_delta': -1.5})",
+      "steps": [
+        {
+          "step": 1,
+          "proposed_op": "none",
+          "params": {},
+          "is_right_direction": null,
+          "delta_per_judge": {},
+          "decision": "TERMINATED",
+          "reason": "Critic proposed no further fixes (leave it)"
+        }
+      ]
+    },
+    {
+      "image": "synth_test_exp_p1_0.jpg",
+      "label": "test (+1.0 EV)",
+      "degradation": "adjust_exposure({'ev_delta': 1.0})",
+      "steps": [
+        {
+          "step": 1,
+          "proposed_op": "none",
+          "params": {},
+          "is_right_direction": null,
+          "delta_per_judge": {},
+          "decision": "TERMINATED",
+          "reason": "Critic proposed no further fixes (leave it)"
+        }
+      ]
+    },
+    {
+      "image": "synth_test_contrast_0_6.jpg",
+      "label": "test (contrast 0.6)",
+      "degradation": "adjust_contrast({'factor': 0.6})",
+      "steps": [
+        {
+          "step": 1,
+          "proposed_op": "none",
+          "params": {},
+          "is_right_direction": null,
+          "delta_per_judge": {},
+          "decision": "TERMINATED",
+          "reason": "Critic proposed no further fixes (leave it)"
+        }
+      ]
+    },
+    {
+      "image": "synth_test_warm_cast.jpg",
+      "label": "test (warm cast)",
+      "degradation": "adjust_white_balance({'temperature': 25.0, 'tint': 5.0})",
+      "steps": [
+        {
+          "step": 1,
+          "proposed_op": "none",
+          "params": {},
+          "is_right_direction": null,
+          "delta_per_judge": {},
+          "decision": "TERMINATED",
+          "reason": "Critic proposed no further fixes (leave it)"
+        }
+      ]
+    },
+    {
+      "image": "synth_temp_exp_m1_5.jpg",
+      "label": "temp (-1.5 EV)",
+      "degradation": "adjust_exposure({'ev_delta': -1.5})",
+      "steps": [
+        {
+          "step": 1,
+          "proposed_op": "adjust_exposure",
+          "params": {
+            "ev_delta": 0.4,
+            "highlight_recovery": true
+          },
+          "is_right_direction": true,
+          "delta_per_judge": {
+            "rsinema": {
+              "delta": 0.072,
+              "delta_std": 1.6,
+              "passes_eps": true
+            },
+            "pyiqa_musiq": {
+              "delta": 1.3067,
+              "delta_std": 38.89,
+              "passes_eps": true
+            },
+            "pyiqa_topiq_nr": {
+              "delta": -0.0042,
+              "delta_std": -0.05,
+              "passes_eps": false
+            },
+            "aesfix_pref_v1": {
+              "delta": 0.5315,
+              "delta_std": 9.26,
+              "passes_eps": true
+            }
+          },
+          "decision": "ACCEPTED",
+          "reason": "AesFix-Pref delta (+0.5315) > epsilon (0.0574)"
+        },
+        {
+          "step": 2,
+          "proposed_op": "adjust_exposure",
+          "params": {
+            "ev_delta": 0.4,
+            "highlight_recovery": true
+          },
+          "is_right_direction": true,
+          "delta_per_judge": {
+            "rsinema": {
+              "delta": 0.0562,
+              "delta_std": 1.25,
+              "passes_eps": true
+            },
+            "pyiqa_musiq": {
+              "delta": 0.8883,
+              "delta_std": 26.44,
+              "passes_eps": true
+            },
+            "pyiqa_topiq_nr": {
+              "delta": 0.0033,
+              "delta_std": 0.04,
+              "passes_eps": false
+            },
+            "aesfix_pref_v1": {
+              "delta": 0.4201,
+              "delta_std": 7.32,
+              "passes_eps": true
+            }
+          },
+          "decision": "ACCEPTED",
+          "reason": "AesFix-Pref delta (+0.4201) > epsilon (0.0574)"
+        },
+        {
+          "step": 3,
+          "proposed_op": "adjust_exposure",
+          "params": {
+            "ev_delta": 0.4,
+            "highlight_recovery": true
+          },
+          "is_right_direction": true,
+          "delta_per_judge": {
+            "rsinema": {
+              "delta": 0.0405,
+              "delta_std": 0.9,
+              "passes_eps": false
+            },
+            "pyiqa_musiq": {
+              "delta": -0.1617,
+              "delta_std": -4.81,
+              "passes_eps": false
+            },
+            "pyiqa_topiq_nr": {
+              "delta": 0.0066,
+              "delta_std": 0.09,
+              "passes_eps": false
+            },
+            "aesfix_pref_v1": {
+              "delta": 0.3511,
+              "delta_std": 6.12,
+              "passes_eps": true
+            }
+          },
+          "decision": "ACCEPTED",
+          "reason": "AesFix-Pref delta (+0.3511) > epsilon (0.0574)"
+        }
+      ]
+    },
+    {
+      "image": "synth_temp_exp_p1_0.jpg",
+      "label": "temp (+1.0 EV)",
+      "degradation": "adjust_exposure({'ev_delta': 1.0})",
+      "steps": [
+        {
+          "step": 1,
+          "proposed_op": "adjust_exposure",
+          "params": {
+            "ev_delta": 0.4,
+            "highlight_recovery": true
+          },
+          "is_right_direction": false,
+          "delta_per_judge": {
+            "rsinema": {
+              "delta": -0.174,
+              "delta_std": -4.43,
+              "passes_eps": false
+            },
+            "pyiqa_musiq": {
+              "delta": -2.2193,
+              "delta_std": -55.76,
+              "passes_eps": false
+            },
+            "pyiqa_topiq_nr": {
+              "delta": -0.0141,
+              "delta_std": -0.2,
+              "passes_eps": false
+            },
+            "aesfix_pref_v1": {
+              "delta": -0.8042,
+              "delta_std": -16.18,
+              "passes_eps": false
+            }
+          },
+          "decision": "REJECTED",
+          "reason": "Judge delta (-0.8042) <= epsilon (0.0497)"
+        }
+      ]
+    },
+    {
+      "image": "synth_temp_contrast_0_6.jpg",
+      "label": "temp (contrast 0.6)",
+      "degradation": "adjust_contrast({'factor': 0.6})",
+      "steps": [
+        {
+          "step": 1,
+          "proposed_op": "adjust_exposure",
+          "params": {
+            "ev_delta": 0.4,
+            "highlight_recovery": true
+          },
+          "is_right_direction": false,
+          "delta_per_judge": {
+            "rsinema": {
+              "delta": -0.007,
+              "delta_std": -0.28,
+              "passes_eps": false
+            },
+            "pyiqa_musiq": {
+              "delta": -1.6435,
+              "delta_std": -41.82,
+              "passes_eps": false
+            },
+            "pyiqa_topiq_nr": {
+              "delta": -0.0138,
+              "delta_std": -0.17,
+              "passes_eps": false
+            },
+            "aesfix_pref_v1": {
+              "delta": -0.0503,
+              "delta_std": -1.05,
+              "passes_eps": false
+            }
+          },
+          "decision": "REJECTED",
+          "reason": "Judge delta (-0.0503) <= epsilon (0.0479)"
+        }
+      ]
+    },
+    {
+      "image": "synth_temp_warm_cast.jpg",
+      "label": "temp (warm cast)",
+      "degradation": "adjust_white_balance({'temperature': 25.0, 'tint': 5.0})",
+      "steps": [
+        {
+          "step": 1,
+          "proposed_op": "adjust_exposure",
+          "params": {
+            "ev_delta": 0.4,
+            "highlight_recovery": true
+          },
+          "is_right_direction": false,
+          "delta_per_judge": {
+            "rsinema": {
+              "delta": -0.1677,
+              "delta_std": -2.85,
+              "passes_eps": false
+            },
+            "pyiqa_musiq": {
+              "delta": -1.3587,
+              "delta_std": -39.04,
+              "passes_eps": false
+            },
+            "pyiqa_topiq_nr": {
+              "delta": -0.0357,
+              "delta_std": -0.46,
+              "passes_eps": false
+            },
+            "aesfix_pref_v1": {
+              "delta": -1.1727,
+              "delta_std": -25.33,
+              "passes_eps": false
+            }
+          },
+          "decision": "REJECTED",
+          "reason": "Judge delta (-1.1727) <= epsilon (0.0463)"
+        }
+      ]
+    }
+  ]
+}
