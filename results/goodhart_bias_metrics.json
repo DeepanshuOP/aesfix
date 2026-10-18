@@ -1,7 +1,9 @@
 {
   "dataset": "DEAR test_processed_markup",
-  "total_test_scenes": 1233,
+  "total_test_scenes_unique": 1283,
+  "total_test_scenes_with_original": 1233,
   "total_test_pairs": 18995,
+  "scene_count_explanation": "DEAR test split contains 1,283 unique scenes across 18,995 pairs. Exactly 1,233 of these scenes contain original-vs-edit comparisons; the remaining 50 scenes contain only edit-vs-edit pairs.",
   "scene_luma_distribution": {
     "p01": 0.2461,
     "p05": 0.3433,
@@ -10,31 +12,33 @@
     "scenes_luma_lt_0_20_count": 6,
     "scenes_luma_lt_0_20_fraction": 0.0049
   },
-  "part_a_large_delta_pairs": {
+  "part_a_brightness_subset": {
+    "source": "results/pilot_pair_scores.json",
     "luma_delta_threshold": 0.15,
-    "pairs_count": 3069,
-    "scenes_count": 904,
-    "human_prefers_brighter_rate": 0.6999,
-    "ci_95": [
-      0.6737,
-      0.7243
-    ]
+    "pairs_count": 75,
+    "scenes_count": 33,
+    "p_human_prefers_brighter": 0.7067,
+    "ci_95_human": [
+      0.573,
+      0.8286
+    ],
+    "p_judge_prefers_brighter": 0.6933,
+    "ci_95_judge": [
+      0.55,
+      0.8356
+    ],
+    "difference_judge_minus_human": -0.0133,
+    "ci_95_difference": [
+      -0.1728,
+      0.1429
+    ],
+    "clarification": "The 0.8021 value previously cited in P5 was the judge's pairwise ACCURACY (agreement with humans) on brightness pairs from the initial pilot run. When measuring actual preference for the brighter image, humans prefer brighter 70.67% and judge prefers brighter 69.33% (difference: -1.33%)."
   },
   "part_b_dark_scenes": {
+    "status": "insufficient data (n=6 scenes)",
     "dark_threshold_luma": 0.2,
     "dark_scenes_count": 6,
     "dark_pairs_count": 90,
-    "human_prefers_darker_rate": 0.3,
-    "human_prefers_brighter_rate": 0.7,
-    "ci_95_darker": [
-      0.1556,
-      0.4444
-    ]
-  },
-  "part_c_judge_bias_gap": {
-    "human_brighter_preference_rate": 0.6999,
-    "aesfix_pref_brighter_preference_rate": 0.8021,
-    "excess_judge_bias_gap": 0.1022,
-    "excess_judge_bias_gap_pct": 10.22
+    "conclusion": "Only 6 out of 1,283 scenes in DEAR have original luminance < 0.20. With n=6 scenes, there is insufficient statistical support to characterize crowd rater behavior on low-key photography."
   }
 }

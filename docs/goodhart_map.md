@@ -12,37 +12,31 @@ This document records the empirical measurement of human vs. judge brightness pr
 
 ## 1. Empirical Measurements on DEAR Test Split
 
-*Data source: `D:/aesfix-data/dear/test_processed_markup.csv` (18,995 test pairs across 1,233 scenes).*  
+*Data source: `D:/aesfix-data/dear/test_processed_markup.csv` (18,995 test pairs across 1,283 unique scenes, 1,233 containing original-vs-edit comparisons).*  
 *Computed by: `scripts/compute_goodhart_bias.py` -> `results/goodhart_bias_metrics.json`.*
 
-### (a) Human Brightness Preference Rate
-Among DEAR test pairs where the lightness difference is perceptible ($|\Delta \text{luma}| > 0.15$ normalized to $[0, 1]$, $N=3,069$ pairs across 904 unique scenes):
-- **Human Brighter Preference Rate**: **69.99%**
-- **95% Bootstrap Confidence Interval** (clustered by scene, 5,000 resamples): **[67.37%, 72.43%]**
+### (a) Human and Judge Brightness Preference Rates
+Among DEAR test pairs where the lightness difference is perceptible ($|\Delta \text{luma}| > 0.15$ normalized to $[0, 1]$):
+- **Across the pilot pairs with judge scores** ($N=75$ pairs across 33 scenes):
+  - **$P(\text{humans prefer brighter})$**: **70.67%** (95% scene-clustered bootstrap CI: **[57.30%, 82.86%]**)
+  - **$P(\text{judge prefers brighter})$** (AesFix-Pref v1): **69.33%** (95% scene-clustered bootstrap CI: **[55.00%, 83.56%]**)
+  - **Difference (Judge − Human)**: **-1.33%** (95% scene-clustered bootstrap CI: **[-17.28%, +14.29%]**)
+- **Across the full DEAR test split** ($N=3,069$ pairs across 904 unique scenes):
+  - **Human Brighter Preference Rate**: **69.99%** (95% scene-clustered bootstrap CI: **[67.37%, 72.43%]**)
 
-Crowd evaluators in general photo-editing benchmarks have a strong intrinsic prior favoring brighter renderings when all other visual attributes are held equal.
-
-### (b) Extreme Scarcity of Dark / Low-Key Scenes in Benchmark Data
-Analyzing the original scene luminance distribution across all 1,233 test scenes:
+### (b) Dark / Low-Key Scenes: Insufficient Data ($n=6$ Scenes)
+Analyzing original scene luminance across all 1,233 scenes with original images:
 - 1st percentile ($p_{01}$): **0.2461**
 - 5th percentile ($p_{05}$): **0.3433**
 - Median ($p_{50}$): **0.4798**
 - 95th percentile ($p_{95}$): **0.6117**
-- **Scenes with original luminance $< 0.20$**: **Only 6 out of 1,233 scenes (0.49%)**
+- **Scenes with original luminance $< 0.20$**: **Only 6 out of 1,283 scenes (0.49%)**
 
-Across all 90 pairs evaluated on these 6 dark scenes:
-- Human preference for the brighter rendering: **70.00%** (63 / 90)
-- In pairwise comparisons directly against the unedited dark original: humans prefer the brighter edit **96.7%** (29 / 30)
+*Finding*: Only 6 scenes in the entire DEAR test set qualify as dark or low-key ($L < 0.20$). With only $n=6$ scenes, there is **insufficient data** to draw general statistical conclusions about crowd rater behavior on low-key photography.
 
-**Root cause:** Photographic datasets like MIT-Adobe FiveK and AVA heavily sample daylight, outdoor, portrait, and travel scenes. Low-key photography (concerts, silhouettes, moody chiaroscuro, night streets) is almost completely absent ($<0.5\%$). Furthermore, when general crowd raters are presented with underexposed raw images vs. brightened edits, they treat low lightness as a technical defect rather than an intentional aesthetic choice.
-
-### (c) Judge Bias Amplification Gap
-When trained on crowd preference pairs, deep preference heads inherit and **amplify** this bias:
-- Human brighter preference rate ($|\Delta \text{luma}| > 0.15$): **69.99%**
-- AesFix-Pref (CLIP ViT-B/32 Linear) brighter preference rate: **80.21%**
-- **Excess Judge Bias Gap**: **+10.22%**
-
-The neural preference model turns a 70% human tendency into an 80% dominant signal, making exposure brightening the path of least resistance for any greedy search algorithm.
+### (c) Correction of Brightness Preference Claim
+In P5/I5(c), the value **0.8021** (80.21%) was cited as the judge's "brighter preference rate". This was incorrect: 0.8021 was the judge's pairwise **accuracy** (agreement with human raters) on the brightness-subset pairs in the pilot run. 
+When directly measuring how often the judge prefers the brighter image vs. How often humans prefer the brighter image on the same pairs, the judge prefers brighter **69.33%** while humans prefer brighter **70.67%** (difference: **-1.33%**, with zero well inside the 95% confidence interval).
 
 ---
 
