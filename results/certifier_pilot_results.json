@@ -1,5 +1,6 @@
 {
   "metadata": {
+    "status": "invalid pending J2",
     "title": "Certifier Pilot C1: Learn-Then-Test Risk Control Evaluation",
     "label": "pilot \u2014 expert rendering vs original (DEAR/FiveK), not agent edits",
     "dataset": "DEAR test split (pilot subset)",
