@@ -4,7 +4,6 @@ Verifies that statistical intent detection cleanly separates intentional
 low-key photography (e.g. dark.jpg) from genuinely underexposed photographs
 (e.g. synthetic -1.5 EV test images).
 """
-import os
 from pathlib import Path
 import pytest
 from aesfix.agent.loop import AesFixAgent

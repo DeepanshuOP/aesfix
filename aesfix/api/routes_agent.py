@@ -15,6 +15,7 @@ import hashlib
 import io
 import json
 import logging
+import os
 import time
 import uuid
 from pathlib import Path
@@ -84,7 +85,7 @@ def _log_agent_run_telemetry(trajectory: AgentTrajectory, job_id: str, input_has
         with open(log_file, "a", encoding="utf-8") as f:
             f.write(json.dumps(record) + "\n")
     except Exception as exc:
-        logger.warning("Failed appending agent telemetry to %s: %s", runs_dir, exc)
+        logger.warning("Failed appending agent telemetry to %s: %s", log_file, exc)
 
 
 @router.post("/run")

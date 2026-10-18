@@ -4,7 +4,6 @@ Tests anti-reward hacking on low-key images (dark.jpg) and positive control on
 underexposed photographs (underexposed_synthetic.jpg).
 """
 import argparse
-import os
 import sys
 from pathlib import Path
 
@@ -14,8 +13,8 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from aesfix.agent.llm import LLMClient
-from aesfix.agent.loop import AesFixAgent
+from aesfix.agent.llm import LLMClient  # noqa: E402
+from aesfix.agent.loop import AesFixAgent  # noqa: E402
 
 
 def main() -> None:
