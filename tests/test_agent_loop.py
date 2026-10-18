@@ -372,7 +372,11 @@ def test_judge_delta_regression_exposure(tmp_path: Path) -> None:
 
     # Score edited image
     edited_res = ensemble.evaluate(str(edited_path))
-    delta_exposure = abs(edited_res.overall_score - base_res.overall_score)
+    pj_name = ensemble.primary_judge.name if hasattr(ensemble, "primary_judge") else None
+    if pj_name and pj_name in edited_res.judge_scores and pj_name in base_res.judge_scores:
+        delta_exposure = abs(edited_res.judge_scores[pj_name].raw_score - base_res.judge_scores[pj_name].raw_score)
+    else:
+        delta_exposure = abs(edited_res.overall_score - base_res.overall_score)
 
     # Strong exposure edit must produce score differing by more than noise floor ε
     assert delta_exposure > epsilon, (
