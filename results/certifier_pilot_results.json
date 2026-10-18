@@ -1,0 +1,93 @@
+{
+  "metadata": {
+    "title": "Certifier Pilot C1: Learn-Then-Test Risk Control Evaluation",
+    "label": "pilot \u2014 expert rendering vs original (DEAR/FiveK), not agent edits",
+    "dataset": "DEAR test split",
+    "num_scenes": 60,
+    "num_pairs": 300,
+    "judge": "AesFix-Pref (CLIP ViT-B/32 + Linear Head)",
+    "delta": 0.1,
+    "n_seeds": 20,
+    "human_edit_preference_rate": 0.6667
+  },
+  "results_by_alpha": {
+    "alpha_0.05": {
+      "ltt": {
+        "method": "LTT (Learn-Then-Test, Clopper-Pearson)",
+        "mean_realized_fir": 0.0,
+        "max_realized_fir": 0.0,
+        "violation_rate": 0.0,
+        "mean_release_rate": 0.0063,
+        "abstain_rate": 0.0
+      },
+      "naive_zero": {
+        "method": "Naive (s > 0)",
+        "mean_realized_fir": 0.0713,
+        "max_realized_fir": 0.1304,
+        "violation_rate": 0.8,
+        "mean_release_rate": 0.4873,
+        "abstain_rate": 0.0
+      },
+      "naive_eps": {
+        "method": "Naive (s > 0.04)",
+        "mean_realized_fir": 0.0459,
+        "max_realized_fir": 0.0968,
+        "violation_rate": 0.4,
+        "mean_release_rate": 0.454,
+        "abstain_rate": 0.0
+      }
+    },
+    "alpha_0.1": {
+      "ltt": {
+        "method": "LTT (Learn-Then-Test, Clopper-Pearson)",
+        "mean_realized_fir": 0.0,
+        "max_realized_fir": 0.0,
+        "violation_rate": 0.0,
+        "mean_release_rate": 0.0063,
+        "abstain_rate": 0.0
+      },
+      "naive_zero": {
+        "method": "Naive (s > 0)",
+        "mean_realized_fir": 0.0713,
+        "max_realized_fir": 0.1304,
+        "violation_rate": 0.1,
+        "mean_release_rate": 0.4873,
+        "abstain_rate": 0.0
+      },
+      "naive_eps": {
+        "method": "Naive (s > 0.04)",
+        "mean_realized_fir": 0.0459,
+        "max_realized_fir": 0.0968,
+        "violation_rate": 0.0,
+        "mean_release_rate": 0.454,
+        "abstain_rate": 0.0
+      }
+    },
+    "alpha_0.2": {
+      "ltt": {
+        "method": "LTT (Learn-Then-Test, Clopper-Pearson)",
+        "mean_realized_fir": 0.0,
+        "max_realized_fir": 0.0,
+        "violation_rate": 0.0,
+        "mean_release_rate": 0.0063,
+        "abstain_rate": 0.0
+      },
+      "naive_zero": {
+        "method": "Naive (s > 0)",
+        "mean_realized_fir": 0.0713,
+        "max_realized_fir": 0.1304,
+        "violation_rate": 0.0,
+        "mean_release_rate": 0.4873,
+        "abstain_rate": 0.0
+      },
+      "naive_eps": {
+        "method": "Naive (s > 0.04)",
+        "mean_realized_fir": 0.0459,
+        "max_realized_fir": 0.0968,
+        "violation_rate": 0.0,
+        "mean_release_rate": 0.454,
+        "abstain_rate": 0.0
+      }
+    }
+  }
+}
