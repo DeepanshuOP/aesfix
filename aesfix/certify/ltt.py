@@ -81,19 +81,16 @@ def learn_then_test_threshold(
     scores_arr = np.asarray(scores, dtype=np.float64)
     human_arr = np.asarray(human_prefers_edit, dtype=bool)
 
-    # Why: For k=0 failures, (1-alpha)^n <= delta requires n >= log(delta)/log(1-alpha).
-    # Testing candidate thresholds with fewer samples than n_min cannot reject H_0
-    # under any data, so scanning them would prematurely abort fixed-sequence testing.
-    n_min = int(np.ceil(np.log(delta) / np.log(1.0 - alpha))) if (0.0 < alpha < 1.0 and 0.0 < delta < 1.0) else 1
-
+    # Fixed-sequence testing evaluates candidates strictly in pre-specified order.
+    # The grid start must be pre-specified rather than determined by calibration data.
     last_passing_threshold: Optional[float] = None
 
     for thresh in candidate_thresholds:
         released_mask = scores_arr >= thresh
         n_released = int(np.sum(released_mask))
-        if n_released < n_min:
-            # Insufficient statistical power to ever reject H_0; advance to testable thresholds
-            continue
+        if n_released <= 0:
+            # Cannot reject H_0 with 0 released samples; fixed-sequence testing stops.
+            break
 
         # False improvements: released edits that humans did NOT prefer
         k_false = int(np.sum(released_mask & (~human_arr)))
@@ -217,11 +214,8 @@ def run_certifier_pilot(
             y_eval = [human_prefers_edit[i] for i in eval_idx]
 
             if candidate_thresholds is None:
-                # Why: Construct candidate threshold sequence over calibration quantiles
-                # from conservative (85th percentile) down to liberal (10th percentile).
-                # This guarantees thresholds align with the empirical score support.
-                cand_thresh = np.quantile(s_calib, np.linspace(0.85, 0.10, 31))
-                cand_thresh = np.unique(cand_thresh)[::-1]
+                # Pre-specified fixed score units evaluated strictly from conservative to liberal
+                cand_thresh = np.linspace(1.5, -0.5, 41)
             else:
                 cand_thresh = candidate_thresholds
 

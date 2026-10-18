@@ -78,8 +78,8 @@ def test_sim_power_at_target_release() -> None:
         probs_cal = np.where(scores_cal >= 0.5, 0.95, 0.60)
         human_cal = rng.uniform(0.0, 1.0, size=n_cal) < probs_cal
 
-        # Candidate thresholds spanning release rates from 30% to 50%
-        cand_thresholds = np.quantile(scores_cal, [0.70, 0.65, 0.60, 0.55, 0.50])[::-1]
+        # Candidate thresholds spanning release rates from 30% to 50% (pre-specified fixed grid)
+        cand_thresholds = [0.70, 0.65, 0.60, 0.55, 0.50]
 
         chosen_thresh = learn_then_test_threshold(
             scores=scores_cal,
@@ -117,7 +117,8 @@ def test_sim_validity_across_500_runs() -> None:
         p_eval = np.where(s_eval >= 0.5, 0.95, 0.60)
         y_eval = rng.uniform(0.0, 1.0, size=n_eval) < p_eval
 
-        cand_thresh = np.quantile(s_cal, np.linspace(0.85, 0.20, 25))[::-1]
+        # Pre-specified fixed score grid evaluated strictly from conservative to liberal
+        cand_thresh = np.linspace(0.85, 0.20, 25)
 
         chosen_thresh = learn_then_test_threshold(
             scores=s_cal,
