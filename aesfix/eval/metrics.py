@@ -170,3 +170,160 @@ def harm_rate(
         return 0.0
 
     return float(applied_losses / total_applied)
+
+
+def pairwise_accuracy(judge_deltas: Sequence[float], human_mos: Sequence[float]) -> float:
+    """Computes pairwise accuracy: fraction of pairs where judge and human agree on the preferred image.
+
+    Args:
+        judge_deltas: Score difference (score_left - score_right) for each pair.
+        human_mos: Fraction of human voters preferring the left image over the right image (in [0.0, 1.0]).
+            mos > 0.5 means humans prefer left; mos < 0.5 means humans prefer right.
+
+    Returns:
+        Pairwise accuracy in [0.0, 1.0].
+    """
+    if len(judge_deltas) != len(human_mos):
+        raise ValueError(f"Length mismatch: judge_deltas ({len(judge_deltas)}) vs human_mos ({len(human_mos)})")
+    if not judge_deltas:
+        return 0.0
+
+    correct = 0
+    total = 0
+    for d, m in zip(judge_deltas, human_mos):
+        if m == 0.5:
+            # Neutral tie in human voting
+            continue
+        total += 1
+        human_prefers_left = m > 0.5
+        judge_prefers_left = d > 0.0
+        if human_prefers_left == judge_prefers_left:
+            correct += 1
+
+    return float(correct / total) if total > 0 else 0.0
+
+
+def pairwise_spearman(judge_deltas: Sequence[float], human_mos: Sequence[float]) -> float:
+    """Computes Spearman rank correlation between judge preference delta and human signed preference margin.
+
+    Orientation Convention (Task B1):
+        - judge_delta: (score_left - score_right)
+        - human_signed_margin: (human_mos - 0.5)
+        Both quantities are positive when the left image is preferred and negative when the right
+        image is preferred. Correlating signed delta with signed margin preserves directional monotonicity.
+        (Correlating signed delta with unsigned |mos - 0.5| is an orientation bug that produces negative/zero correlations).
+
+    Returns:
+        Spearman rank correlation in [-1.0, 1.0].
+    """
+    if len(judge_deltas) != len(human_mos):
+        raise ValueError(f"Length mismatch: judge_deltas ({len(judge_deltas)}) vs human_mos ({len(human_mos)})")
+    if len(judge_deltas) < 2:
+        return 0.0
+
+    from scipy.stats import spearmanr  # type: ignore[import-untyped]
+
+    signed_margins = [float(m) - 0.5 for m in human_mos]
+    srcc_val, _ = spearmanr(judge_deltas, signed_margins)
+    return float(srcc_val)
+
+
+def bootstrap_scene_ci(
+    scene_ids: Sequence[str],
+    is_correct: Sequence[bool],
+    n_resamples: int = 2000,
+    ci_level: float = 0.95,
+    seed: int = 42,
+) -> tuple[float, float, float]:
+    """Computes 95% bootstrap confidence interval over SCENES (cluster bootstrap).
+
+    Why clustering by scene is necessary (Task B2):
+    Pairs within the same scene share scene content and are not statistically independent.
+    Resampling individual pairs artificially shrinks variance. Resampling scenes preserves within-scene correlation.
+
+    Returns:
+        tuple of (mean_accuracy, ci_low, ci_high)
+    """
+    import numpy as np
+    from collections import defaultdict
+
+    if len(scene_ids) != len(is_correct):
+        raise ValueError(f"Length mismatch: {len(scene_ids)} scenes vs {len(is_correct)} outcomes")
+    if not scene_ids:
+        return 0.0, 0.0, 0.0
+
+    # Group outcomes by scene
+    scene_map: dict[str, list[bool]] = defaultdict(list)
+    for s_id, corr in zip(scene_ids, is_correct):
+        scene_map[s_id].append(corr)
+
+    unique_scenes = np.array(list(scene_map.keys()))
+    n_scenes = len(unique_scenes)
+
+    rng = np.random.default_rng(seed)
+    boot_accs = np.zeros(n_resamples, dtype=np.float64)
+
+    for b in range(n_resamples):
+        sample_scenes = rng.choice(unique_scenes, size=n_scenes, replace=True)
+        total_correct = 0
+        total_pairs = 0
+        for s in sample_scenes:
+            vals = scene_map[s]
+            total_correct += sum(vals)
+            total_pairs += len(vals)
+        boot_accs[b] = total_correct / total_pairs if total_pairs > 0 else 0.0
+
+    alpha = (1.0 - ci_level) / 2.0
+    ci_low = float(np.percentile(boot_accs, alpha * 100))
+    ci_high = float(np.percentile(boot_accs, (1.0 - alpha) * 100))
+    mean_acc = float(sum(is_correct) / len(is_correct))
+    return mean_acc, ci_low, ci_high
+
+
+def bootstrap_paired_difference_ci(
+    scene_ids: Sequence[str],
+    correct_a: Sequence[bool],
+    correct_b: Sequence[bool],
+    n_resamples: int = 2000,
+    ci_level: float = 0.95,
+    seed: int = 42,
+) -> tuple[float, float, float]:
+    """Computes 95% bootstrap CI for the paired difference (accuracy_a - accuracy_b) clustered by SCENE.
+
+    Returns:
+        tuple of (mean_diff, ci_low, ci_high)
+    """
+    import numpy as np
+    from collections import defaultdict
+
+    if not (len(scene_ids) == len(correct_a) == len(correct_b)):
+        raise ValueError("Length mismatch between scene_ids, correct_a, and correct_b")
+    if not scene_ids:
+        return 0.0, 0.0, 0.0
+
+    scene_map_a: dict[str, list[bool]] = defaultdict(list)
+    scene_map_b: dict[str, list[bool]] = defaultdict(list)
+    for s_id, a, b in zip(scene_ids, correct_a, correct_b):
+        scene_map_a[s_id].append(a)
+        scene_map_b[s_id].append(b)
+
+    unique_scenes = np.array(list(scene_map_a.keys()))
+    n_scenes = len(unique_scenes)
+
+    rng = np.random.default_rng(seed)
+    boot_diffs = np.zeros(n_resamples, dtype=np.float64)
+
+    for b in range(n_resamples):
+        sample_scenes = rng.choice(unique_scenes, size=n_scenes, replace=True)
+        corr_a = sum(sum(scene_map_a[s]) for s in sample_scenes)
+        corr_b = sum(sum(scene_map_b[s]) for s in sample_scenes)
+        total_p = sum(len(scene_map_a[s]) for s in sample_scenes)
+        if total_p > 0:
+            boot_diffs[b] = (corr_a - corr_b) / total_p
+
+    alpha = (1.0 - ci_level) / 2.0
+    ci_low = float(np.percentile(boot_diffs, alpha * 100))
+    ci_high = float(np.percentile(boot_diffs, (1.0 - alpha) * 100))
+    mean_diff = float((sum(correct_a) - sum(correct_b)) / len(scene_ids))
+    return mean_diff, ci_low, ci_high
+
