@@ -354,22 +354,24 @@ class AesFixAgent:
                 luma = 0.299 * arr[:, :, 0] + 0.587 * arr[:, :, 1] + 0.114 * arr[:, :, 2]
                 mean_luma = float(np.mean(luma))
                 p5_luma = float(np.percentile(luma, 5))
-                p95_luma = float(np.percentile(luma, 95))
         except Exception:
-            mean_luma, p5_luma, p95_luma = 0.5, 0.1, 0.9
+            mean_luma, p5_luma = 0.5, 0.1
 
         stat_is_intentional = False
         stat_style = "normal"
         stat_explanation = "Standard exposure and tone distribution."
 
-        if mean_luma < 0.15 and p5_luma < 0.02:
+        # Intentional style detection: user goal takes precedence for high-key,
+        # while low-key statistical detection protects night photography (F3b / F4 / I3).
+        # Overexposed images with high luma are defects, not intentional high-key.
+        if user_goal and any(kw in user_goal.lower() for kw in ["high-key", "high key"]):
+            stat_is_intentional = True
+            stat_style = "high-key"
+            stat_explanation = f"User goal specifies intentional high-key style: {user_goal}."
+        elif mean_luma < 0.15 and p5_luma < 0.02:
             stat_is_intentional = True
             stat_style = "low-key"
             stat_explanation = f"Intentional low-key night photography (mean luma {mean_luma:.3f}, p5 {p5_luma:.3f})."
-        elif mean_luma > 0.80 and p95_luma > 0.95:
-            stat_is_intentional = True
-            stat_style = "high-key"
-            stat_explanation = f"Intentional high-key photography (mean luma {mean_luma:.3f}, p95 {p95_luma:.3f})."
 
         is_mock = hasattr(self.llm_client, "responses")
         if not is_mock and self.llm_client is not None:

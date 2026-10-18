@@ -18,7 +18,10 @@ import re
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
 
+import numpy as np
+from PIL import Image
 from pydantic import BaseModel, Field, field_validator
+from skimage.color import rgb2lab
 
 from aesfix.data.loaders import ASPECT_DIMENSIONS
 
@@ -285,14 +288,53 @@ class HeuristicAspectCritic(BaseCritic):
         if color_score >= 0.65:
             rationales["color"] = "Harmonious palette with natural saturation and accurate white balance."
         elif color_score < 0.45:
-            rationales["color"] = "Dull or color-cast tones detracting from overall visual appeal."
+            # Estimate color cast via Lab gray-world / white-patch (I3)
+            cast_temp = 0.0
+            cast_tint = 0.0
+            mean_a, mean_b = 0.0, 0.0
+            try:
+                with Image.open(image_path) as pil_img:
+                    arr = np.asarray(pil_img.convert("RGB"), dtype=np.float32) / 255.0
+                    lab = rgb2lab(arr)
+                    mean_a = float(np.mean(lab[:, :, 1]))
+                    mean_b = float(np.mean(lab[:, :, 2]))
+
+                    # Gray-world cast diagnosis:
+                    # b* > 0 is yellow/warm -> propose cooling (-temperature)
+                    # b* < 0 is blue/cool -> propose warming (+temperature)
+                    # a* > 0 is magenta/red -> propose green shift (-tint)
+                    # a* < 0 is green -> propose magenta shift (+tint)
+                    if abs(mean_b) >= 2.0:
+                        cast_temp = -float(np.clip(mean_b * 1.5, -25.0, 25.0))
+                    if abs(mean_a) >= 2.0:
+                        cast_tint = -float(np.clip(mean_a * 1.0, -15.0, 15.0))
+            except Exception as exc:
+                logger.debug("Color cast estimation fallback: %s", exc)
+
+            if abs(cast_temp) < 1.0 and abs(cast_tint) < 1.0:
+                cast_temp = 15.0
+                cast_tint = 0.0
+                diag_msg = "Muted or dull color balance."
+            else:
+                cast_desc = []
+                if cast_temp < 0:
+                    cast_desc.append(f"warm cast (Lab b*={mean_b:+.1f})")
+                elif cast_temp > 0:
+                    cast_desc.append(f"cool cast (Lab b*={mean_b:+.1f})")
+                if cast_tint < 0:
+                    cast_desc.append(f"magenta tint (Lab a*={mean_a:+.1f})")
+                elif cast_tint > 0:
+                    cast_desc.append(f"green tint (Lab a*={mean_a:+.1f})")
+                diag_msg = f"Detected {', '.join(cast_desc)}."
+
+            rationales["color"] = f"{diag_msg} Proposing compensating white balance shift."
             fixes.append(
                 CriticFix(
                     op="adjust_white_balance",
-                    params={"temperature": 15.0, "tint": 0.0},
+                    params={"temperature": round(cast_temp, 1), "tint": round(cast_tint, 1)},
                     expected_aspect="color",
                     direction=1,
-                    nl_instruction="Correct white balance and subtly lift color vibrance.",
+                    nl_instruction=f"Counteract color cast with temperature {cast_temp:+.1f} and tint {cast_tint:+.1f}.",
                 )
             )
         else:

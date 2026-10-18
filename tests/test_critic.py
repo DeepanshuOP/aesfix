@@ -123,3 +123,49 @@ def test_heuristic_critic_on_calibration_images():
     # Missing image must fail loudly
     with pytest.raises(FileNotFoundError):
         critic.critique("non_existent_file.jpg")
+
+
+def test_heuristic_critic_signed_white_balance(tmp_path):
+    """Verifies that HeuristicAspectCritic estimates Lab color cast and proposes opposite signed WB (I3)."""
+    from unittest.mock import patch
+    from PIL import Image
+    from aesfix.judges.ensemble import JudgeScore
+
+    critic = HeuristicAspectCritic()
+
+    # Synthetic warm-cast image (high amber/yellow: R=230, G=190, B=90)
+    warm_path = tmp_path / "synthetic_warm.jpg"
+    Image.new("RGB", (64, 64), color=(230, 190, 90)).save(warm_path)
+
+    # Synthetic cool-cast image (high blue: R=90, G=170, B=230)
+    cool_path = tmp_path / "synthetic_cool.jpg"
+    Image.new("RGB", (64, 64), color=(90, 170, 230)).save(cool_path)
+
+    mock_color_flaw = JudgeScore(
+        name="clip_aspect",
+        raw_score=0.45,
+        normalized_score=0.45,
+        aspects={
+            "composition": 0.70,
+            "lighting": 0.70,
+            "color": 0.35,
+            "subject_clarity": 0.70,
+            "technical": 0.70,
+        },
+    )
+
+    with patch.object(critic._judge, "evaluate", return_value=mock_color_flaw):
+        warm_output = critic.critique(str(warm_path))
+        cool_output = critic.critique(str(cool_path))
+
+    # Warm cast must produce negative temperature proposal (cooling compensation)
+    warm_wb_fixes = [f for f in warm_output.fixes if f.op == "adjust_white_balance"]
+    assert len(warm_wb_fixes) == 1
+    assert warm_wb_fixes[0].params["temperature"] < 0, "Expected negative temperature to cool warm cast"
+    assert "warm cast" in warm_output.rationales["color"]
+
+    # Cool cast must produce positive temperature proposal (warming compensation)
+    cool_wb_fixes = [f for f in cool_output.fixes if f.op == "adjust_white_balance"]
+    assert len(cool_wb_fixes) == 1
+    assert cool_wb_fixes[0].params["temperature"] > 0, "Expected positive temperature to warm cool cast"
+    assert "cool cast" in cool_output.rationales["color"]
