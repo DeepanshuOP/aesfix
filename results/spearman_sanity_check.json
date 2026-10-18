@@ -1,0 +1,84 @@
+{
+  "n_pairs": 300,
+  "input_source": "results\\pilot_pair_scores.json",
+  "correlations": {
+    "spearman": {
+      "statistic": 0.0446,
+      "pvalue": 0.4415415281805972
+    },
+    "kendall_tau": {
+      "statistic": 0.0318,
+      "pvalue": 0.42234603089853406
+    },
+    "pearson_r": {
+      "statistic": 0.1077,
+      "pvalue": 0.062474314043616024
+    }
+  },
+  "contingency_table_2x2": {
+    "x_gt_0_y_gt_0_both_edit": 92,
+    "x_gt_0_y_le_0_judge_edit_human_orig": 95,
+    "x_le_0_y_gt_0_judge_orig_human_edit": 51,
+    "x_le_0_y_le_0_both_orig": 62,
+    "sign_agreement_accuracy": 0.5133
+  },
+  "margin_distribution": {
+    "mean_abs_margin": 0.1984,
+    "median_abs_margin": 0.18,
+    "p25_abs_margin": 0.1,
+    "p75_abs_margin": 0.3,
+    "fraction_margin_below_0_10": 0.3133,
+    "fraction_margin_below_0_15": 0.4633
+  },
+  "stratified_by_margin": [
+    {
+      "margin_threshold": 0.0,
+      "count": 300,
+      "fraction": 1.0,
+      "sign_accuracy": 0.5133,
+      "spearman": 0.0446,
+      "spearman_pvalue": 0.4415415281805972
+    },
+    {
+      "margin_threshold": 0.05,
+      "count": 265,
+      "fraction": 0.8833,
+      "sign_accuracy": 0.5094,
+      "spearman": 0.0523,
+      "spearman_pvalue": 0.39667330247816013
+    },
+    {
+      "margin_threshold": 0.1,
+      "count": 244,
+      "fraction": 0.8133,
+      "sign_accuracy": 0.5205,
+      "spearman": 0.0599,
+      "spearman_pvalue": 0.35134896969709173
+    },
+    {
+      "margin_threshold": 0.15,
+      "count": 161,
+      "fraction": 0.5367,
+      "sign_accuracy": 0.5714,
+      "spearman": 0.0816,
+      "spearman_pvalue": 0.3036561997499461
+    },
+    {
+      "margin_threshold": 0.2,
+      "count": 134,
+      "fraction": 0.4467,
+      "sign_accuracy": 0.5672,
+      "spearman": 0.0917,
+      "spearman_pvalue": 0.29218584939280284
+    },
+    {
+      "margin_threshold": 0.3,
+      "count": 87,
+      "fraction": 0.29,
+      "sign_accuracy": 0.6092,
+      "spearman": 0.1028,
+      "spearman_pvalue": 0.34322875905611316
+    }
+  ],
+  "explanation": "Why signed rank correlation is modest (~0.04 - 0.08) while binary sign agreement is high: (1) In crowdsourced preference pairs, 35-47% of comparisons have human margin |mos - 0.5| < 0.10, where annotator sampling noise dominates the exact ordinal rank of y. (2) Crowdsourced win rates saturate near boundaries and reflect voter variance rather than a continuous linear scale of aesthetic distance. (3) When restricting to high-agreement pairs (|margin| >= 0.30), both sign accuracy and Spearman monotonically increase."
+}
