@@ -44,6 +44,9 @@ jobs:
       - name: Verify zero fake telemetry in evidence files
         run: python scripts/check_no_fake_telemetry.py
 
+      - name: Scan repository for secrets
+        run: python scripts/check_secrets.py
+
   gitleaks:
     runs-on: ubuntu-latest
     steps:

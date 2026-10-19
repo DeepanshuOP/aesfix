@@ -55,15 +55,15 @@ k2a_cells = [
 **Notebook**: `aesfix-dear-512`
 **Hardware**: CPU only (accelerator NONE), Internet ON.
 **Role**:
-1. Retrieve `HF_TOKEN` from Kaggle Secrets (fail loudly if missing).
+1. Retrieve `HF_TOKEN` from Kaggle Secrets (or fallback to anonymous mode).
 2. Download train and test markups from `vsevolodpl/DEAR`.
-3. Stream all 29,886 images (4,981 scenes x 6 styles) with 6 worker threads.
+3. Stream all 29,886 images (4,981 scenes x 6 styles) with 6 worker threads (2 in anonymous mode).
 4. Downscale long side to 512px, JPEG q92.
 5. Exponential backoff with jitter on HTTP 429, honoring Retry-After (up to 8 retries).
 6. Delete downloaded raw file (resolving symlinks) and check disk space every 500 files.
 7. Resumable across executions; writes `manifest.csv` and verifies <1% missing threshold."""),
 
-    code("""# Cell 1: Environment & Secrets Setup (FAIL if HF_TOKEN is missing)
+    code("""# Cell 1: Environment & Secrets Setup
 import os
 import sys
 import time
@@ -79,7 +79,7 @@ from tqdm.auto import tqdm
 
 start_time = time.time()
 
-# Verify HF_TOKEN from Kaggle Secrets (or attached dataset mount)
+# Verify HF_TOKEN from Kaggle Secrets only
 hf_token = None
 try:
     from kaggle_secrets import UserSecretsClient
@@ -89,19 +89,16 @@ try:
         hf_token = str(val).strip()
         print("[Secrets] HF_TOKEN retrieved and verified successfully from Kaggle Secrets.")
 except Exception as e:
-    print(f"[Secrets] Note on Kaggle Secrets: {e}")
+    pass
 
-if not hf_token:
-    token_p = Path("/kaggle/input/aesfix-hf-token/token.txt")
-    if token_p.exists():
-        hf_token = token_p.read_text().strip()
-        print("[Auth] HF_TOKEN retrieved from private dataset mount.")
+if hf_token:
+    os.environ["HF_TOKEN"] = str(hf_token).strip()
+    num_workers = 6
+    print("[Auth] Authenticated mode enabled with 6 workers.")
+else:
+    num_workers = 2
+    print("[Auth] anonymous mode")
 
-if not hf_token or not str(hf_token).strip():
-    print("FATAL: HF_TOKEN missing from Kaggle Secrets and dataset mount!", file=sys.stderr)
-    raise SystemExit(1)
-
-os.environ["HF_TOKEN"] = str(hf_token).strip()
 print(f"Python: {sys.version}")
 """),
 
@@ -120,17 +117,18 @@ IMG_DIR.mkdir(parents=True, exist_ok=True)
 INPUT_PREV = Path("/kaggle/input/aesfix-dear-512")
 
 print("Downloading official train and test markups from vsevolodpl/DEAR...")
+hf_token_val = os.environ.get("HF_TOKEN", None)
 train_raw_path = hf_hub_download(
     repo_id="vsevolodpl/DEAR",
     filename="train_processed_markup.csv",
     repo_type="dataset",
-    token=os.environ["HF_TOKEN"]
+    token=hf_token_val
 )
 test_raw_path = hf_hub_download(
     repo_id="vsevolodpl/DEAR",
     filename="test_processed_markup.csv",
     repo_type="dataset",
-    token=os.environ["HF_TOKEN"]
+    token=hf_token_val
 )
 
 # Copy markups to working directory for K2b consumption
@@ -149,7 +147,7 @@ print(f"Total Target Images: {len(all_scenes) * len(styles)} (6 styles per scene
 
     code("""# Cell 4: Multi-Threaded Streaming, Downscaling & Disk Space Monitoring
 all_tasks = [(style, scene) for scene in all_scenes for style in styles]
-print(f"Starting pipeline for {len(all_tasks)} images with 6 worker threads...")
+print(f"Starting pipeline for {len(all_tasks)} images with {num_workers} worker threads...")
 
 # Pre-create style directories
 for s in styles:
@@ -205,7 +203,7 @@ def process_image(task):
                 filename=hf_rel_path,
                 repo_type="dataset",
                 local_dir=str(tmp_worker_dir),
-                token=os.environ["HF_TOKEN"]
+                token=os.environ.get("HF_TOKEN", None)
             )
             break
         except Exception as e:
@@ -279,7 +277,7 @@ def process_image(task):
             check_disk(processed_counter, len(all_tasks))
         return {"style": style, "scene": scene, "ok": False, "error": str(e)[:200], "bytes": 0, "sha256": ""}
 
-with ThreadPoolExecutor(max_workers=6) as executor:
+with ThreadPoolExecutor(max_workers=num_workers) as executor:
     manifest_records = list(tqdm(executor.map(process_image, all_tasks), total=len(all_tasks), desc="Processing DEAR 512px"))
 """),
 
