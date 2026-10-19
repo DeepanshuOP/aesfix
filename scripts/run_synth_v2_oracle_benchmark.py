@@ -57,11 +57,11 @@ DEFAULT_SIGMA = {
     "aesfix_pref_v2": 0.850,
 }
 
-# Empirical noise floors
+# Empirical noise floors (calibrated to ~0.01 - 0.05 * sigma)
 DEFAULT_EPSILON = {
     "rsinema": 0.005,
     "pyiqa_musiq": 0.030,
-    "pyiqa_topiq_nr": 0.100,
+    "pyiqa_topiq_nr": 0.005,  # calibrated to ~0.05 * sigma (was 0.100, which exceeded 1.1 sigma)
     "aesfix_pref_v1": 0.001,
     "aesfix_pref_v2": 0.001,
 }
