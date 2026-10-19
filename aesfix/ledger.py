@@ -145,3 +145,44 @@ def get_run_by_id(run_id: str, ledger_path: Optional[Union[str, Path]] = None) -
         if run.get("run_id") == run_id:
             return run
     return None
+
+
+def compute_file_sha256(path: Union[str, Path]) -> str:
+    """Computes the SHA-256 hash of a file."""
+    p = Path(path)
+    if not p.is_file():
+        return ""
+    h = hashlib.sha256()
+    with open(p, "rb") as f:
+        while chunk := f.read(65536):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def append_run_to_ledger(
+    task: str = "",
+    config: Optional[Dict[str, Any]] = None,
+    data_manifest: Optional[Dict[str, Any]] = None,
+    metrics: Optional[Dict[str, Any]] = None,
+    cost_usd: Optional[float] = None,
+    ledger_path: Optional[Union[str, Path]] = None,
+    run_id: Optional[str] = None,
+    **kwargs: Any,
+) -> Dict[str, Any]:
+    """Wrapper around append_run for backwards compatibility and task tracking."""
+    cfg = dict(config or {})
+    if task:
+        cfg["task"] = task
+    if kwargs:
+        cfg.update(kwargs)
+    manifest = data_manifest or {}
+    met = metrics or {}
+    return append_run(
+        metrics=met,
+        config=cfg,
+        data_manifest=manifest,
+        cost_usd=cost_usd,
+        ledger_path=ledger_path,
+        run_id=run_id,
+    )
+
