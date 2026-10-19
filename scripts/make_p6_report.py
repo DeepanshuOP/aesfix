@@ -72,7 +72,7 @@ def build_p6_report() -> str:
     lines.append("- **TOPIQ (CFANet, ResNet50)** (*arXiv:2308.03060*):")
     lines.append("  - Table V (random split): SRCC 0.926, PLCC 0.939")
     lines.append("  - Table VIII (official split): **SRCC 0.928, PLCC 0.941**")
-    lines.append("  - Comparison: Our measured `pyiqa_topiq_nr` achieves **0.930 SRCC / 0.944 PLCC**, aligning directly with Table VIII official split.")
+    lines.append("  - Comparison: Our measured `pyiqa_topiq_nr` achieves **0.930 SRCC / 0.944 PLCC** [run:7fc50d71-5d29-494b-9767-67444b213837], aligning directly with Table VIII official split.")
     lines.append("  - The prior claim that TOPIQ's 0.894 was a 'cross-dataset score' was unverified and has been completely deleted.")
     lines.append("- **LIQE** (*arXiv:2303.14968*):")
     lines.append("  - Table 1: **SRCC 0.919, PLCC 0.908** (median of 10 random train/test splits).")
