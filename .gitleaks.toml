@@ -1,0 +1,30 @@
+# Gitleaks configuration with explicit custom rules for AesFix
+
+title = "AesFix Secret Scan Configuration"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "huggingface-token"
+description = "Hugging Face Personal Access Token"
+regex = '''hf_[A-Za-z0-9]{20,}'''
+keywords = ["hf_"]
+
+[[rules]]
+id = "kaggle-api-key"
+description = "Kaggle API Key"
+regex = '''(?i)(?:kaggle|KG)[\-_]?(?:key|token|api|secret)[\s:=]{1,4}['"]?[0-9a-f]{32}['"]?'''
+keywords = ["kaggle", "KG"]
+
+[[rules]]
+id = "gemini-api-key"
+description = "Google Gemini API Key"
+regex = '''AIza[0-9A-Za-z\-_]{35}'''
+keywords = ["AIza"]
+
+[[rules]]
+id = "openrouter-api-key"
+description = "OpenRouter API Key"
+regex = '''sk-or-v1-[a-f0-9]{64}|sk-or-[A-Za-z0-9\-_]{20,}'''
+keywords = ["sk-or"]
