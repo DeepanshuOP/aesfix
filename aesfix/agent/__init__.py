@@ -28,4 +28,8 @@ __all__ = [
     "validate_proposal",
     "format_validation_error_feedback",
     "generate_tool_schema_prompt",
+    "BaseProposer",
+    "GridProposer",
+    "HeuristicProposer",
 ]
+from aesfix.agent.proposer import BaseProposer, GridProposer, HeuristicProposer

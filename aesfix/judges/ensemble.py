@@ -548,6 +548,35 @@ class AesFixPrefJudge(BaseJudge):
         except Exception as exc:
             raise JudgeEvaluationError(f"AesFixPrefJudge failed on {image_path}: {exc}") from exc
 
+    def evaluate_pil(self, pil_image: Image.Image) -> float:
+        """Fast in-memory evaluation of a single PIL image."""
+        self._ensure_loaded()
+        inputs = self._processor(images=pil_image.convert("RGB"), return_tensors="pt")
+        with torch.no_grad():
+            vision_outputs = self._model.vision_model(pixel_values=inputs["pixel_values"])
+            pooled = vision_outputs[1]
+            proj = self._model.visual_projection(pooled)
+            proj_norm = proj / proj.norm(p=2, dim=-1, keepdim=True)
+            raw_score = float((proj_norm @ self._weight.T + self._bias).squeeze().item())
+        return round(raw_score, 4)
+
+    def evaluate_batch_pil(self, pil_images: List[Image.Image]) -> List[float]:
+        """Fast in-memory evaluation of a batch of PIL images."""
+        if not pil_images:
+            return []
+        self._ensure_loaded()
+        rgb_images = [im.convert("RGB") for im in pil_images]
+        inputs = self._processor(images=rgb_images, return_tensors="pt")
+        with torch.no_grad():
+            vision_outputs = self._model.vision_model(pixel_values=inputs["pixel_values"])
+            pooled = vision_outputs[1]
+            proj = self._model.visual_projection(pooled)
+            proj_norm = proj / proj.norm(p=2, dim=-1, keepdim=True)
+            logits = (proj_norm @ self._weight.T + self._bias).squeeze(-1)
+            if logits.ndim == 0:
+                return [round(float(logits.item()), 4)]
+            return [round(float(v), 4) for v in logits.tolist()]
+
 
 
 
