@@ -204,3 +204,4 @@ hf_space/
 kaggle/k2_output_remote/
 scratch/
 CODE_REVIEW.md
+tests/fixtures/synthetic_suite/
