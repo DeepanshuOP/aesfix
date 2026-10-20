@@ -71,32 +71,46 @@ class V2JudgeWrapper:
     def _ensure_loaded(self):
         if self._head is not None:
             return
-        ckpt = torch.load(self.head_path, map_location="cpu")
-        self.backbone_name = ckpt.get("encoder_name", ckpt.get("backbone", self.backbone_name))
+        ckpt = torch.load(self.head_path, map_location="cpu", weights_only=False)
+        enc_id = str(ckpt.get("encoder_id", ""))
+        if "siglip" in enc_id:
+            self.backbone_name = "google/siglip-so400m-patch14-384"
+        elif "clip_b32" in enc_id:
+            self.backbone_name = "openai/clip-vit-base-patch32"
+        elif "clip_l14" in enc_id:
+            self.backbone_name = "openai/clip-vit-large-patch14"
+        elif "dino" in enc_id:
+            self.backbone_name = "facebook/dinov2-base"
+        else:
+            self.backbone_name = ckpt.get("encoder_name", ckpt.get("backbone", self.backbone_name))
         
-        # Build head model
+        feat_dim = int(ckpt.get("feature_dim", 1152))
+        arch = str(ckpt.get("head_architecture", "mlp"))
         state_dict = ckpt.get("state_dict", ckpt)
-        if "weight" in state_dict:
-            in_dim = state_dict["weight"].shape[1]
-            out_dim = state_dict["weight"].shape[0]
-            self._head = torch.nn.Linear(in_dim, out_dim)
-            self._head.load_state_dict(state_dict)
-        elif "0.weight" in state_dict:
-            # MLP head
-            in_dim = state_dict["0.weight"].shape[1]
-            hidden_dim = state_dict["0.weight"].shape[0]
-            out_dim = state_dict["2.weight"].shape[0]
+
+        if arch == "mlp" or any(k.startswith("net.") for k in state_dict):
             self._head = torch.nn.Sequential(
-                torch.nn.Linear(in_dim, hidden_dim),
-                torch.nn.ReLU(),
-                torch.nn.Linear(hidden_dim, out_dim)
+                torch.nn.Linear(feat_dim, 256),
+                torch.nn.GELU(),
+                torch.nn.Dropout(0.2),
+                torch.nn.Linear(256, 1, bias=False),
             )
-            self._head.load_state_dict(state_dict)
+            clean_sd = {k.replace("net.", ""): v for k, v in state_dict.items()}
+            self._head.load_state_dict(clean_sd)
+        else:
+            self._head = torch.nn.Linear(feat_dim, 1, bias=False)
+            clean_sd = {k.replace("fc.", ""): v for k, v in state_dict.items()}
+            self._head.load_state_dict(clean_sd)
         self._head.eval()
 
-        from transformers import AutoImageProcessor, AutoModel
+        from transformers import AutoImageProcessor
         self._processor = AutoImageProcessor.from_pretrained(self.backbone_name)
-        self._model = AutoModel.from_pretrained(self.backbone_name).eval()
+        if "siglip" in self.backbone_name:
+            from transformers import SiglipVisionModel
+            self._model = SiglipVisionModel.from_pretrained(self.backbone_name).eval()
+        else:
+            from transformers import AutoModel
+            self._model = AutoModel.from_pretrained(self.backbone_name).eval()
 
     def evaluate(self, image_path: str):
         with Image.open(image_path) as im:
@@ -107,13 +121,19 @@ class V2JudgeWrapper:
         self._ensure_loaded()
         inputs = self._processor(images=pil_image.convert("RGB"), return_tensors="pt")
         with torch.no_grad():
-            outputs = self._model(**inputs)
-            if hasattr(outputs, "pooler_output") and outputs.pooler_output is not None:
-                feat = outputs.pooler_output
-            elif hasattr(outputs, "last_hidden_state"):
-                feat = outputs.last_hidden_state[:, 0, :]
+            if "siglip" in self.backbone_name:
+                out = self._model(pixel_values=inputs["pixel_values"])
+                feat = out.pooler_output if hasattr(out, "pooler_output") and out.pooler_output is not None else out[1]
+            elif "clip" in self.backbone_name:
+                feat = self._model.vision_model(pixel_values=inputs["pixel_values"])[1]
+                if hasattr(self._model, "visual_projection"):
+                    feat = self._model.visual_projection(feat)
+            elif "dino" in self.backbone_name:
+                feat = self._model(pixel_values=inputs["pixel_values"]).last_hidden_state[:, 0, :]
             else:
-                feat = outputs[0][:, 0, :]
+                outputs = self._model(**inputs)
+                feat = outputs.pooler_output if hasattr(outputs, "pooler_output") and outputs.pooler_output is not None else outputs.last_hidden_state[:, 0, :]
+
             feat = feat / (torch.norm(feat, dim=-1, keepdim=True) + 1e-7)
             raw = float(self._head(feat.float()).squeeze().item())
         return round(raw, 4)
@@ -124,13 +144,19 @@ class V2JudgeWrapper:
         self._ensure_loaded()
         inputs = self._processor(images=[im.convert("RGB") for im in pil_images], return_tensors="pt")
         with torch.no_grad():
-            outputs = self._model(**inputs)
-            if hasattr(outputs, "pooler_output") and outputs.pooler_output is not None:
-                feat = outputs.pooler_output
-            elif hasattr(outputs, "last_hidden_state"):
-                feat = outputs.last_hidden_state[:, 0, :]
+            if "siglip" in self.backbone_name:
+                out = self._model(pixel_values=inputs["pixel_values"])
+                feat = out.pooler_output if hasattr(out, "pooler_output") and out.pooler_output is not None else out[1]
+            elif "clip" in self.backbone_name:
+                feat = self._model.vision_model(pixel_values=inputs["pixel_values"])[1]
+                if hasattr(self._model, "visual_projection"):
+                    feat = self._model.visual_projection(feat)
+            elif "dino" in self.backbone_name:
+                feat = self._model(pixel_values=inputs["pixel_values"]).last_hidden_state[:, 0, :]
             else:
-                feat = outputs[0][:, 0, :]
+                outputs = self._model(**inputs)
+                feat = outputs.pooler_output if hasattr(outputs, "pooler_output") and outputs.pooler_output is not None else outputs.last_hidden_state[:, 0, :]
+
             feat = feat / (torch.norm(feat, dim=-1, keepdim=True) + 1e-7)
             logits = self._head(feat.float()).squeeze(-1)
             if logits.ndim == 0:
