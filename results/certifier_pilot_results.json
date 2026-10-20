@@ -1,146 +1,414 @@
 {
   "metadata": {
-    "status": "invalid pending J2",
-    "title": "Certifier Pilot C1: Learn-Then-Test Risk Control Evaluation",
-    "label": "pilot \u2014 expert rendering vs original (DEAR/FiveK), not agent edits",
-    "dataset": "DEAR test split (pilot subset)",
-    "num_scenes": 60,
-    "num_pairs": 300,
-    "judge": "AesFix-Pref (CLIP ViT-B/32 + Linear Head)",
+    "status": "verified",
+    "title": "Certifier Full Split Evaluation: Learn-Then-Test Risk Control",
+    "label": "full_test \u2014 expert rendering vs original (DEAR/FiveK)",
+    "dataset": "DEAR full test split",
+    "num_scenes": 1233,
+    "num_pairs": 6164,
     "delta": 0.1,
     "n_seeds": 20,
-    "human_edit_preference_rate": 0.6666666666666666,
-    "release_everything_baseline_fir": 0.33333333333333337
+    "human_edit_preference_rate": 0.7068,
+    "source_test_pairs": "D:/aesfix-data/kaggle_runs/dear_full/test_pair_scores.csv"
   },
-  "results_by_alpha": {
+  "results_v1": {
     "alpha_0.05": {
+      "alpha": 0.05,
+      "delta": 0.1,
       "ltt": {
         "method": "LTT (Learn-Then-Test, Clopper-Pearson)",
-        "mean_realized_fir": 0.0084,
-        "max_realized_fir": 0.087,
-        "violation_rate": 0.1,
-        "mean_release_rate": 0.0433,
-        "abstain_rate": 0.85
+        "mean_realized_fir": 0.0,
+        "max_realized_fir": 0.0,
+        "violation_rate": 0.0,
+        "mean_release_rate": 0.0,
+        "abstain_rate": 1.0
+      },
+      "release_all": {
+        "method": "Release-All (Baseline)",
+        "mean_realized_fir": 0.2918,
+        "max_realized_fir": 0.3035,
+        "violation_rate": 1.0,
+        "mean_release_rate": 1.0,
+        "abstain_rate": 0.0
       },
       "naive_zero": {
         "method": "Naive (s > 0)",
-        "mean_realized_fir": 0.1847,
-        "max_realized_fir": 0.2366,
+        "mean_realized_fir": 0.1701,
+        "max_realized_fir": 0.1818,
         "violation_rate": 1.0,
-        "mean_release_rate": 0.6253,
+        "mean_release_rate": 0.6841,
         "abstain_rate": 0.0
       },
       "naive_eps": {
         "method": "Naive (s > 0.04)",
-        "mean_realized_fir": 0.1817,
-        "max_realized_fir": 0.2333,
+        "mean_realized_fir": 0.1637,
+        "max_realized_fir": 0.175,
         "violation_rate": 1.0,
-        "mean_release_rate": 0.6033,
+        "mean_release_rate": 0.6605,
         "abstain_rate": 0.0
       }
     },
     "alpha_0.10": {
+      "alpha": 0.1,
+      "delta": 0.1,
       "ltt": {
         "method": "LTT (Learn-Then-Test, Clopper-Pearson)",
-        "mean_realized_fir": 0.0291,
-        "max_realized_fir": 0.1111,
-        "violation_rate": 0.05,
-        "mean_release_rate": 0.295,
+        "mean_realized_fir": 0.0,
+        "max_realized_fir": 0.0,
+        "violation_rate": 0.0,
+        "mean_release_rate": 0.0,
+        "abstain_rate": 1.0
+      },
+      "release_all": {
+        "method": "Release-All (Baseline)",
+        "mean_realized_fir": 0.2918,
+        "max_realized_fir": 0.3035,
+        "violation_rate": 1.0,
+        "mean_release_rate": 1.0,
         "abstain_rate": 0.0
       },
       "naive_zero": {
         "method": "Naive (s > 0)",
-        "mean_realized_fir": 0.1847,
-        "max_realized_fir": 0.2366,
+        "mean_realized_fir": 0.1701,
+        "max_realized_fir": 0.1818,
         "violation_rate": 1.0,
-        "mean_release_rate": 0.6253,
+        "mean_release_rate": 0.6841,
         "abstain_rate": 0.0
       },
       "naive_eps": {
         "method": "Naive (s > 0.04)",
-        "mean_realized_fir": 0.1817,
-        "max_realized_fir": 0.2333,
+        "mean_realized_fir": 0.1637,
+        "max_realized_fir": 0.175,
         "violation_rate": 1.0,
-        "mean_release_rate": 0.6033,
+        "mean_release_rate": 0.6605,
         "abstain_rate": 0.0
       }
     },
     "alpha_0.15": {
+      "alpha": 0.15,
+      "delta": 0.1,
       "ltt": {
         "method": "LTT (Learn-Then-Test, Clopper-Pearson)",
-        "mean_realized_fir": 0.062,
-        "max_realized_fir": 0.1364,
+        "mean_realized_fir": 0.0,
+        "max_realized_fir": 0.0,
         "violation_rate": 0.0,
-        "mean_release_rate": 0.3647,
+        "mean_release_rate": 0.0,
+        "abstain_rate": 1.0
+      },
+      "release_all": {
+        "method": "Release-All (Baseline)",
+        "mean_realized_fir": 0.2918,
+        "max_realized_fir": 0.3035,
+        "violation_rate": 1.0,
+        "mean_release_rate": 1.0,
         "abstain_rate": 0.0
       },
       "naive_zero": {
         "method": "Naive (s > 0)",
-        "mean_realized_fir": 0.1847,
-        "max_realized_fir": 0.2366,
-        "violation_rate": 0.8,
-        "mean_release_rate": 0.6253,
+        "mean_realized_fir": 0.1701,
+        "max_realized_fir": 0.1818,
+        "violation_rate": 1.0,
+        "mean_release_rate": 0.6841,
         "abstain_rate": 0.0
       },
       "naive_eps": {
         "method": "Naive (s > 0.04)",
-        "mean_realized_fir": 0.1817,
-        "max_realized_fir": 0.2333,
-        "violation_rate": 0.8,
-        "mean_release_rate": 0.6033,
+        "mean_realized_fir": 0.1637,
+        "max_realized_fir": 0.175,
+        "violation_rate": 0.95,
+        "mean_release_rate": 0.6605,
         "abstain_rate": 0.0
       }
     },
     "alpha_0.20": {
+      "alpha": 0.2,
+      "delta": 0.1,
       "ltt": {
         "method": "LTT (Learn-Then-Test, Clopper-Pearson)",
-        "mean_realized_fir": 0.116,
-        "max_realized_fir": 0.2093,
-        "violation_rate": 0.05,
-        "mean_release_rate": 0.4677,
+        "mean_realized_fir": 0.0,
+        "max_realized_fir": 0.0,
+        "violation_rate": 0.0,
+        "mean_release_rate": 0.0,
+        "abstain_rate": 1.0
+      },
+      "release_all": {
+        "method": "Release-All (Baseline)",
+        "mean_realized_fir": 0.2918,
+        "max_realized_fir": 0.3035,
+        "violation_rate": 1.0,
+        "mean_release_rate": 1.0,
         "abstain_rate": 0.0
       },
       "naive_zero": {
         "method": "Naive (s > 0)",
-        "mean_realized_fir": 0.1847,
-        "max_realized_fir": 0.2366,
-        "violation_rate": 0.4,
-        "mean_release_rate": 0.6253,
+        "mean_realized_fir": 0.1701,
+        "max_realized_fir": 0.1818,
+        "violation_rate": 0.0,
+        "mean_release_rate": 0.6841,
         "abstain_rate": 0.0
       },
       "naive_eps": {
         "method": "Naive (s > 0.04)",
-        "mean_realized_fir": 0.1817,
-        "max_realized_fir": 0.2333,
-        "violation_rate": 0.35,
-        "mean_release_rate": 0.6033,
+        "mean_realized_fir": 0.1637,
+        "max_realized_fir": 0.175,
+        "violation_rate": 0.0,
+        "mean_release_rate": 0.6605,
         "abstain_rate": 0.0
       }
     },
     "alpha_0.30": {
+      "alpha": 0.3,
+      "delta": 0.1,
       "ltt": {
         "method": "LTT (Learn-Then-Test, Clopper-Pearson)",
-        "mean_realized_fir": 0.1999,
-        "max_realized_fir": 0.2893,
+        "mean_realized_fir": 0.0,
+        "max_realized_fir": 0.0,
         "violation_rate": 0.0,
-        "mean_release_rate": 0.6977,
+        "mean_release_rate": 0.0,
+        "abstain_rate": 1.0
+      },
+      "release_all": {
+        "method": "Release-All (Baseline)",
+        "mean_realized_fir": 0.2918,
+        "max_realized_fir": 0.3035,
+        "violation_rate": 0.15,
+        "mean_release_rate": 1.0,
         "abstain_rate": 0.0
       },
       "naive_zero": {
         "method": "Naive (s > 0)",
-        "mean_realized_fir": 0.1847,
-        "max_realized_fir": 0.2366,
+        "mean_realized_fir": 0.1701,
+        "max_realized_fir": 0.1818,
         "violation_rate": 0.0,
-        "mean_release_rate": 0.6253,
+        "mean_release_rate": 0.6841,
         "abstain_rate": 0.0
       },
       "naive_eps": {
         "method": "Naive (s > 0.04)",
-        "mean_realized_fir": 0.1817,
-        "max_realized_fir": 0.2333,
+        "mean_realized_fir": 0.1637,
+        "max_realized_fir": 0.175,
         "violation_rate": 0.0,
-        "mean_release_rate": 0.6033,
+        "mean_release_rate": 0.6605,
         "abstain_rate": 0.0
+      }
+    }
+  },
+  "results_v2": {
+    "alpha_0.05": {
+      "alpha": 0.05,
+      "delta": 0.1,
+      "ltt": {
+        "method": "LTT (Learn-Then-Test, Clopper-Pearson)",
+        "mean_realized_fir": 0.0325,
+        "max_realized_fir": 0.0598,
+        "violation_rate": 0.2,
+        "mean_release_rate": 0.2589,
+        "abstain_rate": 0.3
+      },
+      "release_all": {
+        "method": "Release-All (Baseline)",
+        "mean_realized_fir": 0.2918,
+        "max_realized_fir": 0.3035,
+        "violation_rate": 1.0,
+        "mean_release_rate": 1.0,
+        "abstain_rate": 0.0
+      },
+      "naive_zero": {
+        "method": "Naive (s > 0)",
+        "mean_realized_fir": 0.1244,
+        "max_realized_fir": 0.1339,
+        "violation_rate": 1.0,
+        "mean_release_rate": 0.7155,
+        "abstain_rate": 0.0
+      },
+      "naive_eps": {
+        "method": "Naive (s > 0.04)",
+        "mean_realized_fir": 0.1236,
+        "max_realized_fir": 0.1323,
+        "violation_rate": 1.0,
+        "mean_release_rate": 0.7118,
+        "abstain_rate": 0.0
+      }
+    },
+    "alpha_0.10": {
+      "alpha": 0.1,
+      "delta": 0.1,
+      "ltt": {
+        "method": "LTT (Learn-Then-Test, Clopper-Pearson)",
+        "mean_realized_fir": 0.0885,
+        "max_realized_fir": 0.1038,
+        "violation_rate": 0.05,
+        "mean_release_rate": 0.6086,
+        "abstain_rate": 0.0
+      },
+      "release_all": {
+        "method": "Release-All (Baseline)",
+        "mean_realized_fir": 0.2918,
+        "max_realized_fir": 0.3035,
+        "violation_rate": 1.0,
+        "mean_release_rate": 1.0,
+        "abstain_rate": 0.0
+      },
+      "naive_zero": {
+        "method": "Naive (s > 0)",
+        "mean_realized_fir": 0.1244,
+        "max_realized_fir": 0.1339,
+        "violation_rate": 1.0,
+        "mean_release_rate": 0.7155,
+        "abstain_rate": 0.0
+      },
+      "naive_eps": {
+        "method": "Naive (s > 0.04)",
+        "mean_realized_fir": 0.1236,
+        "max_realized_fir": 0.1323,
+        "violation_rate": 1.0,
+        "mean_release_rate": 0.7118,
+        "abstain_rate": 0.0
+      }
+    },
+    "alpha_0.15": {
+      "alpha": 0.15,
+      "delta": 0.1,
+      "ltt": {
+        "method": "LTT (Learn-Then-Test, Clopper-Pearson)",
+        "mean_realized_fir": 0.1366,
+        "max_realized_fir": 0.1525,
+        "violation_rate": 0.05,
+        "mean_release_rate": 0.7416,
+        "abstain_rate": 0.0
+      },
+      "release_all": {
+        "method": "Release-All (Baseline)",
+        "mean_realized_fir": 0.2918,
+        "max_realized_fir": 0.3035,
+        "violation_rate": 1.0,
+        "mean_release_rate": 1.0,
+        "abstain_rate": 0.0
+      },
+      "naive_zero": {
+        "method": "Naive (s > 0)",
+        "mean_realized_fir": 0.1244,
+        "max_realized_fir": 0.1339,
+        "violation_rate": 0.0,
+        "mean_release_rate": 0.7155,
+        "abstain_rate": 0.0
+      },
+      "naive_eps": {
+        "method": "Naive (s > 0.04)",
+        "mean_realized_fir": 0.1236,
+        "max_realized_fir": 0.1323,
+        "violation_rate": 0.0,
+        "mean_release_rate": 0.7118,
+        "abstain_rate": 0.0
+      }
+    },
+    "alpha_0.20": {
+      "alpha": 0.2,
+      "delta": 0.1,
+      "ltt": {
+        "method": "LTT (Learn-Then-Test, Clopper-Pearson)",
+        "mean_realized_fir": 0.1835,
+        "max_realized_fir": 0.1933,
+        "violation_rate": 0.0,
+        "mean_release_rate": 0.83,
+        "abstain_rate": 0.0
+      },
+      "release_all": {
+        "method": "Release-All (Baseline)",
+        "mean_realized_fir": 0.2918,
+        "max_realized_fir": 0.3035,
+        "violation_rate": 1.0,
+        "mean_release_rate": 1.0,
+        "abstain_rate": 0.0
+      },
+      "naive_zero": {
+        "method": "Naive (s > 0)",
+        "mean_realized_fir": 0.1244,
+        "max_realized_fir": 0.1339,
+        "violation_rate": 0.0,
+        "mean_release_rate": 0.7155,
+        "abstain_rate": 0.0
+      },
+      "naive_eps": {
+        "method": "Naive (s > 0.04)",
+        "mean_realized_fir": 0.1236,
+        "max_realized_fir": 0.1323,
+        "violation_rate": 0.0,
+        "mean_release_rate": 0.7118,
+        "abstain_rate": 0.0
+      }
+    },
+    "alpha_0.30": {
+      "alpha": 0.3,
+      "delta": 0.1,
+      "ltt": {
+        "method": "LTT (Learn-Then-Test, Clopper-Pearson)",
+        "mean_realized_fir": 0.1837,
+        "max_realized_fir": 0.1933,
+        "violation_rate": 0.0,
+        "mean_release_rate": 0.8303,
+        "abstain_rate": 0.0
+      },
+      "release_all": {
+        "method": "Release-All (Baseline)",
+        "mean_realized_fir": 0.2918,
+        "max_realized_fir": 0.3035,
+        "violation_rate": 0.15,
+        "mean_release_rate": 1.0,
+        "abstain_rate": 0.0
+      },
+      "naive_zero": {
+        "method": "Naive (s > 0)",
+        "mean_realized_fir": 0.1244,
+        "max_realized_fir": 0.1339,
+        "violation_rate": 0.0,
+        "mean_release_rate": 0.7155,
+        "abstain_rate": 0.0
+      },
+      "naive_eps": {
+        "method": "Naive (s > 0.04)",
+        "mean_realized_fir": 0.1236,
+        "max_realized_fir": 0.1323,
+        "violation_rate": 0.0,
+        "mean_release_rate": 0.7118,
+        "abstain_rate": 0.0
+      }
+    }
+  },
+  "goodhart_j3": {
+    "n_scenes": 904,
+    "n_pairs": 3069,
+    "human_prefers_brighter": {
+      "mean": 0.6996,
+      "ci_95": [
+        0.6738,
+        0.7248
+      ]
+    },
+    "judges": {
+      "aesfix_pref_v1": {
+        "mean": 0.7848,
+        "ci_95": [
+          0.7627,
+          0.8059
+        ],
+        "diff_from_human": 0.0852,
+        "diff_ci_95": [
+          0.0611,
+          0.1097
+        ]
+      },
+      "aesfix_pref_v2": {
+        "mean": 0.7324,
+        "ci_95": [
+          0.7071,
+          0.7562
+        ],
+        "diff_from_human": 0.0328,
+        "diff_ci_95": [
+          0.0127,
+          0.0523
+        ]
       }
     }
   }

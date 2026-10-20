@@ -65,8 +65,33 @@ When directly measuring how often the judge prefers the brighter image vs. How o
 
 ---
 
-## 4. Key Takeaways for Model & System Design
+## 4. Entry 2: Overexposure Gaming & Preference Over Ground-Truth Correction (S3 & S4)
+
+### (a) Ground-Truth Analytical Inversion vs. Judge Reward
+- In **S3** (8 synthetic benchmark images), on the overexposed `test` image (`+1.0 EV` flaw), the ground-truth oracle fix (`-1.0 EV`) is scored **worse** than the overexposed flawed image by rsinema ($\Delta = -0.0734, -0.17\sigma$), TopIQ-NR ($\Delta = -0.0068, -0.08\sigma$), and AesFix-Pref v1 ($\Delta = -0.6577, -0.81\sigma$). Only MUSIQ rewarded the correction ($\Delta = +0.5148, +0.07\sigma$).
+- In **S4** (500 cases across 100 DEAR test scenes), on 100 cases of intentional $+1.0\text{ EV}$ overexposure, analytical color recovery ($\Delta E_{\text{CIEDE2000}}$ drops $\ge 0.5$) succeeds in **99 out of 100 scenes (99.0%)**.
+- However, empirical judge reward rates on the ground-truth inverse are severely depressed:
+  - `aesfix_pref_v1`: rewards fix in only **9/100** cases (**91.0%** of cases preferred the blown-out overexposed image!).
+  - `rsinema`: rewards fix in only **32/100** cases (**68.0%** preferred overexposure).
+  - `pyiqa_musiq`: rewards fix in only **38/100** cases (**62.0%** preferred overexposure).
+  - `pyiqa_topiq_nr`: rewards fix in **73/100** cases (**27.0%** preferred overexposure, benefiting from recalibrated $\epsilon = 0.005$).
+
+### (b) Goodhart Vulnerability Mechanism
+- Aesthetic scoring models trained on human preferences or photographic quality datasets exhibit monotonic positive correlations with luminance and vividness.
+- While severe underexposure is consistently penalized by human raters and models alike, moderate overexposure (+1.0 EV) is frequently perceived by neural feature extractors as "cleaner", with less perceptible shadow noise, higher apparent contrast, and brighter skin tones or highlights.
+- In unconstrained optimization, an agent optimizing pure judge reward will drive exposure upward until catastrophic highlight clipping occurs. Crucially, when handed an already overexposed image, an unconstrained agent refuses to darken it because reducing exposure lowers the raw aesthetic score.
+
+### (c) AesFix Defense: The Anti-Bleach Triad
+AesFix counters overexposure gaming not by relying on the judge, but through deterministic physical and architectural constraints:
+1. **Highlight Clipping Guard**: The Tier A executor measures the percentage of clipped highlight pixels ($Y > 0.99$). If a proposed edit increases highlight clipping by more than $+2.0\%$, the edit is immediately aborted with status `CLIPPED_HIGHLIGHTS`.
+2. **Signed Physical Aspect Critic**: The heuristic aspect critic computes histogram energy in the upper luminance decile. If severe overexposure is detected, positive exposure proposals are blocked at generation time.
+3. **Intent Preservation Guard**: Bounded exposure budgets ($\pm 0.6\text{ EV}$ max delta per step, strictly limited cumulative budget) prevent runaway brightness drift.
+
+---
+
+## 5. Key Takeaways for Model & System Design
 
 1. **Reward Models Reflect Dataset Skew**: Data-driven aesthetic heads trained on public datasets cannot be trusted as solitary loss functions or acceptance criteria for creative tools.
 2. **Structural Guardrails Are Non-Negotiable**: Domain-informed priors (parameter-specific magnitude caps, style intent classification, and signed physical critics) are required to prevent reward hacking.
 3. **Defense in Interviews**: This empirical analysis provides concrete evidence for why AesFix combines neural preference models with explicit heuristic critics and certification bounds rather than running unconstrained end-to-end RL.
+
