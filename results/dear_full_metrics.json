@@ -1,0 +1,168 @@
+{
+  "metadata": {
+    "title": "K2b Full DEAR Benchmark Results",
+    "run_dir": "D:/aesfix-data/kaggle_runs/dear_full",
+    "n_test_pairs": 18993,
+    "n_scenes": 1283,
+    "gpu_hours": 1.2066,
+    "runtime_seconds": 4343.73
+  },
+  "model_selection": [
+    {
+      "candidate": "clip_b32_linear",
+      "encoder": "clip_b32",
+      "architecture": "linear",
+      "feature_dim": 512,
+      "val_accuracy": 0.781,
+      "val_loss": 0.4683
+    },
+    {
+      "candidate": "clip_b32_mlp",
+      "encoder": "clip_b32",
+      "architecture": "mlp",
+      "feature_dim": 512,
+      "val_accuracy": 0.7902,
+      "val_loss": 0.4478
+    },
+    {
+      "candidate": "clip_l14_linear",
+      "encoder": "clip_l14",
+      "architecture": "linear",
+      "feature_dim": 768,
+      "val_accuracy": 0.7726,
+      "val_loss": 0.4881
+    },
+    {
+      "candidate": "clip_l14_mlp",
+      "encoder": "clip_l14",
+      "architecture": "mlp",
+      "feature_dim": 768,
+      "val_accuracy": 0.7832,
+      "val_loss": 0.4656
+    },
+    {
+      "candidate": "siglip_so400m_linear",
+      "encoder": "siglip_so400m",
+      "architecture": "linear",
+      "feature_dim": 1152,
+      "val_accuracy": 0.7975,
+      "val_loss": 0.4432
+    },
+    {
+      "candidate": "siglip_so400m_mlp",
+      "encoder": "siglip_so400m",
+      "architecture": "mlp",
+      "feature_dim": 1152,
+      "val_accuracy": 0.8,
+      "val_loss": 0.4349
+    },
+    {
+      "candidate": "dinov2_base_linear",
+      "encoder": "dinov2_base",
+      "architecture": "linear",
+      "feature_dim": 768,
+      "val_accuracy": 0.7544,
+      "val_loss": 0.5365
+    },
+    {
+      "candidate": "dinov2_base_mlp",
+      "encoder": "dinov2_base",
+      "architecture": "mlp",
+      "feature_dim": 768,
+      "val_accuracy": 0.7576,
+      "val_loss": 0.5114
+    }
+  ],
+  "full_test_table": [
+    {
+      "judge": "pyiqa_musiq",
+      "overall_accuracy": 0.6128,
+      "ci_95": "[0.6030, 0.6222]",
+      "signed_spearman": 0.3169,
+      "brightness_subset_acc": 0.681,
+      "orig_vs_edit_acc": 0.5597,
+      "high_agreement_acc": 0.6816
+    },
+    {
+      "judge": "pyiqa_topiq_nr",
+      "overall_accuracy": 0.7244,
+      "ci_95": "[0.7151, 0.7333]",
+      "signed_spearman": 0.5995,
+      "brightness_subset_acc": 0.7592,
+      "orig_vs_edit_acc": 0.7537,
+      "high_agreement_acc": 0.8435
+    },
+    {
+      "judge": "pyiqa_liqe",
+      "overall_accuracy": 0.6845,
+      "ci_95": "[0.6751, 0.6930]",
+      "signed_spearman": 0.4917,
+      "brightness_subset_acc": 0.7651,
+      "orig_vs_edit_acc": 0.5808,
+      "high_agreement_acc": 0.7914
+    },
+    {
+      "judge": "pyiqa_clip_iqa",
+      "overall_accuracy": 0.68,
+      "ci_95": "[0.6700, 0.6893]",
+      "signed_spearman": 0.4775,
+      "brightness_subset_acc": 0.7103,
+      "orig_vs_edit_acc": 0.707,
+      "high_agreement_acc": 0.7799
+    },
+    {
+      "judge": "apv2_5",
+      "overall_accuracy": 0.6001,
+      "ci_95": "[0.5901, 0.6097]",
+      "signed_spearman": 0.28,
+      "brightness_subset_acc": 0.5885,
+      "orig_vs_edit_acc": 0.6804,
+      "high_agreement_acc": 0.6639
+    },
+    {
+      "judge": "rsinema",
+      "overall_accuracy": 0.7155,
+      "ci_95": "[0.7065, 0.7241]",
+      "signed_spearman": 0.5657,
+      "brightness_subset_acc": 0.7514,
+      "orig_vs_edit_acc": 0.6405,
+      "high_agreement_acc": 0.8285
+    },
+    {
+      "judge": "aesfix_pref_v1",
+      "overall_accuracy": 0.7311,
+      "ci_95": "[0.7219, 0.7395]",
+      "signed_spearman": 0.63,
+      "brightness_subset_acc": 0.7589,
+      "orig_vs_edit_acc": 0.7432,
+      "high_agreement_acc": 0.8586
+    },
+    {
+      "judge": "aesfix_pref_v2",
+      "overall_accuracy": 0.7988,
+      "ci_95": "[0.7917, 0.8058]",
+      "signed_spearman": 0.7563,
+      "brightness_subset_acc": 0.8126,
+      "orig_vs_edit_acc": 0.8297,
+      "high_agreement_acc": 0.9355
+    }
+  ],
+  "paired_differences": {
+    "v2_minus_v1": {
+      "diff": 0.0677,
+      "ci_95": [
+        0.0601,
+        0.0761
+      ],
+      "ci_str": "[+0.0601, +0.0761]"
+    },
+    "v2_minus_topiq": {
+      "diff": 0.0744,
+      "ci_95": [
+        0.0659,
+        0.0832
+      ],
+      "ci_str": "[+0.0659, +0.0832]"
+    }
+  }
+}

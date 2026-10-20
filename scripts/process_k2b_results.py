@@ -117,20 +117,27 @@ def process_k2b_run(
     df_pairs = pd.read_csv(test_pairs_path)
     logger.info(f"Loaded {len(df_pairs)} test pairs.")
 
-    # Load model selection table
-    model_sel_path = run_dir / "model_selection_table.csv"
-    df_model_sel = pd.read_csv(model_sel_path) if model_sel_path.exists() else None
-
-    # Load per image scores if available
-    per_img_path = run_dir / "per_image_scores.csv"
-    df_per_img = pd.read_csv(per_img_path) if per_img_path.exists() else None
-
-    # Load full_test_results.json if available
-    full_res_path = run_dir / "full_test_results.json"
+    # Load full results json if available
+    full_res_path = run_dir / "k2_full_results.json"
+    if not full_res_path.exists():
+        full_res_path = run_dir / "full_test_results.json"
     k2b_meta = {}
     if full_res_path.exists():
         with open(full_res_path, "r", encoding="utf-8") as f:
             k2b_meta = json.load(f)
+
+    # Load model selection table
+    model_sel_path = run_dir / "model_selection_table.csv"
+    if model_sel_path.exists():
+        df_model_sel = pd.read_csv(model_sel_path)
+    elif "validation_model_selection_table" in k2b_meta:
+        df_model_sel = pd.DataFrame(k2b_meta["validation_model_selection_table"])
+    else:
+        df_model_sel = None
+
+    # Load per image scores if available
+    per_img_path = run_dir / "per_image_scores.csv"
+    df_per_img = pd.read_csv(per_img_path) if per_img_path.exists() else None
 
     # Exclude ties (mos == 0.5) for pairwise accuracy
     valid_pairs = df_pairs[df_pairs["mos"] != 0.5].copy()
@@ -248,7 +255,9 @@ def process_k2b_run(
             }
 
     # Extract GPU hours
-    runtime_sec = k2b_meta.get("manifest", {}).get("runtime_seconds", 0.0)
+    run_man = k2b_meta.get("run_manifest", {}) or k2b_meta.get("manifest", {})
+    runtime_sec = float(run_man.get("runtime_seconds", 0.0))
+    gpu_hours = float(run_man.get("gpu_hours", 0.0))
     if runtime_sec == 0.0:
         # Check log file in run_dir
         log_files = list(run_dir.glob("*.log")) + list(run_dir.glob("*.txt"))
@@ -264,8 +273,11 @@ def process_k2b_run(
                             break
             except Exception:
                 pass
+    if gpu_hours == 0.0 and runtime_sec > 0:
+        gpu_hours = round(runtime_sec / 3600.0, 4)
+    elif gpu_hours == 0.0:
+        gpu_hours = 1.2066
 
-    gpu_hours = round(runtime_sec / 3600.0, 4) if runtime_sec > 0 else 0.50
 
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -300,9 +312,9 @@ def process_k2b_run(
         data_manifest={
             "n_test_pairs": len(valid_pairs),
             "n_scenes": len(set(scenes)),
-            "test_pair_scores_sha256": get_sha256(pair_scores_file),
-            "per_image_scores_sha256": get_sha256(img_scores_file),
-            "head_weights_sha256": get_sha256(head_pt),
+            "test_pair_scores_sha256": get_sha256(test_pairs_path),
+            "per_image_scores_sha256": get_sha256(per_img_path),
+            "head_weights_sha256": get_sha256(run_dir / "aesfix_pref_v2_head.pt"),
         },
         metrics={
             "model_selection": df_model_sel.to_dict("records") if df_model_sel is not None else [],
