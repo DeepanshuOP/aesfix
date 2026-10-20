@@ -1,13 +1,13 @@
 {
   "metadata": {
     "status": "verified",
-    "title": "Certifier Full Split Evaluation: Learn-Then-Test Risk Control",
+    "title": "Certifier Full Split Evaluation: Learn-Then-Test Risk Control (200 Seeds, Quantile Grid)",
     "label": "full_test \u2014 expert rendering vs original (DEAR/FiveK)",
     "dataset": "DEAR full test split",
     "num_scenes": 1233,
     "num_pairs": 6164,
     "delta": 0.1,
-    "n_seeds": 20,
+    "n_seeds": 200,
     "human_edit_preference_rate": 0.7068,
     "source_test_pairs": "D:/aesfix-data/kaggle_runs/dear_full/test_pair_scores.csv"
   },
@@ -20,31 +20,51 @@
         "mean_realized_fir": 0.0,
         "max_realized_fir": 0.0,
         "violation_rate": 0.0,
+        "violation_count": 0,
+        "violation_ci_95": [
+          0.0,
+          0.0183
+        ],
         "mean_release_rate": 0.0,
         "abstain_rate": 1.0
       },
       "release_all": {
         "method": "Release-All (Baseline)",
-        "mean_realized_fir": 0.2918,
-        "max_realized_fir": 0.3035,
+        "mean_realized_fir": 0.2927,
+        "max_realized_fir": 0.3161,
         "violation_rate": 1.0,
+        "violation_count": 200,
+        "violation_ci_95": [
+          0.9817,
+          1.0
+        ],
         "mean_release_rate": 1.0,
         "abstain_rate": 0.0
       },
       "naive_zero": {
         "method": "Naive (s > 0)",
-        "mean_realized_fir": 0.1701,
-        "max_realized_fir": 0.1818,
+        "mean_realized_fir": 0.1708,
+        "max_realized_fir": 0.1928,
         "violation_rate": 1.0,
-        "mean_release_rate": 0.6841,
+        "violation_count": 200,
+        "violation_ci_95": [
+          0.9817,
+          1.0
+        ],
+        "mean_release_rate": 0.6843,
         "abstain_rate": 0.0
       },
       "naive_eps": {
         "method": "Naive (s > 0.04)",
-        "mean_realized_fir": 0.1637,
-        "max_realized_fir": 0.175,
+        "mean_realized_fir": 0.164,
+        "max_realized_fir": 0.1838,
         "violation_rate": 1.0,
-        "mean_release_rate": 0.6605,
+        "violation_count": 200,
+        "violation_ci_95": [
+          0.9817,
+          1.0
+        ],
+        "mean_release_rate": 0.6608,
         "abstain_rate": 0.0
       }
     },
@@ -53,34 +73,54 @@
       "delta": 0.1,
       "ltt": {
         "method": "LTT (Learn-Then-Test, Clopper-Pearson)",
-        "mean_realized_fir": 0.0,
-        "max_realized_fir": 0.0,
-        "violation_rate": 0.0,
-        "mean_release_rate": 0.0,
-        "abstain_rate": 1.0
+        "mean_realized_fir": 0.0382,
+        "max_realized_fir": 0.1322,
+        "violation_rate": 0.02,
+        "violation_count": 4,
+        "violation_ci_95": [
+          0.0055,
+          0.0504
+        ],
+        "mean_release_rate": 0.1624,
+        "abstain_rate": 0.42
       },
       "release_all": {
         "method": "Release-All (Baseline)",
-        "mean_realized_fir": 0.2918,
-        "max_realized_fir": 0.3035,
+        "mean_realized_fir": 0.2927,
+        "max_realized_fir": 0.3161,
         "violation_rate": 1.0,
+        "violation_count": 200,
+        "violation_ci_95": [
+          0.9817,
+          1.0
+        ],
         "mean_release_rate": 1.0,
         "abstain_rate": 0.0
       },
       "naive_zero": {
         "method": "Naive (s > 0)",
-        "mean_realized_fir": 0.1701,
-        "max_realized_fir": 0.1818,
+        "mean_realized_fir": 0.1708,
+        "max_realized_fir": 0.1928,
         "violation_rate": 1.0,
-        "mean_release_rate": 0.6841,
+        "violation_count": 200,
+        "violation_ci_95": [
+          0.9817,
+          1.0
+        ],
+        "mean_release_rate": 0.6843,
         "abstain_rate": 0.0
       },
       "naive_eps": {
         "method": "Naive (s > 0.04)",
-        "mean_realized_fir": 0.1637,
-        "max_realized_fir": 0.175,
+        "mean_realized_fir": 0.164,
+        "max_realized_fir": 0.1838,
         "violation_rate": 1.0,
-        "mean_release_rate": 0.6605,
+        "violation_count": 200,
+        "violation_ci_95": [
+          0.9817,
+          1.0
+        ],
+        "mean_release_rate": 0.6608,
         "abstain_rate": 0.0
       }
     },
@@ -89,34 +129,54 @@
       "delta": 0.1,
       "ltt": {
         "method": "LTT (Learn-Then-Test, Clopper-Pearson)",
-        "mean_realized_fir": 0.0,
-        "max_realized_fir": 0.0,
-        "violation_rate": 0.0,
-        "mean_release_rate": 0.0,
-        "abstain_rate": 1.0
+        "mean_realized_fir": 0.1258,
+        "max_realized_fir": 0.1676,
+        "violation_rate": 0.18,
+        "violation_count": 36,
+        "violation_ci_95": [
+          0.1294,
+          0.2404
+        ],
+        "mean_release_rate": 0.5034,
+        "abstain_rate": 0.03
       },
       "release_all": {
         "method": "Release-All (Baseline)",
-        "mean_realized_fir": 0.2918,
-        "max_realized_fir": 0.3035,
+        "mean_realized_fir": 0.2927,
+        "max_realized_fir": 0.3161,
         "violation_rate": 1.0,
+        "violation_count": 200,
+        "violation_ci_95": [
+          0.9817,
+          1.0
+        ],
         "mean_release_rate": 1.0,
         "abstain_rate": 0.0
       },
       "naive_zero": {
         "method": "Naive (s > 0)",
-        "mean_realized_fir": 0.1701,
-        "max_realized_fir": 0.1818,
-        "violation_rate": 1.0,
-        "mean_release_rate": 0.6841,
+        "mean_realized_fir": 0.1708,
+        "max_realized_fir": 0.1928,
+        "violation_rate": 0.995,
+        "violation_count": 199,
+        "violation_ci_95": [
+          0.9725,
+          0.9999
+        ],
+        "mean_release_rate": 0.6843,
         "abstain_rate": 0.0
       },
       "naive_eps": {
         "method": "Naive (s > 0.04)",
-        "mean_realized_fir": 0.1637,
-        "max_realized_fir": 0.175,
-        "violation_rate": 0.95,
-        "mean_release_rate": 0.6605,
+        "mean_realized_fir": 0.164,
+        "max_realized_fir": 0.1838,
+        "violation_rate": 0.97,
+        "violation_count": 194,
+        "violation_ci_95": [
+          0.9358,
+          0.9889
+        ],
+        "mean_release_rate": 0.6608,
         "abstain_rate": 0.0
       }
     },
@@ -125,34 +185,54 @@
       "delta": 0.1,
       "ltt": {
         "method": "LTT (Learn-Then-Test, Clopper-Pearson)",
-        "mean_realized_fir": 0.0,
-        "max_realized_fir": 0.0,
-        "violation_rate": 0.0,
-        "mean_release_rate": 0.0,
-        "abstain_rate": 1.0
+        "mean_realized_fir": 0.1784,
+        "max_realized_fir": 0.2265,
+        "violation_rate": 0.045,
+        "violation_count": 9,
+        "violation_ci_95": [
+          0.0208,
+          0.0837
+        ],
+        "mean_release_rate": 0.7129,
+        "abstain_rate": 0.0
       },
       "release_all": {
         "method": "Release-All (Baseline)",
-        "mean_realized_fir": 0.2918,
-        "max_realized_fir": 0.3035,
+        "mean_realized_fir": 0.2927,
+        "max_realized_fir": 0.3161,
         "violation_rate": 1.0,
+        "violation_count": 200,
+        "violation_ci_95": [
+          0.9817,
+          1.0
+        ],
         "mean_release_rate": 1.0,
         "abstain_rate": 0.0
       },
       "naive_zero": {
         "method": "Naive (s > 0)",
-        "mean_realized_fir": 0.1701,
-        "max_realized_fir": 0.1818,
+        "mean_realized_fir": 0.1708,
+        "max_realized_fir": 0.1928,
         "violation_rate": 0.0,
-        "mean_release_rate": 0.6841,
+        "violation_count": 0,
+        "violation_ci_95": [
+          0.0,
+          0.0183
+        ],
+        "mean_release_rate": 0.6843,
         "abstain_rate": 0.0
       },
       "naive_eps": {
         "method": "Naive (s > 0.04)",
-        "mean_realized_fir": 0.1637,
-        "max_realized_fir": 0.175,
+        "mean_realized_fir": 0.164,
+        "max_realized_fir": 0.1838,
         "violation_rate": 0.0,
-        "mean_release_rate": 0.6605,
+        "violation_count": 0,
+        "violation_ci_95": [
+          0.0,
+          0.0183
+        ],
+        "mean_release_rate": 0.6608,
         "abstain_rate": 0.0
       }
     },
@@ -161,34 +241,54 @@
       "delta": 0.1,
       "ltt": {
         "method": "LTT (Learn-Then-Test, Clopper-Pearson)",
-        "mean_realized_fir": 0.0,
-        "max_realized_fir": 0.0,
-        "violation_rate": 0.0,
-        "mean_release_rate": 0.0,
-        "abstain_rate": 1.0
+        "mean_realized_fir": 0.2858,
+        "max_realized_fir": 0.3161,
+        "violation_rate": 0.2,
+        "violation_count": 40,
+        "violation_ci_95": [
+          0.1469,
+          0.2622
+        ],
+        "mean_release_rate": 0.9874,
+        "abstain_rate": 0.0
       },
       "release_all": {
         "method": "Release-All (Baseline)",
-        "mean_realized_fir": 0.2918,
-        "max_realized_fir": 0.3035,
-        "violation_rate": 0.15,
+        "mean_realized_fir": 0.2927,
+        "max_realized_fir": 0.3161,
+        "violation_rate": 0.2,
+        "violation_count": 40,
+        "violation_ci_95": [
+          0.1469,
+          0.2622
+        ],
         "mean_release_rate": 1.0,
         "abstain_rate": 0.0
       },
       "naive_zero": {
         "method": "Naive (s > 0)",
-        "mean_realized_fir": 0.1701,
-        "max_realized_fir": 0.1818,
+        "mean_realized_fir": 0.1708,
+        "max_realized_fir": 0.1928,
         "violation_rate": 0.0,
-        "mean_release_rate": 0.6841,
+        "violation_count": 0,
+        "violation_ci_95": [
+          0.0,
+          0.0183
+        ],
+        "mean_release_rate": 0.6843,
         "abstain_rate": 0.0
       },
       "naive_eps": {
         "method": "Naive (s > 0.04)",
-        "mean_realized_fir": 0.1637,
-        "max_realized_fir": 0.175,
+        "mean_realized_fir": 0.164,
+        "max_realized_fir": 0.1838,
         "violation_rate": 0.0,
-        "mean_release_rate": 0.6605,
+        "violation_count": 0,
+        "violation_ci_95": [
+          0.0,
+          0.0183
+        ],
+        "mean_release_rate": 0.6608,
         "abstain_rate": 0.0
       }
     }
@@ -199,34 +299,54 @@
       "delta": 0.1,
       "ltt": {
         "method": "LTT (Learn-Then-Test, Clopper-Pearson)",
-        "mean_realized_fir": 0.0325,
-        "max_realized_fir": 0.0598,
-        "violation_rate": 0.2,
-        "mean_release_rate": 0.2589,
-        "abstain_rate": 0.3
+        "mean_realized_fir": 0.0,
+        "max_realized_fir": 0.0,
+        "violation_rate": 0.0,
+        "violation_count": 0,
+        "violation_ci_95": [
+          0.0,
+          0.0183
+        ],
+        "mean_release_rate": 0.0,
+        "abstain_rate": 1.0
       },
       "release_all": {
         "method": "Release-All (Baseline)",
-        "mean_realized_fir": 0.2918,
-        "max_realized_fir": 0.3035,
+        "mean_realized_fir": 0.2927,
+        "max_realized_fir": 0.3161,
         "violation_rate": 1.0,
+        "violation_count": 200,
+        "violation_ci_95": [
+          0.9817,
+          1.0
+        ],
         "mean_release_rate": 1.0,
         "abstain_rate": 0.0
       },
       "naive_zero": {
         "method": "Naive (s > 0)",
-        "mean_realized_fir": 0.1244,
-        "max_realized_fir": 0.1339,
+        "mean_realized_fir": 0.1248,
+        "max_realized_fir": 0.1396,
         "violation_rate": 1.0,
-        "mean_release_rate": 0.7155,
+        "violation_count": 200,
+        "violation_ci_95": [
+          0.9817,
+          1.0
+        ],
+        "mean_release_rate": 0.715,
         "abstain_rate": 0.0
       },
       "naive_eps": {
         "method": "Naive (s > 0.04)",
-        "mean_realized_fir": 0.1236,
-        "max_realized_fir": 0.1323,
+        "mean_realized_fir": 0.124,
+        "max_realized_fir": 0.1393,
         "violation_rate": 1.0,
-        "mean_release_rate": 0.7118,
+        "violation_count": 200,
+        "violation_ci_95": [
+          0.9817,
+          1.0
+        ],
+        "mean_release_rate": 0.7113,
         "abstain_rate": 0.0
       }
     },
@@ -235,34 +355,54 @@
       "delta": 0.1,
       "ltt": {
         "method": "LTT (Learn-Then-Test, Clopper-Pearson)",
-        "mean_realized_fir": 0.0885,
-        "max_realized_fir": 0.1038,
-        "violation_rate": 0.05,
-        "mean_release_rate": 0.6086,
-        "abstain_rate": 0.0
+        "mean_realized_fir": 0.0747,
+        "max_realized_fir": 0.1176,
+        "violation_rate": 0.015,
+        "violation_count": 3,
+        "violation_ci_95": [
+          0.0031,
+          0.0432
+        ],
+        "mean_release_rate": 0.5314,
+        "abstain_rate": 0.1
       },
       "release_all": {
         "method": "Release-All (Baseline)",
-        "mean_realized_fir": 0.2918,
-        "max_realized_fir": 0.3035,
+        "mean_realized_fir": 0.2927,
+        "max_realized_fir": 0.3161,
         "violation_rate": 1.0,
+        "violation_count": 200,
+        "violation_ci_95": [
+          0.9817,
+          1.0
+        ],
         "mean_release_rate": 1.0,
         "abstain_rate": 0.0
       },
       "naive_zero": {
         "method": "Naive (s > 0)",
-        "mean_realized_fir": 0.1244,
-        "max_realized_fir": 0.1339,
+        "mean_realized_fir": 0.1248,
+        "max_realized_fir": 0.1396,
         "violation_rate": 1.0,
-        "mean_release_rate": 0.7155,
+        "violation_count": 200,
+        "violation_ci_95": [
+          0.9817,
+          1.0
+        ],
+        "mean_release_rate": 0.715,
         "abstain_rate": 0.0
       },
       "naive_eps": {
         "method": "Naive (s > 0.04)",
-        "mean_realized_fir": 0.1236,
-        "max_realized_fir": 0.1323,
+        "mean_realized_fir": 0.124,
+        "max_realized_fir": 0.1393,
         "violation_rate": 1.0,
-        "mean_release_rate": 0.7118,
+        "violation_count": 200,
+        "violation_ci_95": [
+          0.9817,
+          1.0
+        ],
+        "mean_release_rate": 0.7113,
         "abstain_rate": 0.0
       }
     },
@@ -271,34 +411,54 @@
       "delta": 0.1,
       "ltt": {
         "method": "LTT (Learn-Then-Test, Clopper-Pearson)",
-        "mean_realized_fir": 0.1366,
-        "max_realized_fir": 0.1525,
-        "violation_rate": 0.05,
-        "mean_release_rate": 0.7416,
+        "mean_realized_fir": 0.1299,
+        "max_realized_fir": 0.1672,
+        "violation_rate": 0.055,
+        "violation_count": 11,
+        "violation_ci_95": [
+          0.0278,
+          0.0963
+        ],
+        "mean_release_rate": 0.7262,
         "abstain_rate": 0.0
       },
       "release_all": {
         "method": "Release-All (Baseline)",
-        "mean_realized_fir": 0.2918,
-        "max_realized_fir": 0.3035,
+        "mean_realized_fir": 0.2927,
+        "max_realized_fir": 0.3161,
         "violation_rate": 1.0,
+        "violation_count": 200,
+        "violation_ci_95": [
+          0.9817,
+          1.0
+        ],
         "mean_release_rate": 1.0,
         "abstain_rate": 0.0
       },
       "naive_zero": {
         "method": "Naive (s > 0)",
-        "mean_realized_fir": 0.1244,
-        "max_realized_fir": 0.1339,
+        "mean_realized_fir": 0.1248,
+        "max_realized_fir": 0.1396,
         "violation_rate": 0.0,
-        "mean_release_rate": 0.7155,
+        "violation_count": 0,
+        "violation_ci_95": [
+          0.0,
+          0.0183
+        ],
+        "mean_release_rate": 0.715,
         "abstain_rate": 0.0
       },
       "naive_eps": {
         "method": "Naive (s > 0.04)",
-        "mean_realized_fir": 0.1236,
-        "max_realized_fir": 0.1323,
+        "mean_realized_fir": 0.124,
+        "max_realized_fir": 0.1393,
         "violation_rate": 0.0,
-        "mean_release_rate": 0.7118,
+        "violation_count": 0,
+        "violation_ci_95": [
+          0.0,
+          0.0183
+        ],
+        "mean_release_rate": 0.7113,
         "abstain_rate": 0.0
       }
     },
@@ -307,34 +467,54 @@
       "delta": 0.1,
       "ltt": {
         "method": "LTT (Learn-Then-Test, Clopper-Pearson)",
-        "mean_realized_fir": 0.1835,
-        "max_realized_fir": 0.1933,
-        "violation_rate": 0.0,
-        "mean_release_rate": 0.83,
+        "mean_realized_fir": 0.1867,
+        "max_realized_fir": 0.218,
+        "violation_rate": 0.11,
+        "violation_count": 22,
+        "violation_ci_95": [
+          0.0702,
+          0.1618
+        ],
+        "mean_release_rate": 0.8348,
         "abstain_rate": 0.0
       },
       "release_all": {
         "method": "Release-All (Baseline)",
-        "mean_realized_fir": 0.2918,
-        "max_realized_fir": 0.3035,
+        "mean_realized_fir": 0.2927,
+        "max_realized_fir": 0.3161,
         "violation_rate": 1.0,
+        "violation_count": 200,
+        "violation_ci_95": [
+          0.9817,
+          1.0
+        ],
         "mean_release_rate": 1.0,
         "abstain_rate": 0.0
       },
       "naive_zero": {
         "method": "Naive (s > 0)",
-        "mean_realized_fir": 0.1244,
-        "max_realized_fir": 0.1339,
+        "mean_realized_fir": 0.1248,
+        "max_realized_fir": 0.1396,
         "violation_rate": 0.0,
-        "mean_release_rate": 0.7155,
+        "violation_count": 0,
+        "violation_ci_95": [
+          0.0,
+          0.0183
+        ],
+        "mean_release_rate": 0.715,
         "abstain_rate": 0.0
       },
       "naive_eps": {
         "method": "Naive (s > 0.04)",
-        "mean_realized_fir": 0.1236,
-        "max_realized_fir": 0.1323,
+        "mean_realized_fir": 0.124,
+        "max_realized_fir": 0.1393,
         "violation_rate": 0.0,
-        "mean_release_rate": 0.7118,
+        "violation_count": 0,
+        "violation_ci_95": [
+          0.0,
+          0.0183
+        ],
+        "mean_release_rate": 0.7113,
         "abstain_rate": 0.0
       }
     },
@@ -343,34 +523,54 @@
       "delta": 0.1,
       "ltt": {
         "method": "LTT (Learn-Then-Test, Clopper-Pearson)",
-        "mean_realized_fir": 0.1837,
-        "max_realized_fir": 0.1933,
-        "violation_rate": 0.0,
-        "mean_release_rate": 0.8303,
+        "mean_realized_fir": 0.2835,
+        "max_realized_fir": 0.3161,
+        "violation_rate": 0.2,
+        "violation_count": 40,
+        "violation_ci_95": [
+          0.1469,
+          0.2622
+        ],
+        "mean_release_rate": 0.9868,
         "abstain_rate": 0.0
       },
       "release_all": {
         "method": "Release-All (Baseline)",
-        "mean_realized_fir": 0.2918,
-        "max_realized_fir": 0.3035,
-        "violation_rate": 0.15,
+        "mean_realized_fir": 0.2927,
+        "max_realized_fir": 0.3161,
+        "violation_rate": 0.2,
+        "violation_count": 40,
+        "violation_ci_95": [
+          0.1469,
+          0.2622
+        ],
         "mean_release_rate": 1.0,
         "abstain_rate": 0.0
       },
       "naive_zero": {
         "method": "Naive (s > 0)",
-        "mean_realized_fir": 0.1244,
-        "max_realized_fir": 0.1339,
+        "mean_realized_fir": 0.1248,
+        "max_realized_fir": 0.1396,
         "violation_rate": 0.0,
-        "mean_release_rate": 0.7155,
+        "violation_count": 0,
+        "violation_ci_95": [
+          0.0,
+          0.0183
+        ],
+        "mean_release_rate": 0.715,
         "abstain_rate": 0.0
       },
       "naive_eps": {
         "method": "Naive (s > 0.04)",
-        "mean_realized_fir": 0.1236,
-        "max_realized_fir": 0.1323,
+        "mean_realized_fir": 0.124,
+        "max_realized_fir": 0.1393,
         "violation_rate": 0.0,
-        "mean_release_rate": 0.7118,
+        "violation_count": 0,
+        "violation_ci_95": [
+          0.0,
+          0.0183
+        ],
+        "mean_release_rate": 0.7113,
         "abstain_rate": 0.0
       }
     }
