@@ -60,9 +60,15 @@ class V2JudgeWrapper:
     """Wrapper for AesFix-Pref v2 head."""
     name = "aesfix_pref_v2"
 
-    def __init__(self, head_path: str, backbone_name: str = "openai/clip-vit-base-patch32"):
+    def __init__(self, head_path: str, backbone_name: Optional[str] = None):
         self.head_path = head_path
-        self.backbone_name = backbone_name
+        fp16_dir = Path(r"D:\aesfix-cache\models\siglip_so400m_vision_fp16")
+        if backbone_name is not None:
+            self.backbone_name = backbone_name
+        elif fp16_dir.exists():
+            self.backbone_name = str(fp16_dir)
+        else:
+            self.backbone_name = "google/siglip-so400m-patch14-384"
         self._head = None
         self._model = None
         self._processor = None
@@ -71,10 +77,19 @@ class V2JudgeWrapper:
     def _ensure_loaded(self):
         if self._head is not None:
             return
+        p = Path(self.head_path)
+        if not p.exists():
+            alt = Path(r"D:\aesfix-data\kaggle_runs\dear_full") / p.name
+            if alt.exists():
+                self.head_path = str(alt)
         ckpt = torch.load(self.head_path, map_location="cpu", weights_only=False)
         enc_id = str(ckpt.get("encoder_id", ""))
+        fp16_dir = Path(r"D:\aesfix-cache\models\siglip_so400m_vision_fp16")
         if "siglip" in enc_id:
-            self.backbone_name = "google/siglip-so400m-patch14-384"
+            if fp16_dir.exists():
+                self.backbone_name = str(fp16_dir)
+            else:
+                self.backbone_name = "google/siglip-so400m-patch14-384"
         elif "clip_b32" in enc_id:
             self.backbone_name = "openai/clip-vit-base-patch32"
         elif "clip_l14" in enc_id:
@@ -82,7 +97,10 @@ class V2JudgeWrapper:
         elif "dino" in enc_id:
             self.backbone_name = "facebook/dinov2-base"
         else:
-            self.backbone_name = ckpt.get("encoder_name", ckpt.get("backbone", self.backbone_name))
+            if fp16_dir.exists() and "siglip" in str(ckpt).lower():
+                self.backbone_name = str(fp16_dir)
+            else:
+                self.backbone_name = ckpt.get("encoder_name", ckpt.get("backbone", self.backbone_name))
         
         feat_dim = int(ckpt.get("feature_dim", 1152))
         arch = str(ckpt.get("head_architecture", "mlp"))
@@ -105,7 +123,7 @@ class V2JudgeWrapper:
 
         from transformers import AutoImageProcessor
         self._processor = AutoImageProcessor.from_pretrained(self.backbone_name)
-        if "siglip" in self.backbone_name:
+        if "siglip" in self.backbone_name.lower():
             from transformers import SiglipVisionModel
             self._model = SiglipVisionModel.from_pretrained(self.backbone_name).eval()
         else:
