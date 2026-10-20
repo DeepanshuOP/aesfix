@@ -127,19 +127,19 @@ Evaluated on test pairs with perceptible lightness difference ($|\Delta \text{lu
 
 In P6, cell deltas divided by noise floor $\epsilon$ yielded unreadable values (e.g. $-657.7$) because preference heads have extremely small noise floors $\epsilon \approx 10^{-3}$. In this complete version, cells report $\Delta / \sigma_{\text{DEAR}}$ (the score change standardized by each judge's standard deviation across DEAR test images). Counts report how many of the 8 oracle fixes each judge rewards beyond its $\epsilon$.
 
-| Image / Flaw | `rsinema` | `pyiqa_musiq` | `pyiqa_topiq_nr` | `aesfix_pref_v1` |
-|---|---|---|---|---|
-| `test (-1.5 EV)` | +0.18 (✓) | +0.43 (✓) | +0.20 (✓) | +1.83 (✓) |
-| `test (+1.0 EV)` | -0.17 (✗) | +0.07 (✓) | -0.08 (✗) | -0.81 (✗) |
-| `test (contrast 0.6)` | +0.46 (✓) | -0.02 (✗) | +0.29 (✓) | +2.79 (✓) |
-| `test (warm cast)` | -0.01 (✗) | +0.04 (✓) | +0.02 (✗) | -0.03 (✗) |
-| `temp (-1.5 EV)` | +0.36 (✓) | +0.31 (✓) | +0.13 (✓) | +1.65 (✓) |
-| `temp (+1.0 EV)` | +0.28 (✓) | +0.30 (✓) | +0.57 (✓) | +0.73 (✓) |
-| `temp (contrast 0.6)` | +0.49 (✓) | +0.09 (✓) | +0.12 (✓) | +2.45 (✓) |
-| `temp (warm cast)` | -0.09 (✗) | +0.11 (✓) | -0.12 (✗) | -0.19 (✗) |
-| **Rewards Fix (> $\epsilon$)** | **5/8** | **7/8** | **5/8** | **5/8** |
+| Image / Flaw | `rsinema` | `pyiqa_musiq` | `pyiqa_topiq_nr` | `aesfix_pref_v1` | `aesfix_pref_v2` |
+|---|---|---|---|---|---|
+| `test (-1.5 EV)` | +0.27 (✓) | +0.45 (✓) | +0.23 (✓) | +1.51 (✓) | +0.91 (✓) |
+| `test (+1.0 EV)` | -0.27 (✗) | +0.08 (✓) | -0.09 (✗) | -0.67 (✗) | -0.74 (✗) |
+| `test (contrast 0.6)` | +0.71 (✓) | -0.02 (✗) | +0.33 (✓) | +2.30 (✓) | +1.42 (✓) |
+| `test (warm cast)` | -0.02 (✗) | +0.04 (✓) | +0.02 (✗) | -0.02 (✗) | +0.05 (✓) |
+| `temp (-1.5 EV)` | +0.57 (✓) | +0.33 (✓) | +0.14 (✓) | +1.36 (✓) | +0.41 (✓) |
+| `temp (+1.0 EV)` | +0.44 (✓) | +0.31 (✓) | +0.64 (✓) | +0.60 (✓) | -0.20 (✗) |
+| `temp (contrast 0.6)` | +0.77 (✓) | +0.09 (✓) | +0.14 (✓) | +2.02 (✓) | +0.62 (✓) |
+| `temp (warm cast)` | -0.14 (✗) | +0.11 (✓) | -0.13 (✗) | -0.16 (✗) | +0.03 (✓) |
+| **Rewards Fix (> $\epsilon$)** | **5/8** | **7/8** | **5/8** | **5/8** | **6/8** |
 
-*Source: `results/synth_v2_oracle_results.json` | SHA256: `7297d319f9f0fdde515c826b2c3f3cec219f6ddd33900c2d76db5eb481f39f90`*
+*Source: `results/synth_v2_oracle_results.json` | SHA256: `b2b72475459da8115425603227c66155819bb05023a6d7a6b89528414125c462`*
 
 ### Overexposure Diagnosis (+1.0 EV Image vs. Ground-Truth Fix -1.0 EV)
 
@@ -170,8 +170,9 @@ To eliminate the sample size bottleneck of 8 images, 100 DEAR test scenes' `tiff
 | `pyiqa_musiq` | **292/500** | **58.4%** | Evaluated |
 | `pyiqa_topiq_nr` | **271/500** | **54.2%** | Evaluated |
 | `aesfix_pref_v1` | **314/500** | **62.8%** | Evaluated |
+| `aesfix_pref_v2` | **335/500** | **67.0%** | Evaluated |
 
-*Source: `results/synth_v2_oracle_results.json` | SHA256: `7297d319f9f0fdde515c826b2c3f3cec219f6ddd33900c2d76db5eb481f39f90`*
+*Source: `results/synth_v2_oracle_results.json` | SHA256: `b2b72475459da8115425603227c66155819bb05023a6d7a6b89528414125c462`*
 
 ## S5. Edit Proposer Benchmark: Heuristic vs. Grid ($k=15$)
 
