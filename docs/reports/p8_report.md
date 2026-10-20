@@ -202,6 +202,15 @@ Three key structural factors explain this failure mode:
 | `grid_v2_topiq_guard` | `adjust_contrast({'factor': 1.6})` | +2.1307 | `results/visuals/dark_grid_v2_topiq_guard.jpg` |
 | `grid_v2_all_guards` | `adjust_contrast({'factor': 1.6})` | +2.1307 | `results/visuals/dark_grid_v2_all_guards.jpg` |
 
+##### Quantitative Luminance & Shadow Clipping Analysis (`dark.jpg`)
+
+| Metric | Before Edit (`dark.jpg`) | After `adjust_contrast(1.6)` | Shift ($\Delta$) | Perceptual Impact |
+|---|---|---|---|---|
+| **Shadow Clipping (luma $\le 0.01$)** | **85.719%** | **86.893%** | **+1.174%** | Severe black crush; further darkens intentional moody shadow tones |
+| **$p_{01}$ Luminance** | **0.00000** | **0.00000** | **0.00000** | Unchanged at absolute zero floor |
+| **$p_{05}$ Luminance** | **0.00392** | **0.00000** | **-0.00392** | Crushed completely to pure black ($0.00000$) |
+| **Fraction of Pixels $< 0.02$** | **87.366%** | **87.764%** | **+0.398%** | Broad shadow compression across low-key silhouette |
+
 *Source: `results/p8_experiments_results.json` | SHA256: `1c81d12bb1a1bcdf27ae61cf2777d36fc18812c099c63c541b82fdb3f8b41a7d`*
 ---
 
