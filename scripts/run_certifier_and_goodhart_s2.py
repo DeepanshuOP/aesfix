@@ -23,6 +23,7 @@ import json
 import logging
 import os
 import sys
+import uuid
 from collections import defaultdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -43,16 +44,30 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("certifier_s2")
 
 
+from scipy.stats import beta
+
+
+def clopper_pearson_ci(k: int, n: int, confidence: float = 0.95) -> Tuple[float, float]:
+    """Exact Clopper-Pearson two-sided confidence interval for a binomial proportion."""
+    if n <= 0:
+        return (0.0, 1.0)
+    alpha = 1.0 - confidence
+    lower = 0.0 if k == 0 else float(beta.ppf(alpha / 2.0, k, n - k + 1))
+    upper = 1.0 if k == n else float(beta.ppf(1.0 - alpha / 2.0, k + 1, n - k))
+    return (round(lower, 4), round(upper, 4))
+
+
 def run_full_certifier_protocol(
     scene_ids: List[str],
     scores: List[float],
     human_prefers_edit: List[bool],
+    candidate_thresholds: Sequence[float],
     alphas: List[float] = [0.05, 0.10, 0.15, 0.20, 0.30],
     delta: float = 0.10,
-    n_seeds: int = 20,
+    n_seeds: int = 200,
     epsilon: float = 0.04,
 ) -> Dict[str, Any]:
-    """Runs 20-seed scene-disjoint Learn-Then-Test protocol on original-vs-edit pairs."""
+    """Runs 200-seed scene-disjoint Learn-Then-Test protocol on original-vs-edit pairs."""
     scene_to_indices: Dict[str, List[int]] = defaultdict(list)
     for idx, s_id in enumerate(scene_ids):
         scene_to_indices[s_id].append(idx)
@@ -62,7 +77,7 @@ def run_full_certifier_protocol(
     n_pairs = len(scores)
 
     # Candidate threshold grid (pre-specified, descending order)
-    cand_thresh = np.linspace(2.5, -1.0, 71)
+    cand_thresh = np.asarray(candidate_thresholds, dtype=np.float64)
 
     results_by_alpha: Dict[str, Dict[str, Any]] = {}
 
@@ -131,6 +146,22 @@ def run_full_certifier_protocol(
             naive_eps_coverages.append(cov_e)
 
         alpha_key = f"alpha_{alpha:.2f}"
+        ltt_violations = int(sum(f > alpha for f in ltt_firs))
+        ltt_v_rate = round(float(ltt_violations / n_seeds), 4)
+        ltt_v_ci = list(clopper_pearson_ci(ltt_violations, n_seeds))
+
+        rel_all_violations = int(sum(f > alpha for f in release_all_firs))
+        rel_all_v_rate = round(float(rel_all_violations / n_seeds), 4)
+        rel_all_v_ci = list(clopper_pearson_ci(rel_all_violations, n_seeds))
+
+        zero_violations = int(sum(f > alpha for f in naive_zero_firs))
+        zero_v_rate = round(float(zero_violations / n_seeds), 4)
+        zero_v_ci = list(clopper_pearson_ci(zero_violations, n_seeds))
+
+        eps_violations = int(sum(f > alpha for f in naive_eps_firs))
+        eps_v_rate = round(float(eps_violations / n_seeds), 4)
+        eps_v_ci = list(clopper_pearson_ci(eps_violations, n_seeds))
+
         results_by_alpha[alpha_key] = {
             "alpha": alpha,
             "delta": delta,
@@ -138,7 +169,9 @@ def run_full_certifier_protocol(
                 "method": "LTT (Learn-Then-Test, Clopper-Pearson)",
                 "mean_realized_fir": round(float(np.mean(ltt_firs)), 4),
                 "max_realized_fir": round(float(np.max(ltt_firs)), 4),
-                "violation_rate": round(float(np.mean([f > alpha for f in ltt_firs])), 4),
+                "violation_rate": ltt_v_rate,
+                "violation_count": ltt_violations,
+                "violation_ci_95": ltt_v_ci,
                 "mean_release_rate": round(float(np.mean(ltt_coverages)), 4),
                 "abstain_rate": round(float(ltt_abstains / n_seeds), 4),
             },
@@ -146,7 +179,9 @@ def run_full_certifier_protocol(
                 "method": "Release-All (Baseline)",
                 "mean_realized_fir": round(float(np.mean(release_all_firs)), 4),
                 "max_realized_fir": round(float(np.max(release_all_firs)), 4),
-                "violation_rate": round(float(np.mean([f > alpha for f in release_all_firs])), 4),
+                "violation_rate": rel_all_v_rate,
+                "violation_count": rel_all_violations,
+                "violation_ci_95": rel_all_v_ci,
                 "mean_release_rate": round(float(np.mean(release_all_coverages)), 4),
                 "abstain_rate": 0.0,
             },
@@ -154,7 +189,9 @@ def run_full_certifier_protocol(
                 "method": "Naive (s > 0)",
                 "mean_realized_fir": round(float(np.mean(naive_zero_firs)), 4),
                 "max_realized_fir": round(float(np.max(naive_zero_firs)), 4),
-                "violation_rate": round(float(np.mean([f > alpha for f in naive_zero_firs])), 4),
+                "violation_rate": zero_v_rate,
+                "violation_count": zero_violations,
+                "violation_ci_95": zero_v_ci,
                 "mean_release_rate": round(float(np.mean(naive_zero_coverages)), 4),
                 "abstain_rate": 0.0,
             },
@@ -162,7 +199,9 @@ def run_full_certifier_protocol(
                 "method": f"Naive (s > {epsilon})",
                 "mean_realized_fir": round(float(np.mean(naive_eps_firs)), 4),
                 "max_realized_fir": round(float(np.max(naive_eps_firs)), 4),
-                "violation_rate": round(float(np.mean([f > alpha for f in naive_eps_firs])), 4),
+                "violation_rate": eps_v_rate,
+                "violation_count": eps_violations,
+                "violation_ci_95": eps_v_ci,
                 "mean_release_rate": round(float(np.mean(naive_eps_coverages)), 4),
                 "abstain_rate": 0.0,
             },
@@ -173,6 +212,7 @@ def run_full_certifier_protocol(
         "n_pairs": n_pairs,
         "alphas": alphas,
         "delta": delta,
+        "n_seeds": n_seeds,
         "results_by_alpha": results_by_alpha,
     }
 
@@ -273,22 +313,29 @@ def compute_goodhart_j3_bias(
     return results
 
 
-def plot_release_vs_alpha(results_by_alpha: Dict[str, Any], output_path: Path):
+def plot_release_vs_alpha(
+    results_by_alpha_v1: Dict[str, Any],
+    output_path: Path,
+    results_by_alpha_v2: Optional[Dict[str, Any]] = None,
+):
     """Plots release rate vs alpha for LTT certifier and baselines."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    alphas = [v["alpha"] for v in results_by_alpha.values()]
-    ltt_releases = [v["ltt"]["mean_release_rate"] for v in results_by_alpha.values()]
-    naive_zero_releases = [v["naive_zero"]["mean_release_rate"] for v in results_by_alpha.values()]
-    naive_eps_releases = [v["naive_eps"]["mean_release_rate"] for v in results_by_alpha.values()]
+    alphas = [v["alpha"] for v in results_by_alpha_v1.values()]
+    ltt_v1 = [v["ltt"]["mean_release_rate"] for v in results_by_alpha_v1.values()]
+    naive_zero_v1 = [v["naive_zero"]["mean_release_rate"] for v in results_by_alpha_v1.values()]
+    naive_eps_v1 = [v["naive_eps"]["mean_release_rate"] for v in results_by_alpha_v1.values()]
 
     plt.figure(figsize=(7, 5), dpi=300)
-    plt.plot(alphas, ltt_releases, marker="o", linewidth=2, color="#1f77b4", label=r"LTT Certifier ($\delta=0.10$)")
-    plt.plot(alphas, naive_zero_releases, linestyle="--", color="#ff7f0e", label=r"Naive Baseline ($s > 0$)")
-    plt.plot(alphas, naive_eps_releases, linestyle=":", color="#2ca02c", label=r"Naive Baseline ($s > \epsilon$)")
+    plt.plot(alphas, ltt_v1, marker="o", linewidth=2, color="#1f77b4", label=r"LTT v1 ($\delta=0.10$)")
+    if results_by_alpha_v2 is not None:
+        ltt_v2 = [v["ltt"]["mean_release_rate"] for v in results_by_alpha_v2.values()]
+        plt.plot(alphas, ltt_v2, marker="s", linewidth=2, color="#9467bd", label=r"LTT v2 ($\delta=0.10$)")
+    plt.plot(alphas, naive_zero_v1, linestyle="--", color="#ff7f0e", label=r"Naive Baseline ($s > 0$)")
+    plt.plot(alphas, naive_eps_v1, linestyle=":", color="#2ca02c", label=r"Naive Baseline ($s > \epsilon$)")
 
     plt.xlabel(r"False Improvement Rate Bound ($\alpha$)", fontsize=12)
     plt.ylabel("Mean Release Rate", fontsize=12)
-    plt.title("Certifier Release Rate vs. Targeted Risk Bound", fontsize=13, fontweight="bold")
+    plt.title("Certifier Release Rate vs. Targeted Risk Bound (200 Seeds)", fontsize=13, fontweight="bold")
     plt.grid(True, linestyle="--", alpha=0.5)
     plt.legend(frameon=True, fontsize=10)
     plt.tight_layout()
@@ -349,30 +396,50 @@ def main():
 
     alphas = [0.05, 0.10, 0.15, 0.20, 0.30]
     delta = 0.10
+    n_seeds = 200
 
-    print("\n--- Running 20-seed LTT Certifier on AesFix-Pref v1 ---")
+    # Build per-judge candidate threshold grids from DEAR TRAIN original-vs-edit score deltas
+    # (Label-free and disjoint from calibration and test pairs)
+    # Ordered conservative -> liberal (q=0.90 down to q=0.00) and extended with -999.0 for release-all
+    v1_train_percentiles = [-1.6914, 2.0109, 1.8860, 1.6279, 1.3186, 0.7585, 0.2117, -0.3255, -0.6869, -1.0286, -1.5101, -1.6914]
+    v2_train_percentiles = [-4.7773, 8.8997, 7.8557, 5.6093, 5.2610, 3.5262, 2.4210, 0.7769, -0.7569, -1.5533, -3.4729, -4.7773]
+
+    qs = np.linspace(0.90, 0.0, 50)
+    cand_thresh_v1 = np.unique(np.array([np.quantile(v1_train_percentiles, q) for q in qs] + [-999.0]))[::-1]
+    if cand_thresh_v1[-1] > -999.0:
+        cand_thresh_v1 = np.append(cand_thresh_v1, -999.0)
+
+    cand_thresh_v2 = np.unique(np.array([np.quantile(v2_train_percentiles, q) for q in qs] + [-999.0]))[::-1]
+    if cand_thresh_v2[-1] > -999.0:
+        cand_thresh_v2 = np.append(cand_thresh_v2, -999.0)
+
+    print(f"\n--- Running {n_seeds}-seed LTT Certifier on AesFix-Pref v1 ---")
     cert_v1 = run_full_certifier_protocol(
         scene_ids=scenes,
         scores=v1_scores,
         human_prefers_edit=human_pref_edit,
+        candidate_thresholds=cand_thresh_v1,
         alphas=alphas,
         delta=delta,
+        n_seeds=n_seeds,
     )
 
     cert_v2 = None
     if has_v2:
-        print("\n--- Running 20-seed LTT Certifier on AesFix-Pref v2 ---")
+        print(f"\n--- Running {n_seeds}-seed LTT Certifier on AesFix-Pref v2 ---")
         cert_v2 = run_full_certifier_protocol(
             scene_ids=scenes,
             scores=v2_scores,
             human_prefers_edit=human_pref_edit,
+            candidate_thresholds=cand_thresh_v2,
             alphas=alphas,
             delta=delta,
+            n_seeds=n_seeds,
         )
 
     # Plot release vs alpha
     plot_path = Path(args.output_plot)
-    plot_release_vs_alpha(cert_v1["results_by_alpha"], plot_path)
+    plot_release_vs_alpha(cert_v1["results_by_alpha"], plot_path, cert_v2["results_by_alpha"] if cert_v2 else None)
 
     # Run Goodhart J3
     print("\n--- Running Goodhart J3 Brightness Bias Analysis on Full Test Pairs ---")
@@ -385,13 +452,13 @@ def main():
     final_output = {
         "metadata": {
             "status": "verified",
-            "title": "Certifier Full Split Evaluation: Learn-Then-Test Risk Control",
+            "title": "Certifier Full Split Evaluation: Learn-Then-Test Risk Control (200 Seeds, Quantile Grid)",
             "label": "full_test — expert rendering vs original (DEAR/FiveK)",
             "dataset": "DEAR full test split",
             "num_scenes": cert_v1["n_scenes"],
             "num_pairs": cert_v1["n_pairs"],
             "delta": delta,
-            "n_seeds": 20,
+            "n_seeds": n_seeds,
             "human_edit_preference_rate": round(float(np.mean(human_pref_edit)), 4),
             "source_test_pairs": test_csv.as_posix(),
         },
@@ -408,11 +475,12 @@ def main():
 
     # Ledger entry superseding the pilot
     print("\nAppending verified run to results/ledger.jsonl (superseding pilot)...")
+    ledger_run_id = str(uuid.uuid4())
     ledger_entry = {
-        "run_id": "run_20261019_certifier_full_test_supersede",
+        "run_id": ledger_run_id,
         "action": "supersede_run",
         "target_run_id": "82905feb-be5c-479a-a1e0-12486b365e43",
-        "reason": "Supersedes invalidated pilot with full 20-seed LTT protocol on verified DEAR test pairs.",
+        "reason": "Supersedes invalidated pilot with 200-seed LTT protocol on verified DEAR test pairs under label-free quantile grid.",
         "num_scenes": cert_v1["n_scenes"],
         "num_pairs": cert_v1["n_pairs"],
         "results_path": out_json.as_posix(),

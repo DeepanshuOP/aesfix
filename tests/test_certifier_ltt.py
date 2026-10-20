@@ -139,3 +139,22 @@ def test_sim_validity_across_500_runs() -> None:
     assert emp_violation_rate <= delta + mc_error, (
         f"Empirical violation rate {emp_violation_rate:.4f} exceeded delta={delta} + MC error={mc_error:.4f}"
     )
+
+
+def test_first_grid_point_releases_nothing_abstains_everywhere() -> None:
+    """Task U1 unit test: if the first candidate threshold releases 0 samples,
+    fixed-sequence testing stops immediately and abstains everywhere (returns None),
+    even if later thresholds would pass.
+    """
+    scores = np.array([0.5, 1.2, 0.8, -0.2, 0.4])
+    human_prefers = np.array([True, True, True, False, True])
+    # First threshold 5.0 is above all scores, subsequent thresholds are safe
+    cand_thresh = [5.0, 1.0, 0.5, 0.0]
+    thresh = learn_then_test_threshold(
+        scores=scores,
+        human_prefers_edit=human_prefers,
+        candidate_thresholds=cand_thresh,
+        alpha=0.20,
+        delta=0.10,
+    )
+    assert thresh is None
