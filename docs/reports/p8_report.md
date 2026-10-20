@@ -181,6 +181,17 @@ Evaluating 5 proposer configurations on the 500 synthetic cases:
 | `grid_v2_topiq_guard` | 100/0/0 | 8/90/2 | 87/0/13 | 2/32/66 | 0/33/67 |
 | `grid_v2_all_guards` | 81/19/0 | 6/93/1 | 92/3/5 | 3/71/26 | 4/79/17 |
 
+#### Analysis of Colour-Cast Failures (Goodhart Entry 3)
+
+Across the 200 synthetic colour-cast cases, unconstrained `grid_v2` recovered only **2 out of 100 warm cast cases (2.0%)** and **0 out of 100 cool cast cases (0.0%)**, worsening perceptual error in **66.0%** of warm casts and **67.0%** of cool casts.
+
+Three key structural factors explain this failure mode:
+1. **Discrete Grid Reachability ($\pm 10/\pm 25$ vs $\pm 15$ Oracle)**: The benchmark injects an analytical white balance shift of $\Delta T = \pm 15.0$ (oracle inverse: $\mp 15.0$). However, the discrete Best-of-15 grid defines temperature shifts exclusively at $\{-25.0, -10.0, +10.0, +25.0\}$. The oracle fix is therefore **topologically unreachable** in candidate space: $\mp 10.0$ under-corrects by $33.3\%$ (leaving residual $\Delta E \approx 0.8-1.2$), while $\mp 25.0$ over-corrects by $66.7\%$ (overshooting into an unnatural opposite cast).
+2. **Oracle Reward vs Selection Preference**: When AesFix-Pref v2 is evaluated directly on the ground-truth oracle fix ($\mp 15.0$), it rewards the correction in **62.0% of warm casts** and **72.0% of cool casts** (vs 47% and 58% for v1, and 12% and 6% for TopIQ-NR). However, when forced to choose from the discrete grid, v2 preferentially selected over-correcting $\mp 25$ shifts (38-41%) or orthogonal contrast/exposure operators (14-16%) that worsened $\Delta E$.
+3. **WB Selection Histogram**:
+   - *Warm Cast (+15)*: 32% Abstained, 2% Under-corrected (-10, recovered), 38% Over-corrected (-25, worse), 16% Contrast/EV (worse), 12% Further warmed (+10/+25, worse).
+   - *Cool Cast (-15)*: 33% Abstained, 0% Under-corrected (+10), 41% Over-corrected (+25, worse), 14% Contrast/EV (worse), 12% Further cooled (-10/-25, worse).
+
 #### Case Study: `dark.jpg` Inspection
 
 | Proposer Configuration | Operator Applied | Judge Gain | Visual Artifact Path |

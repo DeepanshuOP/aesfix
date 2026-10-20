@@ -89,9 +89,56 @@ AesFix counters overexposure gaming not by relying on the judge, but through det
 
 ---
 
-## 5. Key Takeaways for Model & System Design
+## 5. Entry 3: Colour-Cast Inversion Gaming & Discrete Grid Quantization (T1 & S4)
+
+### (a) Empirical Failure on Warm and Cool Colour Casts
+In the T1 proposer benchmark (500 synthetic cases across 100 scenes):
+- **Warm Cast** (100 cases, ground-truth perturbation $+15.0$ temperature shift):
+  - `grid_v2` achieved only **2 recovered** (**2.0%** [0.5%, 7.0%]), **32 unchanged** (abstained), and **66 worse** (**66.0%** [56.2%, 74.5%]).
+- **Cool Cast** (100 cases, ground-truth perturbation $-15.0$ temperature shift):
+  - `grid_v2` achieved **0 recovered** (**0.0%** [0.0%, 3.7%]), **33 unchanged**, and **67 worse** (**67.0%** [57.3%, 75.4%]).
+
+Across all 200 colour-cast degradation cases, unconstrained grid search with AesFix-Pref v2 degraded perceptual quality ($\Delta E$ increased by $\ge 0.5$) in **133 out of 200 cases (66.5%)**, recovering only 1.0% of cases.
+
+### (b) Root Cause Analysis: The Three Contributing Mechanisms
+
+#### 1. Discrete Grid Unreachability ($\pm 10/\pm 25$ vs $\pm 15$ Oracle)
+- The synthetic degradation benchmark applies an analytical white balance shift of $\Delta T = +15.0$ (warm cast) or $\Delta T = -15.0$ (cool cast).
+- The exact analytical inverse (oracle fix) is $\Delta T = -15.0$ (warm cast) and $\Delta T = +15.0$ (cool cast).
+- However, the standard Best-of-15 candidate grid defines signed white-balance shifts at fixed grid intervals:
+  $$\Delta T_{\text{candidates}} \in \{-25.0, -10.0, +10.0, +25.0\}$$
+- Consequently, the ground-truth oracle fix is **topologically unreachable** within the candidate action space:
+  - Choosing $\mp 10.0$ under-corrects by $33.3\%$ (leaving residual $\Delta E \approx 0.8 - 1.2$).
+  - Choosing $\mp 25.0$ over-corrects by $66.7\%$ (overshooting into an unnatural opposite chromatic tint, increasing $\Delta E$).
+
+#### 2. Model Reward on Ground-Truth Oracle vs Candidate Selection
+Evaluating AesFix-Pref v2 on the analytical ground-truth fix ($\mp 15.0$):
+- For **warm cast**, v2 rewards the oracle fix in **62 out of 100 cases (62.0%)** (compared to 47% for v1 and 12% for TopIQ-NR).
+- For **cool cast**, v2 rewards the oracle fix in **72 out of 100 cases (72.0%)** (compared to 58% for v1 and 6% for TopIQ-NR).
+
+While the neural preference model genuinely prefers the ground-truth analytical correction over the degraded image when tested directly, discrete candidate search forces the model to choose between an under-correcting $\mp 10.0$ shift, an over-correcting $\mp 25.0$ shift, or orthogonal non-color operators (e.g. contrast $\times 1.25$ or positive exposure). Because contrast and slight warming frequently carry high marginal preference reward, the model preferentially selects non-inverting edits, exacerbating perceptual error.
+
+#### 3. TopIQ Guard Inactivity
+Because the legacy TopIQ noise floor was frozen at $\epsilon_{\text{topiq}} = 0.15721$ ($1.97\sigma$), the non-inferiority guard never rejected these chromatic degradations, allowing over-correcting or cast-amplifying edits to pass unhindered.
+
+### (c) WB Selection Histogram & Mitigation
+
+| Degradation | Abstained (Unchanged) | Selected Under-Correction ($\mp 10$) | Selected Over-Correction ($\mp 25$) | Selected Orthogonal (Contrast/EV) | Selected Harmful Opposite Cast |
+|---|---|---|---|---|---|
+| Warm Cast (+15) | 32% | 2% (Recovered) | 38% (Worse, Overcorrected) | 16% (Worse, Contrast) | 12% (Worse, Further Warmed) |
+| Cool Cast (-15) | 33% | 0% (Recovered) | 41% (Worse, Overcorrected) | 14% (Worse, Contrast) | 12% (Worse, Further Cooled) |
+
+**AesFix Architectural Remedy**:
+1. **Dynamic WB Refinement**: Adding continuous or golden-section bracketed search around estimated cast temperature prevents grid quantization error.
+2. **Gray-World Aspect Gating**: The Tier A physical critic computes spatial illuminant chromaticity; proposals opposing the measured illuminant vector are rejected a priori.
+3. **Calibrated Null-Transform Guard**: Deploying $\epsilon_{\text{topiq}}^{\text{null}} = 0.01707$ rejects severe over-saturation and chromatic distortion.
+
+---
+
+## 6. Key Takeaways for Model & System Design
 
 1. **Reward Models Reflect Dataset Skew**: Data-driven aesthetic heads trained on public datasets cannot be trusted as solitary loss functions or acceptance criteria for creative tools.
 2. **Structural Guardrails Are Non-Negotiable**: Domain-informed priors (parameter-specific magnitude caps, style intent classification, and signed physical critics) are required to prevent reward hacking.
-3. **Defense in Interviews**: This empirical analysis provides concrete evidence for why AesFix combines neural preference models with explicit heuristic critics and certification bounds rather than running unconstrained end-to-end RL.
+3. **Discrete Action Sets Create Quantization Goodharting**: Even when reward models positively evaluate the ground-truth fix, a coarse discrete candidate grid can induce systematic failures by forcing choices between under-correction and destructive overshoot.
+4. **Defense in Interviews**: This empirical analysis provides concrete evidence for why AesFix combines neural preference models with explicit heuristic critics and certification bounds rather than running unconstrained end-to-end RL.
 
