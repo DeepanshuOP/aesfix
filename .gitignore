@@ -202,6 +202,7 @@ graphify-out/
 UPDATEPLS/
 hf_space/
 kaggle/k2_output_remote/
+results/kaggle_p8_outputs/
 scratch/
 CODE_REVIEW.md
 tests/fixtures/synthetic_suite/

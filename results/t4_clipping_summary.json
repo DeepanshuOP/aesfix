@@ -1,0 +1,1122 @@
+{
+  "metadata": {
+    "task": "T4 Caveat Check for Goodhart Entry 2",
+    "dataset": "DEAR synthetic benchmark v2 (100 overexposure scenes)",
+    "seed_pairs": 42,
+    "source_cases": "results\\synth_v2_cases.csv"
+  },
+  "highlight_clipping_stats": {
+    "n_scenes": 100,
+    "mean_clipping_before": 0.0084,
+    "median_clipping_before": 6e-05,
+    "mean_clipping_after": 0.09105,
+    "median_clipping_after": 0.04052,
+    "mean_clipping_growth": 0.08265,
+    "count_gt_1pct_clipped": 84,
+    "rate_gt_1pct_clipped": 0.84
+  },
+  "human_study_sample_20": [
+    {
+      "pair_id": 1,
+      "scene": "a0302-IMG_4108.jpeg",
+      "ref_file": "01_a0302-IMG_4108_ref.jpg",
+      "ref_sha256": "dff6cdc15289323cb368268fa8e12e9acd750e0bdfd170dc7d8f2fb87f538e51",
+      "ref_hl_clipping": 0.00055,
+      "plus1ev_file": "01_a0302-IMG_4108_plus1ev.jpg",
+      "plus1ev_sha256": "4188883e2555f141b1c3c344a0d61bb5d9d4a038eaab9edc9b19088bbc9af4cb",
+      "plus1ev_hl_clipping": 0.10164
+    },
+    {
+      "pair_id": 2,
+      "scene": "a0322-kme_016.jpeg",
+      "ref_file": "02_a0322-kme_016_ref.jpg",
+      "ref_sha256": "b8c0ef0ec13f045340ce59f16f18a0c0bed180c7cbc8d33302a315624a463479",
+      "ref_hl_clipping": 2e-05,
+      "plus1ev_file": "02_a0322-kme_016_plus1ev.jpg",
+      "plus1ev_sha256": "e93c959c2c4509087d4d2b6f657b9ff71ead57a0fb7383553abcff8fb069b116",
+      "plus1ev_hl_clipping": 0.07655
+    },
+    {
+      "pair_id": 3,
+      "scene": "a0729-jmac_DSC3864.jpeg",
+      "ref_file": "03_a0729-jmac_DSC3864_ref.jpg",
+      "ref_sha256": "3a8ec8ebc3a55a0a54b9a5234460c78a1865769096b6e4318670d9d6ec7c3a72",
+      "ref_hl_clipping": 0.00028,
+      "plus1ev_file": "03_a0729-jmac_DSC3864_plus1ev.jpg",
+      "plus1ev_sha256": "883a8bd87b3415704667c0519585f0c07b31f68e8c4caad0b989c99b82b99e5f",
+      "plus1ev_hl_clipping": 0.03813
+    },
+    {
+      "pair_id": 4,
+      "scene": "a0786-MB_060708_253.jpeg",
+      "ref_file": "04_a0786-MB_060708_253_ref.jpg",
+      "ref_sha256": "76d0f2243ceeb1e1c9dc5cbddeb7f0a851ef95e99585e5f167caa6ce5cc42d73",
+      "ref_hl_clipping": 0.00241,
+      "plus1ev_file": "04_a0786-MB_060708_253_plus1ev.jpg",
+      "plus1ev_sha256": "c0943da07c3097c2510b36af0e5a7c2e994d7883682718ad950049bb97c6320d",
+      "plus1ev_hl_clipping": 0.1877
+    },
+    {
+      "pair_id": 5,
+      "scene": "a0831-IMG_4991.jpeg",
+      "ref_file": "05_a0831-IMG_4991_ref.jpg",
+      "ref_sha256": "08eaec457928f890e70b2c68c0cffb19345a00ea54f9f66b724f67c16613a1f3",
+      "ref_hl_clipping": 0.01457,
+      "plus1ev_file": "05_a0831-IMG_4991_plus1ev.jpg",
+      "plus1ev_sha256": "251f9f79150833145046200f5ef55eafd37388e5310ca33db43ad5d1467f9b82",
+      "plus1ev_hl_clipping": 0.10475
+    },
+    {
+      "pair_id": 6,
+      "scene": "a0906-kme_353.jpeg",
+      "ref_file": "06_a0906-kme_353_ref.jpg",
+      "ref_sha256": "93af3601b47de0ff659bab7f3b621e77c0816aeda5de38ef3f77d3486a8cb2fa",
+      "ref_hl_clipping": 2e-05,
+      "plus1ev_file": "06_a0906-kme_353_plus1ev.jpg",
+      "plus1ev_sha256": "f6aba3436879b95dc9041b77ffe4a2c9b7f1f0f8c94e9fac487db5f12379bd10",
+      "plus1ev_hl_clipping": 0.17018
+    },
+    {
+      "pair_id": 7,
+      "scene": "a1460-050801_074700__I2E5490.jpeg",
+      "ref_file": "07_a1460-050801_074700__I2E5490_ref.jpg",
+      "ref_sha256": "be6673b72960d139c8dcf13a23b82031dd044fa6c8220356cb49b647bf90d9c6",
+      "ref_hl_clipping": 0.0,
+      "plus1ev_file": "07_a1460-050801_074700__I2E5490_plus1ev.jpg",
+      "plus1ev_sha256": "12c9048c98fa4684199fcd069c49cc287adb8213b7daa997bf963a739dc69a65",
+      "plus1ev_hl_clipping": 0.07721
+    },
+    {
+      "pair_id": 8,
+      "scene": "a1522-050708_183600__I2E9778.jpeg",
+      "ref_file": "08_a1522-050708_183600__I2E9778_ref.jpg",
+      "ref_sha256": "e1cc6dbca8c27b522f01ccfa119043c248c4f938930caa02b55a785fb1cbb3b6",
+      "ref_hl_clipping": 0.0,
+      "plus1ev_file": "08_a1522-050708_183600__I2E9778_plus1ev.jpg",
+      "plus1ev_sha256": "8e1f202a37f11e6cd1df956d4e162e9d434ef0c04bd07030493b771240a6fd55",
+      "plus1ev_hl_clipping": 0.01234
+    },
+    {
+      "pair_id": 9,
+      "scene": "a1675-kme_357.jpeg",
+      "ref_file": "09_a1675-kme_357_ref.jpg",
+      "ref_sha256": "69667ee86cb9ad3fe33be2763097099712ab059b91cdbb1fa51038e010b12796",
+      "ref_hl_clipping": 5e-05,
+      "plus1ev_file": "09_a1675-kme_357_plus1ev.jpg",
+      "plus1ev_sha256": "cbe7d9cf7e7b9e98853082298a0c37694697ecb002938dab5080ee1a1f1ddd03",
+      "plus1ev_hl_clipping": 0.00153
+    },
+    {
+      "pair_id": 10,
+      "scene": "a1803-kme_508.jpeg",
+      "ref_file": "10_a1803-kme_508_ref.jpg",
+      "ref_sha256": "d0d2e31c927b735048ebcb7d3fbae8478f4a008d7270c77c06bb7a20ac1dae80",
+      "ref_hl_clipping": 1e-05,
+      "plus1ev_file": "10_a1803-kme_508_plus1ev.jpg",
+      "plus1ev_sha256": "b03e4a89953a61417cbc98279180b9771ad533e9f2f90fa72f4a4c340f01abec",
+      "plus1ev_hl_clipping": 0.24484
+    },
+    {
+      "pair_id": 11,
+      "scene": "a1859-kme_347.jpeg",
+      "ref_file": "11_a1859-kme_347_ref.jpg",
+      "ref_sha256": "d17f3ed887646811a76534ad0202d72b1e91598c17746ac390074a5ccfd374bc",
+      "ref_hl_clipping": 0.00043,
+      "plus1ev_file": "11_a1859-kme_347_plus1ev.jpg",
+      "plus1ev_sha256": "dfee76d64b8026ed72395dc8fb3e1445c0cae0aff26b51eb555d23edd273b7a5",
+      "plus1ev_hl_clipping": 0.26212
+    },
+    {
+      "pair_id": 12,
+      "scene": "a2651-dgw_017.jpeg",
+      "ref_file": "12_a2651-dgw_017_ref.jpg",
+      "ref_sha256": "e747cff769834b0019e110e6abef5f3ce4fdb513fa857c430ef685087c5a697b",
+      "ref_hl_clipping": 2e-05,
+      "plus1ev_file": "12_a2651-dgw_017_plus1ev.jpg",
+      "plus1ev_sha256": "cf866f4182f73e5cb0fa3df98214b90dabaf366598df33efcf87e73a147566cb",
+      "plus1ev_hl_clipping": 0.08123
+    },
+    {
+      "pair_id": 13,
+      "scene": "a3075-NKIM_131.jpeg",
+      "ref_file": "13_a3075-NKIM_131_ref.jpg",
+      "ref_sha256": "0fffabb432eb671c749dddd65880af7a9c65cbcc7fe6b95cefb93a92216c479c",
+      "ref_hl_clipping": 0.00049,
+      "plus1ev_file": "13_a3075-NKIM_131_plus1ev.jpg",
+      "plus1ev_sha256": "8ccb8165b217cb12f62265a86c3895f17a99195d7d4db312a32a9c734d870935",
+      "plus1ev_hl_clipping": 0.04196
+    },
+    {
+      "pair_id": 14,
+      "scene": "a3264-jmac_MG_5785.jpeg",
+      "ref_file": "14_a3264-jmac_MG_5785_ref.jpg",
+      "ref_sha256": "c952188d20b6c1d2af57425ed817750c3fcbec13f65e6399df000d2e198712ca",
+      "ref_hl_clipping": 0.0,
+      "plus1ev_file": "14_a3264-jmac_MG_5785_plus1ev.jpg",
+      "plus1ev_sha256": "66b0f363cf95225b8ae74b62ff5ed7422d96da265fc32c993f81fb615555f488",
+      "plus1ev_hl_clipping": 0.0
+    },
+    {
+      "pair_id": 15,
+      "scene": "a3290-JI2E5151.jpeg",
+      "ref_file": "15_a3290-JI2E5151_ref.jpg",
+      "ref_sha256": "12365ceab6887f64654ac350f6df0804c9bb69ac7f36743d846c44b9351d1aba",
+      "ref_hl_clipping": 0.00016,
+      "plus1ev_file": "15_a3290-JI2E5151_plus1ev.jpg",
+      "plus1ev_sha256": "5f4945519252c08914ba521a00b8e53b71f16870e449fa2c33e2285bea3f3c1c",
+      "plus1ev_hl_clipping": 0.02006
+    },
+    {
+      "pair_id": 16,
+      "scene": "a3474-jmac_MG_1125.jpeg",
+      "ref_file": "16_a3474-jmac_MG_1125_ref.jpg",
+      "ref_sha256": "9c5af4c5a243a80bcea8f0dcc9a8bb2c19b9ca33956e0a1255c30075492598dc",
+      "ref_hl_clipping": 0.0,
+      "plus1ev_file": "16_a3474-jmac_MG_1125_plus1ev.jpg",
+      "plus1ev_sha256": "65fc725d5389c9edbe0b4ad3e85c04cb95a676da992ac738d4a438d196ebc494",
+      "plus1ev_hl_clipping": 0.14074
+    },
+    {
+      "pair_id": 17,
+      "scene": "a3673-_DSC1109.jpeg",
+      "ref_file": "17_a3673-_DSC1109_ref.jpg",
+      "ref_sha256": "ad0a9215be8f7bc528e0e44e4878e2e3df0d3b0d7b1e2015c4f32597ac8178ea",
+      "ref_hl_clipping": 0.00847,
+      "plus1ev_file": "17_a3673-_DSC1109_plus1ev.jpg",
+      "plus1ev_sha256": "f4622526b418572e47ea7b451666fe07f81968f94157a514bab8390358b4591c",
+      "plus1ev_hl_clipping": 0.21762
+    },
+    {
+      "pair_id": 18,
+      "scene": "a4015-kme_168.jpeg",
+      "ref_file": "18_a4015-kme_168_ref.jpg",
+      "ref_sha256": "6c247121317c2df1b26f3f908a0c98a75efeb122233a306a528d042c2d52e78c",
+      "ref_hl_clipping": 1e-05,
+      "plus1ev_file": "18_a4015-kme_168_plus1ev.jpg",
+      "plus1ev_sha256": "cd50245f2dda5e2549553c5b03137ec3050efe46af0923b2275515649f250a5b",
+      "plus1ev_hl_clipping": 0.01811
+    },
+    {
+      "pair_id": 19,
+      "scene": "a4365-DSC_0104.jpeg",
+      "ref_file": "19_a4365-DSC_0104_ref.jpg",
+      "ref_sha256": "b03fece197fb85a1e774daa4554080f321c98845c596bd1bce83d59834601e1d",
+      "ref_hl_clipping": 0.00066,
+      "plus1ev_file": "19_a4365-DSC_0104_plus1ev.jpg",
+      "plus1ev_sha256": "4a23612c7df635c777505b2aeb5d2dcee015ce34650c8990cbbf8adb344ddffd",
+      "plus1ev_hl_clipping": 0.01606
+    },
+    {
+      "pair_id": 20,
+      "scene": "a4723-_DGW7894.jpeg",
+      "ref_file": "20_a4723-_DGW7894_ref.jpg",
+      "ref_sha256": "afdd95407cb4e67f14d758fb1ba5e95c12813c6167996e0e7175186beb984b66",
+      "ref_hl_clipping": 0.0,
+      "plus1ev_file": "20_a4723-_DGW7894_plus1ev.jpg",
+      "plus1ev_sha256": "52615c3d40bfbf4abadb8c997b52f36655ec59a7ca883ce39ec655cb0a1988e0",
+      "plus1ev_hl_clipping": 1e-05
+    }
+  ],
+  "all_100_cases": [
+    {
+      "scene": "a0059-JI2E5556.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a0059-JI2E5556.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a0059-JI2E5556_overexposure_deg.jpg",
+      "hl_before": 0.0,
+      "hl_after": 0.01121,
+      "hl_growth": 0.01121,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a0223-050816_115418__MG_4849.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a0223-050816_115418__MG_4849.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a0223-050816_115418__MG_4849_overexposure_deg.jpg",
+      "hl_before": 0.00013,
+      "hl_after": 0.4816,
+      "hl_growth": 0.48148,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a0266-_DSC0297.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a0266-_DSC0297.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a0266-_DSC0297_overexposure_deg.jpg",
+      "hl_before": 0.0,
+      "hl_after": 0.00546,
+      "hl_growth": 0.00546,
+      "clipped_gt_1pct": false
+    },
+    {
+      "scene": "a0302-IMG_4108.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a0302-IMG_4108.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a0302-IMG_4108_overexposure_deg.jpg",
+      "hl_before": 0.00055,
+      "hl_after": 0.10164,
+      "hl_growth": 0.10109,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a0322-kme_016.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a0322-kme_016.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a0322-kme_016_overexposure_deg.jpg",
+      "hl_before": 2e-05,
+      "hl_after": 0.07655,
+      "hl_growth": 0.07653,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a0417-IMG_3345.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a0417-IMG_3345.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a0417-IMG_3345_overexposure_deg.jpg",
+      "hl_before": 0.00231,
+      "hl_after": 0.17835,
+      "hl_growth": 0.17604,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a0430-kme_065.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a0430-kme_065.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a0430-kme_065_overexposure_deg.jpg",
+      "hl_before": 1e-05,
+      "hl_after": 0.01215,
+      "hl_growth": 0.01214,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a0522-kme_253.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a0522-kme_253.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a0522-kme_253_overexposure_deg.jpg",
+      "hl_before": 0.0,
+      "hl_after": 0.24298,
+      "hl_growth": 0.24298,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a0640-20061231_174638__E6B8019.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a0640-20061231_174638__E6B8019.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a0640-20061231_174638__E6B8019_overexposure_deg.jpg",
+      "hl_before": 6e-05,
+      "hl_after": 0.6022,
+      "hl_growth": 0.60215,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a0666-IMG_5021.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a0666-IMG_5021.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a0666-IMG_5021_overexposure_deg.jpg",
+      "hl_before": 0.0006,
+      "hl_after": 0.01911,
+      "hl_growth": 0.01851,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a0680-jn_20080130_Las_Vegas_0048.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a0680-jn_20080130_Las_Vegas_0048.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a0680-jn_20080130_Las_Vegas_0048_overexposure_deg.jpg",
+      "hl_before": 0.00341,
+      "hl_after": 0.02475,
+      "hl_growth": 0.02134,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a0729-jmac_DSC3864.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a0729-jmac_DSC3864.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a0729-jmac_DSC3864_overexposure_deg.jpg",
+      "hl_before": 0.00028,
+      "hl_after": 0.03813,
+      "hl_growth": 0.03786,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a0739-IMG_0746.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a0739-IMG_0746.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a0739-IMG_0746_overexposure_deg.jpg",
+      "hl_before": 0.0,
+      "hl_after": 0.06182,
+      "hl_growth": 0.06182,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a0786-MB_060708_253.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a0786-MB_060708_253.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a0786-MB_060708_253_overexposure_deg.jpg",
+      "hl_before": 0.00241,
+      "hl_after": 0.1877,
+      "hl_growth": 0.18529,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a0831-IMG_4991.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a0831-IMG_4991.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a0831-IMG_4991_overexposure_deg.jpg",
+      "hl_before": 0.01457,
+      "hl_after": 0.10475,
+      "hl_growth": 0.09019,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a0833-DSC_0012-1-2.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a0833-DSC_0012-1-2.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a0833-DSC_0012-1-2_overexposure_deg.jpg",
+      "hl_before": 1e-05,
+      "hl_after": 0.00264,
+      "hl_growth": 0.00263,
+      "clipped_gt_1pct": false
+    },
+    {
+      "scene": "a0876-IMG_3503.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a0876-IMG_3503.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a0876-IMG_3503_overexposure_deg.jpg",
+      "hl_before": 0.00011,
+      "hl_after": 0.03054,
+      "hl_growth": 0.03043,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a0906-kme_353.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a0906-kme_353.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a0906-kme_353_overexposure_deg.jpg",
+      "hl_before": 2e-05,
+      "hl_after": 0.17018,
+      "hl_growth": 0.17016,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a0918-_MG_1507.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a0918-_MG_1507.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a0918-_MG_1507_overexposure_deg.jpg",
+      "hl_before": 9e-05,
+      "hl_after": 0.02362,
+      "hl_growth": 0.02353,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a1021-IMG_5051.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a1021-IMG_5051.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a1021-IMG_5051_overexposure_deg.jpg",
+      "hl_before": 0.00351,
+      "hl_after": 0.01371,
+      "hl_growth": 0.0102,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a1114-IMG_4045.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a1114-IMG_4045.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a1114-IMG_4045_overexposure_deg.jpg",
+      "hl_before": 3e-05,
+      "hl_after": 0.16072,
+      "hl_growth": 0.16069,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a1255-IMG_0147.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a1255-IMG_0147.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a1255-IMG_0147_overexposure_deg.jpg",
+      "hl_before": 0.00088,
+      "hl_after": 0.05359,
+      "hl_growth": 0.05271,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a1264-IMG_2896.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a1264-IMG_2896.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a1264-IMG_2896_overexposure_deg.jpg",
+      "hl_before": 0.01495,
+      "hl_after": 0.36877,
+      "hl_growth": 0.35382,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a1300-kme_042.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a1300-kme_042.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a1300-kme_042_overexposure_deg.jpg",
+      "hl_before": 0.0,
+      "hl_after": 0.03454,
+      "hl_growth": 0.03454,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a1409-IMG_4840.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a1409-IMG_4840.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a1409-IMG_4840_overexposure_deg.jpg",
+      "hl_before": 8e-05,
+      "hl_after": 0.00798,
+      "hl_growth": 0.0079,
+      "clipped_gt_1pct": false
+    },
+    {
+      "scene": "a1436-MB_040516_055.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a1436-MB_040516_055.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a1436-MB_040516_055_overexposure_deg.jpg",
+      "hl_before": 0.0,
+      "hl_after": 0.0034,
+      "hl_growth": 0.0034,
+      "clipped_gt_1pct": false
+    },
+    {
+      "scene": "a1459-IMG_4909.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a1459-IMG_4909.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a1459-IMG_4909_overexposure_deg.jpg",
+      "hl_before": 0.00032,
+      "hl_after": 0.03914,
+      "hl_growth": 0.03882,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a1460-050801_074700__I2E5490.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a1460-050801_074700__I2E5490.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a1460-050801_074700__I2E5490_overexposure_deg.jpg",
+      "hl_before": 0.0,
+      "hl_after": 0.07721,
+      "hl_growth": 0.07721,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a1522-050708_183600__I2E9778.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a1522-050708_183600__I2E9778.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a1522-050708_183600__I2E9778_overexposure_deg.jpg",
+      "hl_before": 0.0,
+      "hl_after": 0.01234,
+      "hl_growth": 0.01234,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a1675-kme_357.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a1675-kme_357.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a1675-kme_357_overexposure_deg.jpg",
+      "hl_before": 5e-05,
+      "hl_after": 0.00153,
+      "hl_growth": 0.00148,
+      "clipped_gt_1pct": false
+    },
+    {
+      "scene": "a1715-LSYD4O0733.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a1715-LSYD4O0733.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a1715-LSYD4O0733_overexposure_deg.jpg",
+      "hl_before": 0.44,
+      "hl_after": 0.47264,
+      "hl_growth": 0.03265,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a1803-kme_508.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a1803-kme_508.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a1803-kme_508_overexposure_deg.jpg",
+      "hl_before": 1e-05,
+      "hl_after": 0.24484,
+      "hl_growth": 0.24484,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a1815-_DSC0075.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a1815-_DSC0075.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a1815-_DSC0075_overexposure_deg.jpg",
+      "hl_before": 0.00325,
+      "hl_after": 0.09801,
+      "hl_growth": 0.09477,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a1823-kme_426.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a1823-kme_426.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a1823-kme_426_overexposure_deg.jpg",
+      "hl_before": 0.00013,
+      "hl_after": 0.05693,
+      "hl_growth": 0.0568,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a1836-jn_20080803_0681.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a1836-jn_20080803_0681.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a1836-jn_20080803_0681_overexposure_deg.jpg",
+      "hl_before": 0.0,
+      "hl_after": 0.01256,
+      "hl_growth": 0.01256,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a1859-kme_347.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a1859-kme_347.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a1859-kme_347_overexposure_deg.jpg",
+      "hl_before": 0.00043,
+      "hl_after": 0.26212,
+      "hl_growth": 0.26169,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a1862-DSC_0236.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a1862-DSC_0236.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a1862-DSC_0236_overexposure_deg.jpg",
+      "hl_before": 0.00159,
+      "hl_after": 0.03542,
+      "hl_growth": 0.03384,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a1881-kme_259.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a1881-kme_259.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a1881-kme_259_overexposure_deg.jpg",
+      "hl_before": 0.0753,
+      "hl_after": 0.16639,
+      "hl_growth": 0.0911,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a1904-kme_443.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a1904-kme_443.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a1904-kme_443_overexposure_deg.jpg",
+      "hl_before": 0.00125,
+      "hl_after": 0.07377,
+      "hl_growth": 0.07252,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a1941-MB_20030906_014.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a1941-MB_20030906_014.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a1941-MB_20030906_014_overexposure_deg.jpg",
+      "hl_before": 0.02771,
+      "hl_after": 0.16506,
+      "hl_growth": 0.13735,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a1946-IMG_0232.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a1946-IMG_0232.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a1946-IMG_0232_overexposure_deg.jpg",
+      "hl_before": 0.00646,
+      "hl_after": 0.04189,
+      "hl_growth": 0.03544,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a1978-IMG_4399.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a1978-IMG_4399.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a1978-IMG_4399_overexposure_deg.jpg",
+      "hl_before": 2e-05,
+      "hl_after": 0.57361,
+      "hl_growth": 0.57359,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a2113-20070619_135552__MG_8411.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a2113-20070619_135552__MG_8411.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a2113-20070619_135552__MG_8411_overexposure_deg.jpg",
+      "hl_before": 0.0,
+      "hl_after": 0.13656,
+      "hl_growth": 0.13656,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a2126-IMG_4744.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a2126-IMG_4744.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a2126-IMG_4744_overexposure_deg.jpg",
+      "hl_before": 0.0,
+      "hl_after": 0.0017,
+      "hl_growth": 0.0017,
+      "clipped_gt_1pct": false
+    },
+    {
+      "scene": "a2237-CRW_1174.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a2237-CRW_1174.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a2237-CRW_1174_overexposure_deg.jpg",
+      "hl_before": 2e-05,
+      "hl_after": 0.01146,
+      "hl_growth": 0.01143,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a2245-20060508_141031__MG_6785.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a2245-20060508_141031__MG_6785.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a2245-20060508_141031__MG_6785_overexposure_deg.jpg",
+      "hl_before": 0.0043,
+      "hl_after": 0.02677,
+      "hl_growth": 0.02246,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a2248-NKIM_113.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a2248-NKIM_113.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a2248-NKIM_113_overexposure_deg.jpg",
+      "hl_before": 0.00565,
+      "hl_after": 0.24689,
+      "hl_growth": 0.24124,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a2265-050731_203304__I2E5462.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a2265-050731_203304__I2E5462.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a2265-050731_203304__I2E5462_overexposure_deg.jpg",
+      "hl_before": 2e-05,
+      "hl_after": 0.02809,
+      "hl_growth": 0.02808,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a2272-NKIM_MG_6476.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a2272-NKIM_MG_6476.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a2272-NKIM_MG_6476_overexposure_deg.jpg",
+      "hl_before": 0.0,
+      "hl_after": 0.06976,
+      "hl_growth": 0.06976,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a2291-Ja_Pe-14.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a2291-Ja_Pe-14.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a2291-Ja_Pe-14_overexposure_deg.jpg",
+      "hl_before": 0.0,
+      "hl_after": 0.04717,
+      "hl_growth": 0.04717,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a2322-060810_113704__Z9B0250.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a2322-060810_113704__Z9B0250.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a2322-060810_113704__Z9B0250_overexposure_deg.jpg",
+      "hl_before": 6e-05,
+      "hl_after": 0.02206,
+      "hl_growth": 0.02199,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a2360-_DGW6395.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a2360-_DGW6395.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a2360-_DGW6395_overexposure_deg.jpg",
+      "hl_before": 0.0,
+      "hl_after": 0.03433,
+      "hl_growth": 0.03433,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a2432-IMG_4459.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a2432-IMG_4459.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a2432-IMG_4459_overexposure_deg.jpg",
+      "hl_before": 0.03991,
+      "hl_after": 0.29663,
+      "hl_growth": 0.25672,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a2476-_DSC6421.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a2476-_DSC6421.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a2476-_DSC6421_overexposure_deg.jpg",
+      "hl_before": 0.0,
+      "hl_after": 0.02314,
+      "hl_growth": 0.02314,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a2651-dgw_017.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a2651-dgw_017.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a2651-dgw_017_overexposure_deg.jpg",
+      "hl_before": 2e-05,
+      "hl_after": 0.08123,
+      "hl_growth": 0.08121,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a2659-kme_238.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a2659-kme_238.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a2659-kme_238_overexposure_deg.jpg",
+      "hl_before": 0.00076,
+      "hl_after": 0.02092,
+      "hl_growth": 0.02017,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a2750-NKIM_MG_8285.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a2750-NKIM_MG_8285.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a2750-NKIM_MG_8285_overexposure_deg.jpg",
+      "hl_before": 0.06772,
+      "hl_after": 0.12814,
+      "hl_growth": 0.06043,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a2848-MB_060708_292.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a2848-MB_060708_292.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a2848-MB_060708_292_overexposure_deg.jpg",
+      "hl_before": 0.01548,
+      "hl_after": 0.04667,
+      "hl_growth": 0.03119,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a2868-IMG_1740.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a2868-IMG_1740.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a2868-IMG_1740_overexposure_deg.jpg",
+      "hl_before": 0.00013,
+      "hl_after": 0.00845,
+      "hl_growth": 0.00833,
+      "clipped_gt_1pct": false
+    },
+    {
+      "scene": "a2918-_I2E7066.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a2918-_I2E7066.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a2918-_I2E7066_overexposure_deg.jpg",
+      "hl_before": 0.0,
+      "hl_after": 0.05626,
+      "hl_growth": 0.05626,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a3021-WP_CRW_0302 (1).jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a3021-WP_CRW_0302 (1).jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a3021-WP_CRW_0302 (1)_overexposure_deg.jpg",
+      "hl_before": 0.00054,
+      "hl_after": 0.07325,
+      "hl_growth": 0.07271,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a3049-20050327_165901__E6B2556.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a3049-20050327_165901__E6B2556.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a3049-20050327_165901__E6B2556_overexposure_deg.jpg",
+      "hl_before": 0.0,
+      "hl_after": 0.06636,
+      "hl_growth": 0.06636,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a3061-jn_2007_12_12__BU_CRUISE_085.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a3061-jn_2007_12_12__BU_CRUISE_085.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a3061-jn_2007_12_12__BU_CRUISE_085_overexposure_deg.jpg",
+      "hl_before": 0.03374,
+      "hl_after": 0.08592,
+      "hl_growth": 0.05218,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a3063-dgw_138.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a3063-dgw_138.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a3063-dgw_138_overexposure_deg.jpg",
+      "hl_before": 0.0,
+      "hl_after": 0.01396,
+      "hl_growth": 0.01396,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a3075-NKIM_131.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a3075-NKIM_131.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a3075-NKIM_131_overexposure_deg.jpg",
+      "hl_before": 0.00049,
+      "hl_after": 0.04196,
+      "hl_growth": 0.04147,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a3107-WP_CRW_0539.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a3107-WP_CRW_0539.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a3107-WP_CRW_0539_overexposure_deg.jpg",
+      "hl_before": 0.0,
+      "hl_after": 9e-05,
+      "hl_growth": 9e-05,
+      "clipped_gt_1pct": false
+    },
+    {
+      "scene": "a3160-IMG_0832.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a3160-IMG_0832.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a3160-IMG_0832_overexposure_deg.jpg",
+      "hl_before": 1e-05,
+      "hl_after": 0.10261,
+      "hl_growth": 0.1026,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a3166-050701_124928__MG_3318.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a3166-050701_124928__MG_3318.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a3166-050701_124928__MG_3318_overexposure_deg.jpg",
+      "hl_before": 1e-05,
+      "hl_after": 0.05049,
+      "hl_growth": 0.05048,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a3167-_DSC0035.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a3167-_DSC0035.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a3167-_DSC0035_overexposure_deg.jpg",
+      "hl_before": 0.0,
+      "hl_after": 0.00948,
+      "hl_growth": 0.00948,
+      "clipped_gt_1pct": false
+    },
+    {
+      "scene": "a3264-jmac_MG_5785.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a3264-jmac_MG_5785.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a3264-jmac_MG_5785_overexposure_deg.jpg",
+      "hl_before": 0.0,
+      "hl_after": 0.0,
+      "hl_growth": 0.0,
+      "clipped_gt_1pct": false
+    },
+    {
+      "scene": "a3278-Ja_Pe-38.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a3278-Ja_Pe-38.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a3278-Ja_Pe-38_overexposure_deg.jpg",
+      "hl_before": 5e-05,
+      "hl_after": 0.0105,
+      "hl_growth": 0.01045,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a3290-JI2E5151.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a3290-JI2E5151.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a3290-JI2E5151_overexposure_deg.jpg",
+      "hl_before": 0.00016,
+      "hl_after": 0.02006,
+      "hl_growth": 0.0199,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a3420-IMG_5818.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a3420-IMG_5818.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a3420-IMG_5818_overexposure_deg.jpg",
+      "hl_before": 0.0,
+      "hl_after": 0.01187,
+      "hl_growth": 0.01187,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a3431-_DSC0103-3.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a3431-_DSC0103-3.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a3431-_DSC0103-3_overexposure_deg.jpg",
+      "hl_before": 0.0001,
+      "hl_after": 0.0036,
+      "hl_growth": 0.0035,
+      "clipped_gt_1pct": false
+    },
+    {
+      "scene": "a3432-jmac_DSC3184.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a3432-jmac_DSC3184.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a3432-jmac_DSC3184_overexposure_deg.jpg",
+      "hl_before": 0.00014,
+      "hl_after": 0.00732,
+      "hl_growth": 0.00718,
+      "clipped_gt_1pct": false
+    },
+    {
+      "scene": "a3474-jmac_MG_1125.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a3474-jmac_MG_1125.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a3474-jmac_MG_1125_overexposure_deg.jpg",
+      "hl_before": 0.0,
+      "hl_after": 0.14074,
+      "hl_growth": 0.14074,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a3635-IMG_4031.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a3635-IMG_4031.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a3635-IMG_4031_overexposure_deg.jpg",
+      "hl_before": 0.00297,
+      "hl_after": 0.32534,
+      "hl_growth": 0.32237,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a3673-_DSC1109.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a3673-_DSC1109.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a3673-_DSC1109_overexposure_deg.jpg",
+      "hl_before": 0.00847,
+      "hl_after": 0.21762,
+      "hl_growth": 0.20915,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a3705-kme_421.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a3705-kme_421.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a3705-kme_421_overexposure_deg.jpg",
+      "hl_before": 0.00831,
+      "hl_after": 0.09917,
+      "hl_growth": 0.09087,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a3710-07-11-20-at-16h52m05s-_MG_5742.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a3710-07-11-20-at-16h52m05s-_MG_5742.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a3710-07-11-20-at-16h52m05s-_MG_5742_overexposure_deg.jpg",
+      "hl_before": 2e-05,
+      "hl_after": 8e-05,
+      "hl_growth": 6e-05,
+      "clipped_gt_1pct": false
+    },
+    {
+      "scene": "a3734-IMG_4186.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a3734-IMG_4186.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a3734-IMG_4186_overexposure_deg.jpg",
+      "hl_before": 0.0,
+      "hl_after": 0.43791,
+      "hl_growth": 0.43791,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a4015-kme_168.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a4015-kme_168.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a4015-kme_168_overexposure_deg.jpg",
+      "hl_before": 1e-05,
+      "hl_after": 0.01811,
+      "hl_growth": 0.0181,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a4046-kme_554.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a4046-kme_554.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a4046-kme_554_overexposure_deg.jpg",
+      "hl_before": 3e-05,
+      "hl_after": 0.04673,
+      "hl_growth": 0.04671,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a4279-WP_CRW_0610.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a4279-WP_CRW_0610.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a4279-WP_CRW_0610_overexposure_deg.jpg",
+      "hl_before": 0.0,
+      "hl_after": 0.03285,
+      "hl_growth": 0.03285,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a4300-_DGW0239.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a4300-_DGW0239.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a4300-_DGW0239_overexposure_deg.jpg",
+      "hl_before": 3e-05,
+      "hl_after": 0.03128,
+      "hl_growth": 0.03126,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a4320-kme_0234.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a4320-kme_0234.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a4320-kme_0234_overexposure_deg.jpg",
+      "hl_before": 0.0,
+      "hl_after": 0.02292,
+      "hl_growth": 0.02292,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a4365-DSC_0104.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a4365-DSC_0104.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a4365-DSC_0104_overexposure_deg.jpg",
+      "hl_before": 0.00066,
+      "hl_after": 0.01606,
+      "hl_growth": 0.0154,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a4441-_DGW0274.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a4441-_DGW0274.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a4441-_DGW0274_overexposure_deg.jpg",
+      "hl_before": 5e-05,
+      "hl_after": 0.01421,
+      "hl_growth": 0.01416,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a4476-IMG_4029.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a4476-IMG_4029.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a4476-IMG_4029_overexposure_deg.jpg",
+      "hl_before": 0.00047,
+      "hl_after": 0.02698,
+      "hl_growth": 0.02651,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a4522-Duggan_050712_1693.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a4522-Duggan_050712_1693.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a4522-Duggan_050712_1693_overexposure_deg.jpg",
+      "hl_before": 0.0,
+      "hl_after": 0.00061,
+      "hl_growth": 0.00061,
+      "clipped_gt_1pct": false
+    },
+    {
+      "scene": "a4564-Duggan_090406_7253.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a4564-Duggan_090406_7253.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a4564-Duggan_090406_7253_overexposure_deg.jpg",
+      "hl_before": 0.0,
+      "hl_after": 0.01859,
+      "hl_growth": 0.01859,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a4627-LS20050429d650046.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a4627-LS20050429d650046.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a4627-LS20050429d650046_overexposure_deg.jpg",
+      "hl_before": 7e-05,
+      "hl_after": 0.069,
+      "hl_growth": 0.06892,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a4692-20090321_at_16h01m53__MG_0133.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a4692-20090321_at_16h01m53__MG_0133.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a4692-20090321_at_16h01m53__MG_0133_overexposure_deg.jpg",
+      "hl_before": 1e-05,
+      "hl_after": 0.00123,
+      "hl_growth": 0.00121,
+      "clipped_gt_1pct": false
+    },
+    {
+      "scene": "a4698-09-05-17-at-20h52m53s-_MG_9266.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a4698-09-05-17-at-20h52m53s-_MG_9266.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a4698-09-05-17-at-20h52m53s-_MG_9266_overexposure_deg.jpg",
+      "hl_before": 0.00093,
+      "hl_after": 0.0216,
+      "hl_growth": 0.02067,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a4723-_DGW7894.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a4723-_DGW7894.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a4723-_DGW7894_overexposure_deg.jpg",
+      "hl_before": 0.0,
+      "hl_after": 1e-05,
+      "hl_growth": 1e-05,
+      "clipped_gt_1pct": false
+    },
+    {
+      "scene": "a4728-DSC_0082.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a4728-DSC_0082.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a4728-DSC_0082_overexposure_deg.jpg",
+      "hl_before": 0.0001,
+      "hl_after": 0.0607,
+      "hl_growth": 0.06059,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a4821-kme_00032.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a4821-kme_00032.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a4821-kme_00032_overexposure_deg.jpg",
+      "hl_before": 0.00041,
+      "hl_after": 0.09882,
+      "hl_growth": 0.09841,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a4841-DSC_0446.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a4841-DSC_0446.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a4841-DSC_0446_overexposure_deg.jpg",
+      "hl_before": 0.01596,
+      "hl_after": 0.02154,
+      "hl_growth": 0.00558,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a4877-DSC_0087.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a4877-DSC_0087.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a4877-DSC_0087_overexposure_deg.jpg",
+      "hl_before": 0.01302,
+      "hl_after": 0.14585,
+      "hl_growth": 0.13284,
+      "clipped_gt_1pct": true
+    },
+    {
+      "scene": "a4940-MB_070908_065.jpeg",
+      "ref_path": "D:\\aesfix-data\\synth_refs\\a4940-MB_070908_065.jpeg",
+      "deg_path": "D:\\aesfix-data\\synth_cases\\a4940-MB_070908_065_overexposure_deg.jpg",
+      "hl_before": 0.01868,
+      "hl_after": 0.10216,
+      "hl_growth": 0.08349,
+      "clipped_gt_1pct": true
+    }
+  ]
+}

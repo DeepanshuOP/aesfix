@@ -57,14 +57,16 @@ DEFAULT_SIGMA = {
     "aesfix_pref_v2": 0.850,
 }
 
-# Empirical noise floors (calibrated to ~0.01 - 0.05 * sigma)
-DEFAULT_EPSILON = {
-    "rsinema": 0.005,
-    "pyiqa_musiq": 0.030,
-    "pyiqa_topiq_nr": 0.005,  # calibrated to ~0.05 * sigma (was 0.100, which exceeded 1.1 sigma)
-    "aesfix_pref_v1": 0.001,
-    "aesfix_pref_v2": 0.001,
-}
+def load_frozen_epsilons(config_path: Optional[Path] = None) -> Dict[str, float]:
+    """Loads procedure-derived frozen epsilons from config/judge_epsilon.json (T0.d)."""
+    p = config_path or (REPO_ROOT / "config" / "judge_epsilon.json")
+    if not p.exists():
+        raise FileNotFoundError(f"Frozen judge epsilon config not found: {p}. Run scripts/calibrate_judge_epsilons.py first.")
+    with open(p, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    eps = data.get("frozen_epsilons", {})
+    print(f"Loaded procedure-derived frozen epsilons from {p}: {eps}")
+    return eps
 
 
 def load_dear_sigmas(summary_path: Optional[Path] = None, per_image_path: Optional[Path] = None) -> Dict[str, float]:
@@ -374,9 +376,9 @@ def main():
     else:
         print("Note: v2 judge head not yet present. Benchmark will evaluate rsinema, MUSIQ, TopIQ-NR, v1.")
 
-    # 2. Load Sigmas & Epsilons
+    # 2. Load Sigmas & Epsilons (Procedure-derived frozen epsilon, T0.d)
     sigmas = load_dear_sigmas()
-    epsilons = DEFAULT_EPSILON
+    epsilons = load_frozen_epsilons()
 
     # 3. S3: 8 Synthetic Images
     synth_8_dir = REPO_ROOT / "data" / "synthetic_benchmark"

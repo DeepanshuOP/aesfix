@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "title": "Scene-Clustered Bootstrap 95% CIs for Brightness Bias",
+    "source_data": "D:\\aesfix-data\\kaggle_runs\\dear_full\\test_pair_scores.csv",
+    "n_pairs": 3069,
+    "n_scenes": 904,
+    "n_bootstrap": 5000,
+    "seed": 42,
+    "condition": "|d_luma| > 0.15 and mos != 0.5"
+  },
+  "metrics": {
+    "human_prefers_brighter": {
+      "mean": 0.6995794318657108,
+      "ci_lower": 0.6738192554121228,
+      "ci_upper": 0.7247865127223165
+    },
+    "v1_prefers_brighter": {
+      "mean": 0.7847717930927969,
+      "ci_lower": 0.7626556438133704,
+      "ci_upper": 0.8059214638157896
+    },
+    "v2_prefers_brighter": {
+      "mean": 0.7324006961483498,
+      "ci_lower": 0.707108380115087,
+      "ci_upper": 0.7562185657102197
+    },
+    "v1_bias_diff": {
+      "mean": 0.08519236122708607,
+      "ci_lower": 0.06105311370210817,
+      "ci_upper": 0.10969964394002615
+    },
+    "v2_bias_diff": {
+      "mean": 0.03282126428263892,
+      "ci_lower": 0.012726614918154005,
+      "ci_upper": 0.052298520064192035
+    },
+    "absolute_bias_reduction": {
+      "mean": 0.05237109694444715,
+      "ci_lower": 0.030433309180229094,
+      "ci_upper": 0.0737432434611488
+    },
+    "relative_bias_reduction": {
+      "mean": 0.6157279789147578,
+      "ci_lower": 0.4117509620670704,
+      "ci_upper": 0.8289610113994657
+    }
+  }
+}
