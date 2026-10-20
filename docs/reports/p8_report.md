@@ -288,10 +288,11 @@ Goodhart Entry 2 assumes the expert render strictly beats its +1 EV degraded ver
 
 | Experiment / Workflow | Platform / Hardware | Wall Time | GPU-Hours Consumed |
 |---|---|---|---|
-| K2a (`aesfix-dear-512`) Full Dataset Preprocessing | Kaggle Tesla T4 | 110 min | 1.833 GPU-h |
+| K2a (`aesfix-dear-512`) Full Dataset Preprocessing | Kaggle CPU-only (4-core) | 110 min | 0.000 GPU-h (CPU Free Tier) |
 | K2b (`aesfix-k2-dear-judges`) Embedding & Head Search | Kaggle Tesla T4 | 72 min | 1.207 GPU-h |
 | P8 (`aesfix-p8-experiments`) Multi-Candidate Inference (T1–T3) | Kaggle Tesla T4 | 50 min | 0.833 GPU-h |
-| **Total Weekly GPU Consumption** | **Kaggle Cloud** | **232 min** | **3.873 GPU-h** |
+| **Total Weekly GPU Consumption** | **Kaggle Cloud** | **232 min** | **2.040 GPU-h** |
+
 
 ---
 

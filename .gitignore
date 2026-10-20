@@ -206,3 +206,7 @@ results/kaggle_p8_outputs/
 scratch/
 CODE_REVIEW.md
 tests/fixtures/synthetic_suite/
+
+# Evaluation Visuals & Binary Assets (Strictly excluded from git)
+results/visuals/*.jpg
+results/human_study_candidates/
