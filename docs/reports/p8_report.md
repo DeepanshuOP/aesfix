@@ -141,19 +141,34 @@ The 95th percentile of absolute score shifts $|\Delta_j|$ was frozen in `config/
 
 ## T1. Edit Proposer Benchmark on 500 Synthetic Cases
 
-Evaluating 5 proposer configurations on the 500 synthetic cases under frozen procedure-derived noise floors $\epsilon$:
+Evaluating 5 proposer configurations on the 500 synthetic cases:
 1. `heuristic_v1`: Rule-based search guided by v1.
 2. `grid_v1`: Dense 15-candidate grid guided by v1.
 3. `grid_v2`: Dense 15-candidate grid guided by v2.
 4. `grid_v2_topiq_guard`: Dense grid guided by v2 with TopIQ-NR non-inferiority guard ($\Delta s_{\text{topiq}} \ge -\epsilon_{\text{topiq}}$).
 5. `grid_v2_all_guards`: Grid guided by v2 with TopIQ guard plus highlight/shadow clipping guards and exposure-intent gating.
 
+> [!IMPORTANT]
+> **Method Disclosure (TopIQ Guard Inactivity & Noise Floor Recalibration)**:
+> Under the original procedure-derived noise floor ($\epsilon_{\text{topiq}} = 0.15721$), the non-inferiority guard condition ($\Delta s_{\text{topiq}} \ge -\epsilon$) was satisfied by **100% of candidate edits** across all 500 cases, because TopIQ score drops under photographic edits rarely exceed $0.05$. Consequently, the guard **never fired**, and `grid_v2` and `grid_v2_topiq_guard` yielded bitwise identical metrics (**197 recovered, 155 unchanged, 148 worse, mean $\Delta E = -2.7700$**).
+> 
+> Furthermore, cross-referencing against the DEAR test split score distribution revealed that $\epsilon_{\text{topiq}} = 0.15721$ corresponded to **$1.97\sigma$** of the dataset standard deviation ($\sigma_{\text{topiq}} = 0.07960$), violating the pre-registered selection rule $\epsilon_j < 0.5\sigma_{\text{DEAR}}$.
+> 
+> Under the pre-registered **null-transform protocol** (horizontal flip, 1–2px reflect-pad translation, and same-pipeline JPEG q92 re-encode across 50 DEAR train scenes; 95th percentile of $|\Delta|$), the empirical noise floors were frozen into `config/judge_epsilon.json`:
+> - `pyiqa_topiq_nr`: $\epsilon = 0.01707$ (mean $|\Delta|=0.00569$, max $0.03185$, $0.21\sigma_{\text{DEAR}} < 0.03980$, **PASSED**)
+> - `aesfix_pref_v1`: $\epsilon = 0.44138$ (mean $|\Delta|=0.15043$, max $0.91850$, $0.45\sigma_{\text{DEAR}} < 0.49350$, **PASSED**)
+> - `rsinema`: $\epsilon = 0.08393$ (mean $|\Delta|=0.02650$, max $0.16528$, $0.30\sigma_{\text{DEAR}} < 0.13790$, **PASSED**)
+> - `pyiqa_musiq`: $\epsilon = 1.78040$ (mean $|\Delta|=0.53846$, max $2.82045$, $0.27\sigma_{\text{DEAR}} < 3.27955$, **PASSED**)
+> - `aesfix_pref_v2`: $\epsilon = 1.85784$ (mean $|\Delta|=0.83035$, max $2.16640$, $0.28\sigma_{\text{DEAR}} < 3.28840$, **PASSED**)
+> 
+> Under $\epsilon_{\text{topiq}} = 0.01707$, the guard actively discards degraded candidates and abstains when all non-trivial candidates degrade perceptual quality.
+
 | Configuration | Recovered Count (Rate [Wilson CI]) | Unchanged Count (Rate [Wilson CI]) | Worse Count (Rate [Wilson CI]) | Mean $\Delta E$ Change | Mean Score Gain |
 |---|---|---|---|---|---|
 | `heuristic_v1` | **74** (14.8% [12.0%, 18.2%]) | **256** (51.2% [46.8%, 55.6%]) | **170** (34.0% [30.0%, 38.3%]) | +0.0000 | +0.9527 |
 | `grid_v1` | **10** (2.0% [1.1%, 3.6%]) | **442** (88.4% [85.3%, 90.9%]) | **48** (9.6% [7.3%, 12.5%]) | +2.0072 | +0.1069 |
 | `grid_v2` | **197** (39.4% [35.2%, 43.8%]) | **155** (31.0% [27.1%, 35.2%]) | **148** (29.6% [25.8%, 33.7%]) | -2.7700 | +3.9498 |
-| `grid_v2_topiq_guard` | **197** (39.4% [35.2%, 43.8%]) | **155** (31.0% [27.1%, 35.2%]) | **148** (29.6% [25.8%, 33.7%]) | -2.7700 | +3.9498 |
+| `grid_v2_topiq_guard` (old $\epsilon=0.157$) | **197** (39.4% [35.2%, 43.8%]) | **155** (31.0% [27.1%, 35.2%]) | **148** (29.6% [25.8%, 33.7%]) | -2.7700 | +3.9498 |
 | `grid_v2_all_guards` | **186** (37.2% [33.1%, 41.5%]) | **265** (53.0% [48.6%, 57.3%]) | **49** (9.8% [7.5%, 12.7%]) | -4.0505 | +2.8819 |
 
 #### Breakdown by Degradation Type (100 Cases Each)

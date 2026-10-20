@@ -4157,5 +4157,60 @@
         }
       }
     }
-  ]
+  ],
+  "null_transform_epsilons": {
+    "protocol": "null_transform (horizontal flip, 1-2px translation with reflect padding, JPEG q92 re-encode)",
+    "dataset": "DEAR Train Split (vsevolodpl/DEAR tiff16_c, 512px q92)",
+    "n_images": 50,
+    "selection_rule": "epsilon_j < 0.5 * sigma_DEAR",
+    "frozen_epsilons": {
+      "pyiqa_topiq_nr": 0.01707,
+      "aesfix_pref_v1": 0.44138,
+      "rsinema": 0.08393,
+      "pyiqa_musiq": 1.7804,
+      "aesfix_pref_v2": 1.85784
+    },
+    "detailed_statistics": {
+      "pyiqa_topiq_nr": {
+        "p95": 0.01707,
+        "mean": 0.00569,
+        "max": 0.03185,
+        "dear_sigma": 0.0796,
+        "half_sigma": 0.0398,
+        "passes_rule": true
+      },
+      "aesfix_pref_v1": {
+        "p95": 0.44138,
+        "mean": 0.15043,
+        "max": 0.9185,
+        "dear_sigma": 0.987,
+        "half_sigma": 0.4935,
+        "passes_rule": true
+      },
+      "rsinema": {
+        "p95": 0.08393,
+        "mean": 0.0265,
+        "max": 0.16528,
+        "dear_sigma": 0.2758,
+        "half_sigma": 0.1379,
+        "passes_rule": true
+      },
+      "pyiqa_musiq": {
+        "p95": 1.7804,
+        "mean": 0.53846,
+        "max": 2.82045,
+        "dear_sigma": 6.5591,
+        "half_sigma": 3.27955,
+        "passes_rule": true
+      },
+      "aesfix_pref_v2": {
+        "p95": 1.85784,
+        "mean": 0.83035,
+        "max": 2.1664,
+        "dear_sigma": 6.5768,
+        "half_sigma": 3.2884,
+        "passes_rule": true
+      }
+    }
+  }
 }

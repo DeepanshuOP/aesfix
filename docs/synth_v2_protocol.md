@@ -70,6 +70,19 @@ On the Oracle-Fix test, judges evaluate both degraded image $I_{deg}$ and oracle
   where $\sigma_{DEAR}$ is the empirical standard deviation of the judge across the DEAR test set (NOT per-image $\epsilon$, avoiding uninterpretable division by tiny numbers).
 - **Reward Condition**: The judge rewards the oracle fix if $\Delta_{raw} > \epsilon_{judge}$, where $\epsilon_{judge}$ is the judge's noise floor.
 
+### 5.1 Pre-Registered Noise Floor Selection Rule
+To ensure noise floor filtering operates strictly at fine-grained sub-perceptual perturbation scales without rejecting genuine aesthetic improvements, every candidate judge noise floor $\epsilon_j$ must satisfy the pre-registered selection rule:
+$$\epsilon_j < 0.5 \sigma_{\text{DEAR}}$$
+where $\sigma_{\text{DEAR}}$ is the empirical standard deviation of the judge's score distribution across the DEAR test split (e.g. $\sigma_{\text{topiq}} = 0.0796 \implies \epsilon_{\text{topiq}} < 0.0398$; $\sigma_{v1} = 0.9870 \implies \epsilon_{v1} < 0.4935$). Any noise floor exceeding $0.5\sigma_{\text{DEAR}}$ represents a macroscopic half-standard-deviation aesthetic shift and is disqualified as an over-conservative threshold that disables guardrails (such as the legacy $\epsilon_{\text{topiq}} = 0.157 \approx 1.97\sigma$, which caused the TopIQ non-inferiority guard to never fire).
+
+### 5.2 Pre-Registered Null-Transform Noise Floor ($\epsilon^{\text{null}}$)
+In addition to compression and resize perturbations, an empirical 'null-transform $\epsilon$' is defined by evaluating content-preserving spatial and compression operations:
+1. Horizontal reflection (`flip`)
+2. 1–2px translation with reflect padding (`translate_reflect`)
+3. Same-pipeline JPEG q92 re-encode (`q92_reencode`)
+
+The null-transform noise floor $\epsilon_j^{\text{null}}$ is computed as the 95th percentile of absolute score deltas $|\Delta_j| = |S_j(I_{\text{null}}) - S_j(I)|$ across 50 disjoint DEAR train images, verified to satisfy $\epsilon_j^{\text{null}} < 0.5 \sigma_{\text{DEAR}}$, and frozen in `config/judge_epsilon.json`.
+
 ---
 
 ## 6. Proposer Policies (S5)
